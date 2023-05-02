@@ -40,7 +40,7 @@ xmax = 2.0 * f
 nx = 100
 dx = 2.0 * xmax / float(nx)
 
-h = np.zeros((ndim+4, ndim+4), dtype=np.float32)
+h = np.zeros((ndim, ndim), dtype=np.float32)
 e = np.zeros(ndim, dtype=np.float32)
 v = np.zeros((ndim, ndim), dtype=np.float32)
 psi = np.zeros(ndim, dtype=np.float32)
@@ -90,17 +90,19 @@ for n in range(ndim):
     h[n, n] = a * x4 + b * x2 + e0
 
     # <n|h|n+2>
-    x4 = c44 * np.sqrt((n + 1.0) * (n + 2)) * (4 * n + 6)
-    x2 = c22 * np.sqrt((n + 1.0) * (n + 2))
-    hh = a * x4 + b * x2
-    h[n, n + 2] = hh
-    h[n + 2, n] = hh
+    if n + 2 < ndim:
+        x4 = c44 * np.sqrt((n + 1.0) * (n + 2)) * (4 * n + 6)
+        x2 = c22 * np.sqrt((n + 1.0) * (n + 2))
+        hh = a * x4 + b * x2
+        h[n, n + 2] = hh
+        h[n + 2, n] = hh
 
     # <n|h|n+4>
-    x4 = c44 * np.sqrt((n + 1.0) * (n + 2) * (n + 3) * (n + 4))
-    hh = a * x4
-    h[n, n + 4] = hh
-    h[n + 4, n] = hh
+    if n + 4 < ndim:
+        x4 = c44 * np.sqrt((n + 1.0) * (n + 2) * (n + 3) * (n + 4))
+        hh = a * x4
+        h[n, n + 4] = hh
+        h[n + 4, n] = hh
     
 # Diagonalize h using numpy's eigh function
 
@@ -167,13 +169,13 @@ def hermite3(n, x, p):
 # Define harmonic oscillator wave function
 def psiosc(n, x, psi):
     # Harmonic oscillator wave functions psi(i=0,..,n)=psi_i(x)
-    #Parameters:
+    # Parameters:
     #    n (int): The highest index of the harmonic oscillator wave functions to compute.
     #    x (float): The value of x at which to evaluate the harmonic oscillator wave functions.
     #    psi (list): A list of length n+1 to store the computed values of the harmonic oscillator wave functions.
     
-    nmax = 1000  # maximum value for n
-    h = np.zeros(nmax)  # array to store Hermite polynomials
+
+    h = np.zeros(n+1)  # array to store Hermite polynomials
     global m  # mass
     global w  # frequency
 
@@ -203,8 +205,8 @@ for k in range(nx+1):
         psix += v[j,0] * psi[j]
     
     # Compare to simple model
-    psip = (2.0 * f / np.pi)**0.25 * np.exp(-f * (x - f)**2)
-    psim = (2.0 * f / np.pi)**0.25 * np.exp(-f * (x + f)**2)
+    psip = (2.0 * f / pi)**0.25 * np.exp(-f * (x - f)**2)
+    psim = (2.0 * f / pi)**0.25 * np.exp(-f * (x + f)**2)
     psi0 = 1.0 / np.sqrt(2.0) * (psip + psim)
     
     # Check normalization
