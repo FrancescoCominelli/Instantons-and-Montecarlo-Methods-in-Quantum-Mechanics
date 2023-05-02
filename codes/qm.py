@@ -5,6 +5,7 @@ import sympy as sym
 from math import factorial
 from pickle import APPEND
 import random
+import format_strings as fs
 #-------------------------------------------------------------------------------------------------
 #-------------------------------------------------------------------------------------------------
 #   lattice calculation in quantum mechanics                              
@@ -85,7 +86,7 @@ def disp(n, xtot, x2tot):
 #-------------------------------------------------------------------------------------------------
 f   = 1.4
 n   = 800
-ih  = 0
+icold  = 0
 a   = 0.05
 nmc = 1000
 neq = 100
@@ -93,6 +94,31 @@ delx= 0.5
 nc  = 5
 n_p  = 20
 tmax = n*a
+
+
+
+
+
+
+
+#open txt files
+file6  = open()
+file16 = open('Data/qm.dat', 'w')
+file17 = open('Data/config.dat', 'w')
+file18 = open('Data/trajectory.dat', 'w')
+file19 = open('Data/qmdist.dat', 'w')
+file20 = open('Data/qmcor.dat', 'w')
+file21 = open('Data/qmcor2.dat', 'w')
+file22 = open('Data/qmcor3.dat', 'w')
+#write on a txt file values
+file16.write('lattice qm 1.0')
+file16.write('----------')
+file16.write(fs.f101.format(f,n,a))
+file16.write(fs.f102.format(nmc,neq))
+file16.write(fs.f103.format(np,nc))
+file16.write(fs.f104.format(delx,icold))
+file17.write(n,nmc/kp,n*a,f)
+
 #-------------------------------------------------------------------------------------------------
 #   set the histogram parameters
 #-------------------------------------------------------------------------------------------------
@@ -121,7 +147,7 @@ ttot2_sum= 0.0
 tvir_sum = 0.0
 tvir2_sum= 0.0
 x = np.zeros(n)
-if ih==0:
+if icold==0:
     for i in range(n):
         x[i]= -f
 else:
@@ -145,21 +171,21 @@ for i in range(n):
 #-------------------------------------------------------------------------------------------------
 #    monte carlo sweeps                                                     
 #-------------------------------------------------------------------------------------------------
-nacc = 0
-nhit = 0
+nacc  = 0
+nhit  = 0
 nconf = 0
-ncor = 0
+ncor  = 0
 histo_x = np.zeros(neq)
 
 for i in range(1, nmc):
     nconf += 1
     if i == neq:
         nconf = 0
-        ncor = 0
-        xcor_sum = np.zeros(neq)
+        ncor  = 0
+        xcor_sum  = np.zeros(neq)
         x2cor_sum = np.zeros(neq)
         x3cor_sum = np.zeros(neq)
-        histo_x = np.zeros(neq)
+        histo_x   = np.zeros(neq)
     #---------------------------------------------------------------------------------------------
     #   one sweep thorough configuration                                       
     #---------------------------------------------------------------------------------------------
@@ -202,6 +228,9 @@ for i in range(1, nmc):
         vtot  = vtot +a*v
         tvtot = tvtot+a*tv
         stot  = stot + s
+    #write on a txt file
+    file18.write(i,stot,ttot,vtot)
+
     #--------------------------------------------------------------------------------------------
     #     populate histogram                                                     
     #--------------------------------------------------------------------------------------------
