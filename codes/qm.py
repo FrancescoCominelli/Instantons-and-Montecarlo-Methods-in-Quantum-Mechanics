@@ -1,11 +1,8 @@
-import numpy as np
-import scipy as sp
-import matplotlib.pyplot as plt
-import sympy as sym
-from math import factorial
-from pickle import APPEND
-import random
 import format_strings as fs
+import numpy as np
+import matplotlib.pyplot as plt
+import random
+from tqdm import tqdm
 #------------------------------------------------------------------------------
 #------------------------------------------------------------------------------
 #   lattice calculation in quantum mechanics                              
@@ -80,21 +77,56 @@ def disp(n, xtot, x2tot):
         del2 = 0      
     xerr = np.sqrt(del2)  
     return xav, xerr
+#------------------------------------------------------------------------------
+#   plot histogram
+#       Input:  amin    minimum value in histogram
+#               m       number of bins 
+#               ist()   histogram array
+#------------------------------------------------------------------------------
 
+def plot_histogram2(amin, m , ist):
+    bins = np.linspace(amin, -amin, m+1)
+    plt.hist(bins[:-1], bins, density=True ,weights=ist, histtype='step')
+    plt.xlabel('x')
+    plt.ylabel('P(x)')
+    plt.show()
+    
+#------------------------------------------------------------------------------
+#   Read input values from console
+#------------------------------------------------------------------------------
+
+while True:
+    try:
+        seed = int(input("Enter the random seed: ")) #change to int() if expecting int-point input
+        break # Break out of the loop if input is numeric
+    except ValueError:
+        print("Invalid input. Please enter a number.")
+while True:
+    try:
+        icold = bool(input("Insert 0 (for a cold start) or 1 (for a hot start): ")) #change to bool() if expecting bool-point input
+        break # Break out of the loop if input is numeric
+    except ValueError:
+        print("Invalid input. Please enter a number.")
+while True:
+    try:
+        nmc = int(input("Enter the number of MonteCarlo sweeps: ")) #change to int() if expecting int-point input
+        break # Break out of the loop if input is numeric
+    except ValueError:
+        print("Invalid input. Please enter a number.")   
 #------------------------------------------------------------------------------
 #   set the values
 #------------------------------------------------------------------------------
-f   = 1.4
-n   = 800
-icold  = 0
-a   = 0.05
-nmc = 1000
-neq = 100
-delx= 0.5
-nc  = 5
-n_p  = 20
-tmax = n*a
-kp = 5
+
+f      = 1.4
+n      = 800
+a      = 0.05
+neq    = 100
+delx   = 0.5
+nc     = 5
+n_p    = 20
+tmax   = n*a
+kp     = 5
+nxhist = 50
 
 #------------------------------------------------------------------------------
 # echo input parameters
@@ -123,14 +155,13 @@ file17.write(fs.f444.format(n, nmc/kp, n*a, f))
 #   set the histogram parameters
 #------------------------------------------------------------------------------
 
-nxhist    = 50
-xhist_min = -1.5*f
-stxhist   = 3.0*f/nxhist
+xhist_min = -2.0*f
+stxhist   = -2*xhist_min/nxhist
 
 #------------------------------------------------------------------------------
 #     initialize                                                             
 #------------------------------------------------------------------------------
-random.seed(-1234)
+random.seed(seed)
 xcor_er   = np.zeros(n_p)
 x2cor_er  = np.zeros(n_p)
 x3cor_er  = np.zeros(n_p)
@@ -140,7 +171,7 @@ x3cor_sum = np.zeros(neq)
 xcor2_sum = np.zeros(neq)
 x2cor2_sum= np.zeros(neq)
 x3cor2_sum= np.zeros(neq)
-histo_x   = np.zeros(neq)
+histo_x   = np.zeros(nxhist)
 x2sub_av  = np.zeros(n_p)
 x2sub_er  = np.zeros(n_p)
 stot_sum = 0.0
@@ -189,9 +220,7 @@ nacc  = 0
 nhit  = 0
 nconf = 0
 ncor  = 0
-histo_x = np.zeros(neq)
-
-for i in range(nmc):
+for i in tqdm(range(nmc)):
     nconf += 1
     if i == neq:
         nconf = 0
@@ -211,7 +240,7 @@ for i in range(nmc):
         xcor_sum  = np.zeros(neq)
         x2cor_sum = np.zeros(neq)
         x3cor_sum = np.zeros(neq)
-        histo_x   = np.zeros(neq)
+        histo_x   = np.zeros(nxhist)
     #--------------------------------------------------------------------------
     #   one sweep thorough configuration                                       
     #--------------------------------------------------------------------------
@@ -268,7 +297,7 @@ for i in range(nmc):
     ttot2_sum+= ttot**2
     tvir_sum += tvtot
     tvir2_sum+= tvtot**2
-    
+
     for k in range(n):
         histogramarray(x[k], xhist_min, stxhist, nxhist, histo_x)
         x_sum += x[k]
@@ -292,7 +321,7 @@ for i in range(nmc):
             x2cor_sum[ip]  += x2cor
             x2cor2_sum[ip] += x2cor**2
             x3cor_sum[ip]  += x3cor
-            x3cor2_sum[ip] += x3cor**2            	
+            x3cor2_sum[ip] += x3cor**2         	
 #------------------------------------------------------------------------------
 #   averages                                                               
 #------------------------------------------------------------------------------
@@ -389,35 +418,18 @@ for ip in range(n_p-1):
 #   wave function                                                              
 #------------------------------------------------------------------------------
 
-file16.write('\nx distribution\n')
+plot_histogram2(xhist_min, nxhist, histo_x)
 
-X = stxhist + np.arange(len(histo_x))
-Y = histo_x
-
-# plot
-fig, ax = plt.subplots()
-
-ax.step(X, Y, linewidth=2.5)
-
-ax.set(xlim=(-20, 20))#, xticks=np.arange(1, 8),
-#       ylim=(0, 8), yticks=np.arange(1, 8))
-
-plt.show()
-
-
-
-
-# Ground state wave function histogram
-#print("---------------------------------------------")
-#print("x\t\tP(x)")
-#x_norm = 0
-#for i in range(n_bins):
-#    x_norm += histo_x[i]*delta_bin
-#   
-#for i in range(n_bins):
-#    xx = x_hist_min + i*delta_bin
-#    print("{:.4f}\t{:.4f}".format(xx, histo_x[i]/x_norm))
-
+file19.write('x distribution\n')
+xnorm = 0.0
+for i in range(nxhist):
+    xnorm += histo_x[i]*stxhist
+for i in range(nxhist):
+    xx = xhist_min + (i-1)*stxhist
+    file19.write(fs.f222.format(xx, histo_x[i]/xnorm))
+    
+#------------------------------------------------------------------------------
+#------------------------------------------------------------------------------
 file16.close()
 file17.close()
 file18.close()
