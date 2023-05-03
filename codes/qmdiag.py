@@ -155,7 +155,7 @@ for n in range(ndim):
     
 #Compute rescaled Hermite polynomials H_i(x)/2^i/sqrt(i!) for i = 0 to n.
 def hermite3(n, x, p):
-    #Parameters:
+    # Parameters:
     #    n (int): The highest degree of Hermite polynomials to compute.
     #    x (float): The value of x at which to evaluate the Hermite polynomials.
     #    p (list): A list of length n+1 to store the computed values of Hermite polynomials.
