@@ -131,7 +131,7 @@ nxhist = 50
 #------------------------------------------------------------------------------
 # echo input parameters
 #------------------------------------------------------------------------------
-#open txt files
+# open txt files
 
 file16 = open('Data/qm.dat', 'w')
 file17 = open('Data/config.dat', 'w')
@@ -141,7 +141,7 @@ file20 = open('Data/qmcor.dat', 'w')
 file21 = open('Data/qmcor2.dat', 'w')
 file22 = open('Data/qmcor3.dat', 'w')
 
-#write on a txt file values
+# write on a txt file the values
 
 file16.write('lattice qm 1.0\n')
 file16.write('----------\n')
@@ -241,9 +241,9 @@ for i in tqdm(range(nmc)):
         x2cor_sum = np.zeros(neq)
         x3cor_sum = np.zeros(neq)
         histo_x   = np.zeros(nxhist)
-    #--------------------------------------------------------------------------
-    #   one sweep thorough configuration                                       
-    #--------------------------------------------------------------------------
+#--------------------------------------------------------------------------
+#   one sweep thorough configuration                                       
+#--------------------------------------------------------------------------
     for j in range(1,n):
         nhit += 1
         xpm   = (x[j]-x[j-1])/a
@@ -266,9 +266,9 @@ for i in tqdm(range(nmc)):
     x[n-1]= x[0]
     x     = np.append(x, x[1])
 		
-	#--------------------------------------------------------------------------
-    #   calculate action and other things                                                  
-    #--------------------------------------------------------------------------
+#--------------------------------------------------------------------------
+#   calculate action and other things                                                  
+#--------------------------------------------------------------------------
     stot = 0.0
     ttot = 0.0
     tvtot= 0.0
@@ -285,10 +285,19 @@ for i in tqdm(range(nmc)):
         stot  = stot + s
     #write on a txt file
     file18.write(fs.f444.format(i,stot,ttot,vtot))
-
-    #--------------------------------------------------------------------------
-    #     populate histogram include in sample                                                     
-    #--------------------------------------------------------------------------
+    
+    if i % kp == 0:
+        print("configuration   ", i, "\n",
+              "acceptance rate ", float(nacc)/float(nhit), "\n",
+              "action (T,V)    ", stot, ttot, vtot)
+        file17.write('configuration: ')
+        file17.write(str(i))
+        file17.write('\n')
+        for i in range(n):
+            file17.write(fs.f222.format(i*a, x[i]))
+#--------------------------------------------------------------------------
+#     populate histogram include in sample                                                     
+#--------------------------------------------------------------------------
     stot_sum += stot
     stot2_sum+= stot**2
     vtot_sum += vtot
@@ -300,13 +309,13 @@ for i in tqdm(range(nmc)):
 
     for k in range(n):
         histogramarray(x[k], xhist_min, stxhist, nxhist, histo_x)
-        x_sum += x[k]
+        x_sum  += x[k]
         x2_sum += x[k]**2
         x4_sum += x[k]**4
         x8_sum += x[k]**8
-    #--------------------------------------------------------------------------
-    #     correlation function                                                   
-    #--------------------------------------------------------------------------
+#--------------------------------------------------------------------------
+#     correlation function                                                   
+#--------------------------------------------------------------------------
     for ic in range(nc):
         ncor += 1 
         ip0  = int((n-n_p)*random.random()) 
