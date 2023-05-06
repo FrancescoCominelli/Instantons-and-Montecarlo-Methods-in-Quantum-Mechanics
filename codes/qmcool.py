@@ -107,7 +107,7 @@ def inst(f, a, delx, n, x, xi, xa, z):
             xa[na-1] = tau
             z[nin-1] = tau
         ix = ixp
-    return ni, na, xi, xa, z
+    return ni, na
 
 #------------------------------------------------------------------------------
 #   Estimate average and error from xtot and x2tot
