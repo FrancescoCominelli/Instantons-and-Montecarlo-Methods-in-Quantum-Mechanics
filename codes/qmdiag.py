@@ -1,6 +1,7 @@
 import numpy as np
 import format_strings as fs
 import functions as fn 
+import re
 
 #Direct diagonalization of quantum mechanical anharmonic oscillator
 
@@ -8,25 +9,20 @@ import functions as fn
 #Harmonic oscillator: H_0=m/2(\dot x)^2+m/2*w^2x^2
 #Perturbation: H_1=A*x^4+B*x^2+C
 
-#Read input values from console
-while True:
-    try:
-        f = float(input("Parameter f: ")) #change to float() if expecting floating-point input
-        break # Break out of the loop if input is numeric
-    except ValueError:
-        print("Invalid input. Please enter a number.")
-while True:
-    try:
-        ndim = int(input("Dimension of matrix (n>40): ")) #change to int() if expecting int-point input
-        break # Break out of the loop if input is numeric
-    except ValueError:
-        print("Invalid input. Please enter a number.")
-while True:
-    try:
-        w0 = float(input("Unperturbed oscillator frequency (choose w0 ~ 4*f): ")) #change to float() if expecting floating-point input
-        break # Break out of the loop if input is numeric
-    except ValueError:
-        print("Invalid input. Please enter a number.")
+# open the file for reading
+with open('parameters.txt', 'r') as file:
+    # read the contents of the file
+    contents = file.read()
+   
+# search for the values of f and a using regular expressions
+f    = re.search(r'f\s*=\s*(\d+\.\d+)', contents).group(1)
+ndim = re.search(r'ndim\s*=\s*(\d+)', contents).group(1)
+w0   = re.search(r'w0\s*=\s*(\d+\.\d+)', contents).group(1)
+
+# convert the values to integers
+f    = float(f)
+ndim = int(ndim)
+w0   = float(w0)
 
 eps = 1.e-30
 pi = np.pi

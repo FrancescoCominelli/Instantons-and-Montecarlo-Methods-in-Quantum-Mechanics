@@ -1,0 +1,37 @@
+Minimum of anharmonic oscillator potential V(x) = (x^2 − f^2)^2
+f      = 1.4
+
+Dimension of basis used for diagonalizing H (choose N ≥ 40)
+ndim   = 40
+
+Unperturbed oscillator frequency (choose w0 ∼ 4f)
+w0     = 5.6
+
+Number of lattice points in the euclidean time direction (n ∼ 800)
+n      = 800
+
+Lattice spacing (a ∼ 0.05)
+a      = 0.05
+
+Choose 0 (cold start x_i = −f), choose 1 (hot start x_i = ran())
+icold  = 1
+
+Number of equilibration sweeps before first measurement (neq ∼ 100)
+neq    = 100
+
+Number of Monte Carlo sweeps (nmc ∼ 10^5)
+nmc    = 1000
+
+Width of Gaussian distribution used for Monte Carlo update x(n) (delx ∼ 0.5)
+delx   = 0.5
+
+Number of points on which correlation functions are measured
+n_p    = 20
+
+Number of sweeps between writeout of complete configuration
+kp     = 5
+
+Number of steps in adiabatic switching (nswitch ∼ 20)
+nalpha = 20
+
+

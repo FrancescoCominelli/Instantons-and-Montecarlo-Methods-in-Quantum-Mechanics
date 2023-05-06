@@ -3,6 +3,7 @@ import numpy as np
 import random
 import functions as fn
 from tqdm import tqdm
+import re
 #------------------------------------------------------------------------------
 #------------------------------------------------------------------------------
 #   lattice calculation in quantum mechanics                              
@@ -60,31 +61,39 @@ while True:
         break # Break out of the loop if input is numeric
     except ValueError:
         print("Invalid input. Please enter a number.")
-while True:
-    try:
-        icold = bool(input("Insert 0 (for a cold start) or 1 (for a hot start): ")) #change to bool() if expecting bool-point input
-        break # Break out of the loop if input is numeric
-    except ValueError:
-        print("Invalid input. Please enter a number.")
-while True:
-    try:
-        nmc = int(input("Enter the number of MonteCarlo sweeps: ")) #change to int() if expecting int-point input
-        break # Break out of the loop if input is numeric
-    except ValueError:
-        print("Invalid input. Please enter a number.")   
+
 #------------------------------------------------------------------------------
 #   set the values
 #------------------------------------------------------------------------------
+# open the file for reading
+with open('parameters.txt', 'r') as file:
+    # read the contents of the file
+    contents = file.read()
+   
+# search for the values of f and a using regular expressions
+f    = re.search(r'f\s*=\s*(\d+\.\d+)', contents).group(1)
+n    = re.search(r'n\s*=\s*(\d+)', contents).group(1)
+a    = re.search(r'w0\s*=\s*(\d+\.\d+)', contents).group(1)
+icold= re.search(r'icold\s*=\s*(\d+)', contents).group(1)
+neq  = re.search(r'neq\s*=\s*(\d+)', contents).group(1)
+nmc  = re.search(r'nmc\s*=\s*(\d+)', contents).group(1)
+delx = re.search(r'delx\s*=\s*(\d+\.\d+)', contents).group(1)
+n_p  = re.search(r'n_p\s*=\s*(\d+)', contents).group(1)
+kp   = re.search(r'kp\s*=\s*(\d+)', contents).group(1)
 
-f      = 1.4
-n      = 800
-a      = 0.05
-neq    = 100
-delx   = 0.5
+# convert the values to integers
+f    = float(f)
+n    = int(n)
+a    = float(a)
+icold= int(icold)
+neq  = int(neq)
+nmc  = int(nmc)
+delx = float(delx)
+n_p  = int(n_p)
+kp   = int(kp)
+
 nc     = 5
-n_p    = 20
 tmax   = n*a
-kp     = 5
 nxhist = 50
 
 #------------------------------------------------------------------------------

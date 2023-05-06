@@ -2,6 +2,7 @@ import numpy as np
 import format_strings as fs
 import random
 import functions as fn
+import re
 
 #------------------------------------------------------------------------------
 # Lattice calculation in quantum mechanics.
@@ -39,33 +40,40 @@ while True:
         break # Break out of the loop if input is numeric
     except ValueError:
         print("Invalid input. Please enter a number.")
-while True:
-    try:
-        icold = bool(input("Insert 0 (for a cold start) or 1 (for a hot start): ")) #change to bool() if expecting bool-point input
-        break # Break out of the loop if input is numeric
-    except ValueError:
-        print("Invalid input. Please enter a number.")
-while True:
-    try:
-        nmc = int(input("Enter the number of MonteCarlo sweeps: ")) #change to int() if expecting int-point input
-        break # Break out of the loop if input is numeric
-    except ValueError:
-        print("Invalid input. Please enter a number.")
-
 
 #------------------------------------------------------------------------------
 #   set the values
 #------------------------------------------------------------------------------
+# open the file for reading
+with open('parameters.txt', 'r') as file:
+    # read the contents of the file
+    contents = file.read()
+   
+# search for the values of f and a using regular expressions
+f      = re.search(r'f\s*=\s*(\d+\.\d+)', contents).group(1)
+n      = re.search(r'n\s*=\s*(\d+)', contents).group(1)
+a      = re.search(r'a\s*=\s*(\d+\.\d+)', contents).group(1)
+icold  = re.search(r'icold\s*=\s*(\d+)', contents).group(1)
+neq    = re.search(r'neq\s*=\s*(\d+)', contents).group(1)
+nmc    = re.search(r'nmc\s*=\s*(\d+)', contents).group(1)
+delx   = re.search(r'delx\s*=\s*(\d+\.\d+)', contents).group(1)
+kp     = re.search(r'kp\s*=\s*(\d+)', contents).group(1)
+w0     = re.search(r'w0\s*=\s*(\d+\.\d+)', contents).group(1)
+nalpha = re.search(r'nalpha\s*=\s*(\d+)', contents).group(1)
 
-f      = 1.4
-n      = 800
-a      = 0.05
-neq    = 100
-delx   = 0.5
-kp     = 5
-w      = 5.6
-nalpha = 20
+# convert the values to integers
+f      = float(f)
+n      = int(n)
+a      = float(a)
+icold  = int(icold)
+neq    = int(neq)
+nmc    = int(nmc)
+delx   = float(delx)
+kp     = int(kp)
+w0     = float(w0)
+nalpha = int(nalpha)
 
+w      = w0
 dalpha = 1.0/float(nalpha)
 beta   = n*a
 
