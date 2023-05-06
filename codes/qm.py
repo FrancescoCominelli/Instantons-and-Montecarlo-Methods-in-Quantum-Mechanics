@@ -1,7 +1,7 @@
 import format_strings as fs
 import numpy as np
-import matplotlib.pyplot as plt
 import random
+import functions as fn
 from tqdm import tqdm
 #------------------------------------------------------------------------------
 #------------------------------------------------------------------------------
@@ -49,47 +49,6 @@ from tqdm import tqdm
 #     m       number of bins                                              
 #     hist(n) histogram array                                             
 #------------------------------------------------------------------------------
-def histogramarray(a, amin, st, m, hist):
-    j = (a - amin)/st + 1.000001
-    if (j < 1):
-        j = 1
-    if (j > m):
-        j = m
-    hist[int(j)-1] += 1
-    return
-#------------------------------------------------------------------------------
-#   Estimate average and error from xtot and x2tot
-#------------------------------------------------------------------------------
-#   Input:
-#           n: number of measurements
-#           xtot: sum of x_i
-#           x2tot: sum of x**2
-#   Output:
-#           xav: average
-#           xerr: error estimate
-#------------------------------------------------------------------------------  
-def disp(n, xtot, x2tot):
-    if n < 1:
-        raise ValueError("Number of measurements must be at least 1")
-    xav = xtot / float(n)
-    del2 = x2tot / float(n*n) - xav*xav / float(n)
-    if del2 < 0:
-        del2 = 0      
-    xerr = np.sqrt(del2)  
-    return xav, xerr
-#------------------------------------------------------------------------------
-#   plot histogram
-#       Input:  amin    minimum value in histogram
-#               m       number of bins 
-#               ist()   histogram array
-#------------------------------------------------------------------------------
-
-def plot_histogram2(amin, m , ist):
-    bins = np.linspace(amin, -amin, m+1)
-    plt.hist(bins[:-1], bins, density=True ,weights=ist, histtype='step')
-    plt.xlabel('x')
-    plt.ylabel('P(x)')
-    plt.show()
     
 #------------------------------------------------------------------------------
 #   Read input values from console
@@ -308,7 +267,7 @@ for i in tqdm(range(nmc)):
     tvir2_sum+= tvtot**2
 
     for k in range(n):
-        histogramarray(x[k], xhist_min, stxhist, nxhist, histo_x)
+        fn.histogramarray(x[k], xhist_min, stxhist, nxhist, histo_x)
         x_sum  += x[k]
         x2_sum += x[k]**2
         x4_sum += x[k]**4
@@ -337,17 +296,17 @@ for i in tqdm(range(nmc)):
 xcor_av = np.zeros(n_p)
 x2cor_av= np.zeros(n_p)
 x3cor_av= np.zeros(n_p)
-stot_av,stot_err = disp(nconf,stot_sum,stot2_sum)
-vtot_av,vtot_err = disp(nconf,vtot_sum,vtot2_sum)
-ttot_av,ttot_err = disp(nconf,ttot_sum,ttot2_sum)
-tvir_av,tvir_err = disp(nconf,tvir_sum,tvir2_sum)
-x_av,x_err       = disp(nconf*n,x_sum,x2_sum)
-x2_av,x2_err     = disp(nconf*n,x2_sum,x4_sum)
-x4_av,x4_err     = disp(nconf*n,x4_sum,x8_sum)
+stot_av,stot_err = fn.disp(nconf,stot_sum,stot2_sum)
+vtot_av,vtot_err = fn.disp(nconf,vtot_sum,vtot2_sum)
+ttot_av,ttot_err = fn.disp(nconf,ttot_sum,ttot2_sum)
+tvir_av,tvir_err = fn.disp(nconf,tvir_sum,tvir2_sum)
+x_av,x_err       = fn.disp(nconf*n,x_sum,x2_sum)
+x2_av,x2_err     = fn.disp(nconf*n,x2_sum,x4_sum)
+x4_av,x4_err     = fn.disp(nconf*n,x4_sum,x8_sum)
 for ip in range(n_p):
-    xcor_av[ip],xcor_er[ip]   = disp(ncor,xcor_sum[ip],xcor2_sum[ip])
-    x2cor_av[ip],x2cor_er[ip] = disp(ncor,x2cor_sum[ip],x2cor2_sum[ip],)
-    x3cor_av[ip],x3cor_er[ip] = disp(ncor,x3cor_sum[ip],x3cor2_sum[ip],)
+    xcor_av[ip],xcor_er[ip]   = fn.disp(ncor,xcor_sum[ip],xcor2_sum[ip])
+    x2cor_av[ip],x2cor_er[ip] = fn.disp(ncor,x2cor_sum[ip],x2cor2_sum[ip],)
+    x3cor_av[ip],x3cor_er[ip] = fn.disp(ncor,x3cor_sum[ip],x3cor2_sum[ip],)
 v_av  = vtot_av/tmax
 v_err = vtot_err/tmax
 t_av  = ttot_av/tmax
@@ -427,7 +386,7 @@ for ip in range(n_p-1):
 #   wave function                                                              
 #------------------------------------------------------------------------------
 
-plot_histogram2(xhist_min, nxhist, histo_x)
+fn.plot_histogram2(xhist_min, nxhist, histo_x)
 
 file19.write('x distribution\n')
 xnorm = 0.0

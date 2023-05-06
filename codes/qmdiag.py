@@ -1,13 +1,12 @@
 import numpy as np
-import format_strings as fs 
+import format_strings as fs
+import functions as fn 
 
 #Direct diagonalization of quantum mechanical anharmonic oscillator
 
 #Hamiltonian m/2(\dot x)^2+k(x^2-f^2)^2, units 2m=k=1
 #Harmonic oscillator: H_0=m/2(\dot x)^2+m/2*w^2x^2
 #Perturbation: H_1=A*x^4+B*x^2+C
-
-nmax = 1000
 
 #Read input values from console
 while True:
@@ -152,42 +151,6 @@ for n in range(ndim):
     print(fs.f551.format(n, e[n], rho[n], rho2[n], rho3[n]))
     file16.write(fs.f551.format(n, e[n], rho[n], rho2[n], rho3[n]))
 
-    
-#Compute rescaled Hermite polynomials H_i(x)/2^i/sqrt(i!) for i = 0 to n.
-def hermite3(n, x, p):
-    # Parameters:
-    #    n (int): The highest degree of Hermite polynomials to compute.
-    #    x (float): The value of x at which to evaluate the Hermite polynomials.
-    #    p (list): A list of length n+1 to store the computed values of Hermite polynomials.
-
-    p[0] = 1.0
-    p[1] = x
-
-    for i in range(2, n + 1):
-        p[i] = (x * p[i - 1] - np.sqrt(i - 1.0) * p[i - 2] / 2.0) / np.sqrt(float(i))
-    
-# Define harmonic oscillator wave function
-def psiosc(n, x, psi):
-    # Harmonic oscillator wave functions psi(i=0,..,n)=psi_i(x)
-    # Parameters:
-    #    n (int): The highest index of the harmonic oscillator wave functions to compute.
-    #    x (float): The value of x at which to evaluate the harmonic oscillator wave functions.
-    #    psi (list): A list of length n+1 to store the computed values of the harmonic oscillator wave functions.
-    
-
-    h = np.zeros(n+1)  # array to store Hermite polynomials
-    global m  # mass
-    global w  # frequency
-
-    y = np.sqrt(m * w) * x
-    hermite3(n, y, h)
-
-    for i in range(n + 1):
-        xnorm = (m * w / pi) ** 0.25 * 2.0 ** (i / 2.0)
-        psi[i] = xnorm * h[i] * np.exp(-m * w / 2.0 * x ** 2)
-
-    return psi
-
 # Groundstate wave function 
 
 file16.write('\n')
@@ -199,7 +162,7 @@ xnorm2 = 0.0
 for k in range(nx+1):
     x = -xmax + k*dx
     psix = 0.0
-    psiosc(ndim-1, x, psi)
+    fn.psiosc(m, w, ndim-1, x, psi)
     
     for j in range(ndim):
         psix += v[j,0] * psi[j]

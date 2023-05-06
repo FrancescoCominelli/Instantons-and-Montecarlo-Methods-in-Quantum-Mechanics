@@ -1,6 +1,7 @@
 import numpy as np
 import format_strings as fs
 import random
+import functions as fn
 
 #------------------------------------------------------------------------------
 # Lattice calculation in quantum mechanics.
@@ -27,28 +28,6 @@ import random
 #   nc      number of correlator measurements in a single configuration                                
 #   kp      number of sweeps between writeout of complete configuration     
 #------------------------------------------------------------------------------
-
-
-#------------------------------------------------------------------------------
-#   Estimate average and error from xtot and x2tot
-#------------------------------------------------------------------------------
-#   Input:
-#           n: number of measurements
-#           xtot: sum of x_i
-#           x2tot: sum of x**2
-#   Output:
-#           xav: average
-#           xerr: error estimate
-#------------------------------------------------------------------------------  
-def disp(n, xtot, x2tot):
-    if n < 1:
-        raise ValueError("Number of measurements must be at least 1")
-    xav = xtot / float(n)
-    del2 = x2tot / float(n*n) - xav*xav / float(n)
-    if del2 < 0:
-        del2 = 0      
-    xerr = np.sqrt(del2)  
-    return xav, xerr
 
 #------------------------------------------------------------------------------
 #   Read input values from console
@@ -112,13 +91,13 @@ file16.write(fs.f105.format(w, nalpha))
 #------------------------------------------------------------------------------
 random.seed(seed)
 
-stot_sum = 0.0
-stot2_sum= 0.0
-vav_sum = 0.0
-vav2_sum= 0.0
-valpha_sum = 0.0
-valpha2_sum= 0.0
-x_sum = 0
+stot_sum    = 0.0
+stot2_sum   = 0.0
+vav_sum     = 0.0
+vav2_sum    = 0.0
+valpha_sum  = 0.0
+valpha2_sum = 0.0
+x_sum  = 0
 x2_sum = 0
 x4_sum = 0
 x8_sum = 0
@@ -270,12 +249,12 @@ for ialpha in range(2 * nalpha + 1):
 #   averages                                                               
 #------------------------------------------------------------------------------
     
-    stot_av, stot_err     = disp(nconf, stot_sum, stot2_sum)
-    v_av, v_err           = disp(nconf, vav_sum, vav2_sum)
-    valpha_av, valpha_err = disp(nconf, valpha_sum, valpha2_sum)
-    x_av, x_err           = disp(nconf*n, x_sum, x2_sum)
-    x2_av,x2_err          = disp(nconf*n, x2_sum, x4_sum)
-    x4_av,x4_err          = disp(nconf*n, x4_sum, x8_sum)
+    stot_av, stot_err     = fn.disp(nconf, stot_sum, stot2_sum)
+    v_av, v_err           = fn.disp(nconf, vav_sum, vav2_sum)
+    valpha_av, valpha_err = fn.disp(nconf, valpha_sum, valpha2_sum)
+    x_av, x_err           = fn.disp(nconf*n, x_sum, x2_sum)
+    x2_av,x2_err          = fn.disp(nconf*n, x2_sum, x4_sum)
+    x4_av,x4_err          = fn.disp(nconf*n, x4_sum, x8_sum)
     
     va_av[ialpha]  = valpha_av
     va_err[ialpha] = valpha_err
@@ -285,7 +264,7 @@ for ialpha in range(2 * nalpha + 1):
     else:
         da = dalpha / 2.0
     de = da * valpha_av
-    ei = ei + de
+    ei += de
 
 #------------------------------------------------------------------------------
 #   output                                                               
@@ -312,6 +291,9 @@ edw_sum = 0.0
 edw_err = 0.0
 edw_hal = 0.0
 
+#------------------------------------------------------------------------------
+#   have sum=1/2(up+down) and up = 1/2*f0+f1+...+1/2*fn, down=...                                                               
+#------------------------------------------------------------------------------
 
 for ia in range(nalpha+1):
     if ia % nalpha == 0:

@@ -1,6 +1,7 @@
 import numpy as np
 import format_strings as fs
 import random
+import functions as fn
 
 
 #------------------------------------------------------------------------------
@@ -17,27 +18,6 @@ import random
 #------------------------------------------------------------------------------
 #   action m/2(\dot x)^2+k(x^2-f^2)^2, units 2m=k=1. 
 #------------------------------------------------------------------------------
-
-#------------------------------------------------------------------------------
-#   Estimate average and error from xtot and x2tot
-#------------------------------------------------------------------------------
-#   Input:
-#           n: number of measurements
-#           xtot: sum of x_i
-#           x2tot: sum of x**2
-#   Output:
-#           xav: average
-#           xerr: error estimate
-#------------------------------------------------------------------------------  
-def disp(n, xtot, x2tot):
-    if n < 1:
-        raise ValueError("Number of measurements must be at least 1")
-    xav = xtot / float(n)
-    del2 = x2tot / float(n*n) - xav*xav / float(n)
-    if del2 < 0:
-        del2 = 0      
-    xerr = np.sqrt(del2)  
-    return xav, xerr
 
 #------------------------------------------------------------------------------
 #   Read input values from console
@@ -292,9 +272,9 @@ for ialpha in range(2*nalpha+1):
 #--------------------------------------------------------------------------
 #   averages                                                     
 #--------------------------------------------------------------------------
-    stot_av, stot_err     = disp(nconf, stot_sum, stot2_sum)
-    v_av, v_err           = disp(nconf, vav_sum, vav2_sum)
-    valpha_av, valpha_err = disp(nconf, valpha_sum, valpha2_sum)
+    stot_av, stot_err     = fn.disp(nconf, stot_sum, stot2_sum)
+    v_av, v_err           = fn.disp(nconf, vav_sum, vav2_sum)
+    valpha_av, valpha_err = fn.disp(nconf, valpha_sum, valpha2_sum)
 
     va_av[ialpha]  = valpha_av
     va_err[ialpha] = valpha_err
@@ -518,9 +498,9 @@ for ialpha in range(2 * nalpha + 1):
 #--------------------------------------------------------------------------
 #   averages                                                     
 #--------------------------------------------------------------------------
-    stot_av, stot_err     = disp(nconf, stot_sum, stot2_sum)
-    v_av, v_err           = disp(nconf, vav_sum, vav2_sum)
-    valpha_av, valpha_err = disp(nconf, valpha_sum, valpha2_sum)
+    stot_av, stot_err     = fn.disp(nconf, stot_sum, stot2_sum)
+    v_av, v_err           = fn.disp(nconf, vav_sum, vav2_sum)
+    valpha_av, valpha_err = fn.disp(nconf, valpha_sum, valpha2_sum)
 
     va_av[ialpha]  = valpha_av
     va_err[ialpha] = valpha_err
