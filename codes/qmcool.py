@@ -48,6 +48,7 @@ from tqdm import tqdm
 #   S/N         action per instanton. S_0 is the continuum result for one 
 #               instanton
 #------------------------------------------------------------------------------
+
 #------------------------------------------------------------------------------
 #     function to include value a in histogram array hist(n)
 #     def histogramarray(a, amin, st, m, hist)                
@@ -84,9 +85,9 @@ def act(f, a, delx, n, x):
         stot = stot + s
     return stot, ttot, vtot
 
-#------------------------------------------------------------------------c
-#     return number and location of (anti) instantons                    c
-#------------------------------------------------------------------------c
+#------------------------------------------------------------------------------
+#     return number and location of (anti) instantons                    
+#------------------------------------------------------------------------------
 def inst(f, a, delx, n, x, xi, xa, z):
     ni = 0
     na = 0
@@ -106,10 +107,61 @@ def inst(f, a, delx, n, x, xi, xa, z):
             xa[na-1] = tau
             z[nin-1] = tau
         ix = ixp
-    return ni, na
+    return ni, na, xi, xa, z
 
 #------------------------------------------------------------------------------
+#   Estimate average and error from xtot and x2tot
+#------------------------------------------------------------------------------
+#   Input:
+#           n: number of measurements
+#           xtot: sum of x_i
+#           x2tot: sum of x**2
+#   Output:
+#           xav: average
+#           xerr: error estimate
+#------------------------------------------------------------------------------  
+def disp(n, xtot, x2tot):
+    if n < 1:
+        raise ValueError("Number of measurements must be at least 1")
+    xav = xtot / float(n)
+    del2 = x2tot / float(n*n) - xav*xav / float(n)
+    if del2 < 0:
+        del2 = 0      
+    xerr = np.sqrt(del2)  
+    return xav, xerr
 
+#----------------------------------------------------------------------------c
+#   log derivative                                                         c
+#----------------------------------------------------------------------------c
+def dl(xcor1,xcor2,a):      
+    dl = (xcor1-xcor2)/(xcor1*a)
+    return dl
+
+#----------------------------------------------------------------------------c
+#     log derivative, error                                                  c
+#----------------------------------------------------------------------------c
+def dle(xcor1,xcor2,xcor1e,xcor2e,a):      
+    dle2 = (xcor2e/xcor1)**2+(xcor1e*xcor2/xcor1**2)**2
+    dle  = np.sqrt(dle2)
+    return dle
+
+#------------------------------------------------------------------------------
+#   plot histogram
+#       Input:  amin    minimum value in histogram
+#               m       number of bins 
+#               ist()   histogram array
+#------------------------------------------------------------------------------
+
+def plot_histogram2(amin, m , ist):
+    bins = np.linspace(amin, -amin, m+1)
+    plt.hist(bins[:-1], bins, density=True ,weights=ist, histtype='step')
+    plt.xlabel('x')
+    plt.ylabel('P(x)')
+    plt.show()
+    
+#------------------------------------------------------------------------------
+
+file6  = open('Data/file6.dat', 'w' )
 file16 = open('Data/qm.dat', 'w')
 file17 = open('Data/config.dat', 'w')
 file18 = open('Data/trajectory.dat', 'w')
@@ -167,9 +219,9 @@ while True:
     except ValueError:
         print("Invalid input. Please enter a number.")
      
-#----------------------------------------------------------------------------
+#------------------------------------------------------------------------------
 #     echo input parameters                                                  
-#----------------------------------------------------------------------------
+#------------------------------------------------------------------------------
 
 pi  = np.pi
 s0  = 4.0/3.0*f**3
@@ -177,18 +229,18 @@ de  = 8*np.sqrt(2.0/pi)*f**2.5*np.exp(-s0)
 de2 = de*(1.0-71.0/72.0/s0)
 file16.write('lattice qm 1.1')
 file16.write('--------------\n')
-file16.write(fs.f201(f,n,a))
-file16.write(fs.f202(nmc,neq))
-file16.write(fs.f203(n_p,nc))
-file16.write(fs.f204(delx,icold,ncool))
-file16.write(fs.f205(s0,de,de*n*a))
-file16.write(fs.f201(s0,de2,de2*n*a))
+file16.write(fs.f201.format(f,n,a))
+file16.write(fs.f202.format(nmc,neq))
+file16.write(fs.f203.format(n_p,nc))
+file16.write(fs.f204.format(delx,icold,ncool))
+file16.write(fs.f205.format(s0,de,de*n*a))
+file16.write(fs.f206.format(s0,de2,de2*n*a))
 #file17.write('#',n,nmc/kp,n*a,f)
 #file20.write('#',n,nmc/kp,n*a,f)
 
-#----------------------------------------------------------------------------
+#------------------------------------------------------------------------------
 #     parameters for histograms                                              
-#----------------------------------------------------------------------------
+#------------------------------------------------------------------------------
 
 nxhist = 50
 xhist_min = -1.5 * f
@@ -196,9 +248,9 @@ stxhist = -2 * xhist_min / nxhist
 nzhist = 40
 stzhist = 4.01 / nzhist
 
-#----------------------------------------------------------------------------c
-#    clear summation arrays                                                 c
-#----------------------------------------------------------------------------c
+#------------------------------------------------------------------------------
+#    clear summation arrays                                                 
+#------------------------------------------------------------------------------
 
 stot_sum  = 0.0
 stot2_sum = 0.0
@@ -223,9 +275,9 @@ xi         = np.zeros(ncool)
 xa         = np.zeros(ncool)
 z          = np.zeros(ncool)
 
-#----------------------------------------------------------------------------
+#------------------------------------------------------------------------------
 #     correlators <x(#0)x(t)>
-#----------------------------------------------------------------------------
+#------------------------------------------------------------------------------
 
 xcor_sum   = np.zeros(ncool)
 xcor2_sum  = np.zeros(ncool)
@@ -236,9 +288,9 @@ xcool2_sum = np.zeros(ncool)
 xcool_av   = np.zeros(ncool)
 xcool_er   = np.zeros(ncool)
 
-#----------------------------------------------------------------------------
+#------------------------------------------------------------------------------
 #     correlators <x^2(0)x^2(t)>                                             
-#----------------------------------------------------------------------------
+#------------------------------------------------------------------------------
 
 x2cor_sum     = np.zeros(ncool)
 x2cor2_sum    = np.zeros(ncool)
@@ -253,9 +305,9 @@ x2cool_er     = np.zeros(ncool)
 x2cool_sub_av = np.zeros(ncool)
 x2cool_sub_er = np.zeros(ncool)
 
-#----------------------------------------------------------------------------
+#------------------------------------------------------------------------------
 #     correlators <x^3(0)x^3(t)>                                             
-#----------------------------------------------------------------------------
+#------------------------------------------------------------------------------
 
 x3cor_sum   = np.zeros(ncool)
 x3cor2_sum  = np.zeros(ncool)
@@ -429,50 +481,276 @@ for i in tqdm(range(nmc)):
             x2cor_sum[ip]  += x2cor
             x2cor2_sum[ip] += x2cor**2
             x3cor_sum[ip]  += x3cor
-            x3cor2_sum[ip] += x3cor**2 
-    #----------------------------------------------------------------------------c
-    #   cooling and topological charge                                         c
-    #----------------------------------------------------------------------------c
+            x3cor2_sum[ip] += x3cor**2
+            
+    #--------------------------------------------------------------------------
+    #   cooling and topological charge                                         
+    #--------------------------------------------------------------------------
+    
     if i % kp == 0:
         ncoolconf += 1
         xs = [0.0] * (n + 1)
-        ni, na = inst(f, a, delx, xs, n, xi, xa, z)
+        ni, na, xi, xa, z = inst(f, a, delx, n, xs, xi, xa, z)
         ss, ts, vs = act(f, a, delx, n, xs)
         nin = ni + na
         nin_sum[0]   += nin
         nin2_sum[0]  += nin**2
         scool_sum[0] += ss
         scool2_sum[0]+= ss**2
-    for icool in range(ncool):
-        xs = [0.0] * (n + 1)
-        ni, na = inst(f, a, delx, xs, n, xi, xa, z)
-        ss, ts, vs = act(f, a, delx, n, xs)
-        nin = ni + na
-        nin_sum[0]   += nin
-        nin2_sum[0]  += nin**2
-        scool_sum[0] += ss
-        scool2_sum[0]+= ss**2
-    #----------------------------------------------------------------------------c
-    #     cooled configuration: instanton distribution                           c
-    #----------------------------------------------------------------------------c
+        for icool in range(ncool):
+            xs = [0.0] * (n + 1)
+            ni, na, xi, xa, z = inst(f, a, delx, n, xs, xi, xa, z)
+            ss, ts, vs = act(f, a, delx, n, xs)
+            nin = ni + na
+            nin_sum[0]   += nin
+            nin2_sum[0]  += nin**2
+            scool_sum[0] += ss
+            scool2_sum[0]+= ss**2
+            
+        #----------------------------------------------------------------------
+        #     cooled configuration: instanton distribution                            
+        #----------------------------------------------------------------------
+        
+        for ii in range(1, nin, 2):
+            if ii == 1:
+                zm = z[nin-1] - tmax
+            else:
+                zm = z[ii-2]
+            z0  = z[ii-1]
+            zp  = z[ii]
+            zia = min(zp-z0, z0-zm)
+            histogramarray(zia, 0.0, stzhist, nzhist, iz)
 
-         do 310 ii=1,nin-1,2
-            if(ii .eq. 1) then
-               zm = z(nin)-tmax
-            else
-               zm = z(ii-1)
-            endif
-            z0 = z(ii)
-            zp = z(ii+1)
-            zia= min(zp-z0,z0-zm)
-            call lens(zia,0.0,stzhist,nzhist,iz)
- 310     continue
-       
+        #----------------------------------------------------------------------
+        #   cooled correlator                                                      
+        #----------------------------------------------------------------------
+        
+        for ic in range(nc):
+            ncoolcor += 1
+            ip0 = ipa[ic]
+            x0 = xs[ip0]
+            for ip in range(np):
+                x1    = xs[ip0+ip]
+                xcor  = x0*x1
+                x2cor = xcor**2
+                x3cor = xcor**3
+                xcool_sum[ip]   += xcor
+                xcool2_sum[ip]  += xcor**2
+                xcool_sum[ip]   += xcor
+                xcool2_sum[ip]  += xcor**2
+                x2cool_sum[ip]  += x2cor
+                x2cool2_sum[ip] += x2cor**2
+                x3cool_sum[ip]  += x3cor
+                x3cool2_sum[ip] += x3cor**2
+    #--------------------------------------------------------------------------
+    #     write configuration                                                    
+    #--------------------------------------------------------------------------
+    if i % kp2 == 0:
+        file6.write('\n')
+        file6.write('configuration   ', i)
+        file6.write('acceptance rate ', float(nacc / nhit))
+        file6.write('action (T,V)    ', stot, ttot, vtot)
+        # file17.write('# configuration', i)
+        # file20.write('# configuration', i)
+        for k in range(n):
+            file17.write(k*a, x[k])
+            file20.write(k*a, xs[k])
+#------------------------------------------------------------------------------
+#   averages
+#------------------------------------------------------------------------------
+stot_av, stot_err = disp(nconf  , stot_sum, stot2_sum)
+vtot_av, vtot_err = disp(nconf  , vtot_sum, vtot2_sum)
+ttot_av, ttot_err = disp(nconf  , ttot_sum, ttot2_sum)
+tvir_av, tvir_err = disp(nconf  , tvir_sum, tvir2_sum)
+x_av   ,  x_err   = disp(nconf*n, x_sum   , x2_sum)
+x2_av  ,  x2_err  = disp(nconf*n, x2_sum  , x4_sum)
+x4_av  , x4_err   = disp(nconf*n, x4_sum  , x8_sum)
+#------------------------------------------------------------------------------
+#     correlators                                                            
+#------------------------------------------------------------------------------
 
+for ip in range(n_p):
+    xcor_av[ip]  , xcor_er[ip]   = disp(ncor    , xcor_sum[ip]  , xcor2_sum[ip]) 
+    x2cor_av[ip] , x2cor_er[ip]  = disp(ncor    , x2cor_sum[ip] , x2cor2_sum[ip]) 
+    x3cor_av[ip] , x3cor_er[ip]  = disp(ncor    , x3cor_sum[ip] , x3cor2_sum[ip]) 
+    xcool_av[ip] , xcool_er[ip]  = disp(ncoolcor, xcool_sum[ip] , xcool2_sum[ip]) 
+    x2cool_av[ip], x2cool_er[ip] = disp(ncoolcor, x2cool_sum[ip], x2cool2_sum[ip]) 
+    x3cool_av[ip], x3cool_er[ip] = disp(ncoolcor, x3cool_sum[ip], x3cool2_sum[ip]) 
 
+#------------------------------------------------------------------------------
+#   instanton density, cooled action                                       
+#------------------------------------------------------------------------------
 
+nin_av   = np.zeros(ncool+1)
+nin_er   = np.zeros(ncool+1)
+scool_av = np.zeros(ncool+1)
+scool_er = np.zeros(ncool+1) 
+for ic in range(ncool + 1):
+    nin_av[ic], nin_er[ic] = disp(ncoolconf, nin_sum[ic]  , nin2_sum[ic]) 
+    scool_av[ic], scool_er[ic] = disp(ncoolconf, scool_sum[ic], scool2_sum[ic]) 
+v_av   = vtot_av/tmax
+v_err  = vtot_err/tmax
+t_av   = ttot_av/tmax
+t_err  = ttot_err/tmax
+tv_av  = tvir_av/tmax
+tv_err = tvir_err/tmax
+e_av   = v_av+tv_av
+e_err  = np.sqrt(v_err**2+tv_err**2)
 
+#------------------------------------------------------------------------------
+#   output                                                                 
+#------------------------------------------------------------------------------
 
+file16.write('\n')
+file16.write('nconf = ',nconf) 
+file16.write('ncoolc= ',ncoolconf)      
+file16.write(fs.f801.format(stot_av,stot_err)) 
+file16.write(fs.f802.format(v_av,v_err)) 
+file16.write(fs.f803.format(t_av,t_err)) 
+file16.write(fs.f804.format(tv_av,tv_err)) 
+file16.write(fs.f805.format(e_av,e_err)) 
+file16.write(fs.f806.format(x_av,x_err)) 
+file16.write(fs.f807.format(x2_av,x2_err)) 
+file16.write(fs.f808.format(x4_av,x4_err)) 
+file16.write('\n')
+
+#------------------------------------------------------------------------------
+#   correlators etc                                                        
+#------------------------------------------------------------------------------
+      
+file16.write('\n')
+file16.write(' <x(0)x(t)> correlation function\n') 
+file21.write('#<x(0)x(t)> correlation function\n')
+for ip in range(n_p):
+    dx  = dl(xcor_av[ip], xcor_av[ip+1], a)
+    dxe = dle(xcor_av[ip], xcor_av[ip+1], xcor_er[ip], xcor_er[ip+1], a)
+    file16.write(fs.f555.format(ip*a, xcor_av[ip], xcor_er[ip], dx, dxe)) 
+    file21.write(fs.f555.format(ip*a, xcor_av[ip], xcor_er[ip], dx, dxe)) 
+file16.write('\n')
+file16.write(' <x(0)x(t)> cooled correlation function\n') 
+file22.write('#<x(0)x(t)> cooled correlation function\n')
+for ip in range(n_p):
+    dx  = dl(xcool_av[ip], xcool_av[ip+1], a)
+    dxe = dle(xcool_av[ip], xcool_av[ip+1], xcool_er[ip], xcool_er[ip+1], a)
+    file16.write(fs.f555.format(ip*a, xcool_av[ip], xcool_er[ip], dx, dxe)) 
+    file22.write(fs.f555.format(ip*a, xcool_av[ip], xcool_er[ip], dx, dxe)) 
+
+#------------------------------------------------------------------------------
+#     <x^2(0)x^2(t) correlator requires subtraction                          
+#------------------------------------------------------------------------------
+ 
+xx_sub = x2cor_av[n_p]
+xx_er  = x2cor_er[n_p]
+for ip in range(n_p):
+    x2sub_av[ip] = x2cor_av[ip]-xx_sub
+    x2sub_er[ip] = np.sqrt(x2cor_er[ip]**2+xx_er**2)
+#------------------------------------------------------------------------------
+#     x^3(0)x^3(t) correlator                                                
+#------------------------------------------------------------------------------
+
+file16.write('\n')
+file16.write(' <x^2(0)x^2(t)> correlation function\n')
+file27.write('#<x^2(0)x^2(t)> correlation function\n')      
+for ip in range(n_p):
+    dx  = dl(x2sub_av[ip], x2sub_av[ip+1],a)
+    dxe = dle(x2sub_av[ip], x2sub_av[ip+1], x2sub_er[ip],x2sub_er(ip+1),a)
+    file16.write(fs.f555.format(ip*a, x2cor_av[ip], x2cor_er[ip], dx, dxe))
+    file26.write(fs.f555.format(ip*a, x2cor_av[ip], x2cor_er[ip], dx, dxe))     
+xx_sub = x2cool_av(n_p)
+xx_er  = x2cool_er(n_p)
+for ip in range(n_p):
+    x2cool_sub_av[ip] = x2cool_av[ip]-xx_sub
+    x2cool_sub_er[ip] = np.sqrt(x2cool_er[ip]**2+xx_er**2)
+file16.write('\n')
+file16.write(' <x^2(0)x^2(t)> cooled correlation function\n')
+file27.write('#<x^2(0)x^2(t)> cooled correlation function\n')
+for ip in range(n_p):
+    dx = dl(x2cool_sub_av(ip), x2cool_sub_av(ip+1), a)
+    dxe=dle(x2cool_sub_av(ip), x2cool_sub_av(ip+1), x2cool_sub_er(ip), x2cool_sub_er(ip+1), a)
+    file16.write(fs.f555.format(ip*a, x2cool_av[ip], x2cool_er[ip], dx, dxe))
+    file27.write(fs.f555.format(ip*a, x2cool_av[ip], x2cool_er[ip], dx, dxe))
+    
+#------------------------------------------------------------------------------
+#     x^3(0)x^3(t) correlator                                                
+#------------------------------------------------------------------------------
+
+file16.write('\n')
+file16.write(' <x^3(0)x^3(t)> correlation function\n')
+file28.write('#<x^3(0)x^3(t)> correlation function\n')      
+for ip in range(n_p):
+    dx  = dl(x3cor_av[ip], x3cor_av[ip+1],a)
+    dxe = dle(x3cor_av[ip],x3cor_av[ip+1], x3cor_er[ip],x3cor_er[ip+1],a)
+    file16.write(fs.f555.format(ip*a,x3cor_av[ip],x3cor_er[ip],dx,dxe))
+    file28.write(fs.f555.format(ip*a,x3cor_av[ip],x3cor_er[ip],dx,dxe))     
+file16.write('\n')
+file16.write(' <x^3(0)x^3(t)> cooled correlation function\n')
+file29.write('#<x^3(0)x^3(t)> cooled correlation function\n')
+for ip in range(n_p):
+    dx  = dl(x3cool_av[ip],x3cool_av[ip+1],a)
+    dxe = dle(x3cool_av[ip],x3cool_av[ip+1], x3cool_er[ip],x3cool_er[ip+1],a)
+    file16.write(fs.f555.format(ip*a,x3cool_av[ip],x3cool_er[ip],dx,dxe))
+    file29.write(fs.f555.format(ip*a,x3cool_av[ip],x3cool_er[ip],dx,dxe))
+
+#------------------------------------------------------------------------------
+#     instanton density                                                      
+#------------------------------------------------------------------------------
+
+file16.write('\n')
+file16.write(' number of instantons\n')
+file23.write('#number of instantons\n')
+for ic in range(icool+1):
+    file16.write(fs.f556.format(ic, nin_av[ic], nin_er[ic], de*tmax, de2*tmax)) 
+    file23.write(fs.f556.format(ic, nin_av[ic], nin_er[ic], de*tmax, de2*tmax))       
+file16.write('\n')
+file16.write(' action vs cooling sweeps\n')
+file24.write('#action vs cooling sweeps\n')
+for ic in range(icool+1):    
+    sin = nin_av(ic)*s0
+    file16.write(fs.f433.format(ic,nin_av[ic], nin_er[ic], de*tmax, de2*tmax)) 
+    file24.write(fs.f433.format(ic,nin_av[ic], nin_er[ic], de*tmax, de2*tmax))                          
+file16.write('\n')
+file16.write(' action per instanton, S_0 = ', 4.0/3.0*f**3, '\n')
+file25.write('#action vs cooling sweeps\n', 4.0/3.0*f**3, '\n') 
+for ic in range(icool+1):
+    si_av= scool_av[ic]/nin_av[ic]                    
+    del2 =(scool_er[ic]/scool_av[ic])**2+(nin_er[ic]/nin_av[ic])**2
+    si_er= si_av*np.sqrt(del2)
+    file16.write(fs.f443.format(ic,si_av,si_er,s0))
+    file25.write(fs.f443.format(ic,si_av,si_er,s0))
+
+#------------------------------------------------------------------------------
+#   histograms                                                             
+#------------------------------------------------------------------------------
+         
+file16.write('\n')
+file16.write(' x distribution \n')
+plot_histogram2(xhist_min, nxhist , ix)
+file16.write('\n')
+file16.write(' z distribution \n')
+plot_histogram2(0.0,stzhist,nzhist,iz)
+for i in range(nzhist): 
+    xx = (i+0.5)*stzhist
+    file30.write(xx,iz[i])
+
+#------------------------------------------------------------------------------
+#------------------------------------------------------------------------------
+
+file6.close()
+file16.close()
+file17.close()
+file18.close()
+file19.close()
+file20.close()
+file21.close()
+file22.close()
+file23.close()
+file24.close()
+file25.close()
+file26.close()
+file27.close()
+file28.close()
+file29.close()
+file30.close()
 
 
 
