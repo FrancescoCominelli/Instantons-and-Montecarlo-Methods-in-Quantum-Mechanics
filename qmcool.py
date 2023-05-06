@@ -92,7 +92,7 @@ def inst(f, a, delx, n, x, xi, xa, z):
     ni = 0
     na = 0
     nin= 0
-    ix = int(np.sign(1.0, x[0]))
+    ix = int(np.copysign(1.0, x[0]))
     for i in range(1, n):
         tau = a * i
         ixp = int(np.sign(1.0, x[i]))
@@ -229,12 +229,12 @@ de  = 8*np.sqrt(2.0/pi)*f**2.5*np.exp(-s0)
 de2 = de*(1.0-71.0/72.0/s0)
 file16.write('lattice qm 1.1')
 file16.write('--------------\n')
-file16.write(fs.f201(f,n,a))
-file16.write(fs.f202(nmc,neq))
-file16.write(fs.f203(n_p,nc))
-file16.write(fs.f204(delx,icold,ncool))
-file16.write(fs.f205(s0,de,de*n*a))
-file16.write(fs.f201(s0,de2,de2*n*a))
+file16.write(fs.f201.format(f,n,a))
+file16.write(fs.f202.format(nmc,neq))
+file16.write(fs.f203.format(n_p,nc))
+file16.write(fs.f204.format(delx,icold,ncool))
+file16.write(fs.f205.format(s0,de,de*n*a))
+file16.write(fs.f206.format(s0,de2,de2*n*a))
 #file17.write('#',n,nmc/kp,n*a,f)
 #file20.write('#',n,nmc/kp,n*a,f)
 
@@ -604,14 +604,14 @@ e_err  = np.sqrt(v_err**2+tv_err**2)
 file16.write('\n')
 file16.write('nconf = ',nconf) 
 file16.write('ncoolc= ',ncoolconf)      
-file16.write(fs.f801(stot_av,stot_err)) 
-file16.write(fs.f802(v_av,v_err)) 
-file16.write(fs.f803(t_av,t_err)) 
-file16.write(fs.f804(tv_av,tv_err)) 
-file16.write(fs.f805(e_av,e_err)) 
-file16.write(fs.f806(x_av,x_err)) 
-file16.write(fs.f807(x2_av,x2_err)) 
-file16.write(fs.f808(x4_av,x4_err)) 
+file16.write(fs.f801.format(stot_av,stot_err)) 
+file16.write(fs.f802.format(v_av,v_err)) 
+file16.write(fs.f803.format(t_av,t_err)) 
+file16.write(fs.f804.format(tv_av,tv_err)) 
+file16.write(fs.f805.format(e_av,e_err)) 
+file16.write(fs.f806.format(x_av,x_err)) 
+file16.write(fs.f807.format(x2_av,x2_err)) 
+file16.write(fs.f808.format(x4_av,x4_err)) 
 file16.write('\n')
 
 #------------------------------------------------------------------------------
@@ -624,16 +624,16 @@ file21.write('#<x(0)x(t)> correlation function\n')
 for ip in range(n_p):
     dx  = dl(xcor_av[ip], xcor_av[ip+1], a)
     dxe = dle(xcor_av[ip], xcor_av[ip+1], xcor_er[ip], xcor_er[ip+1], a)
-    file16.write(fs.f555(ip*a, xcor_av[ip], xcor_er[ip], dx, dxe)) 
-    file21.write(fs.f555(ip*a, xcor_av[ip], xcor_er[ip], dx, dxe)) 
+    file16.write(fs.f555.format(ip*a, xcor_av[ip], xcor_er[ip], dx, dxe)) 
+    file21.write(fs.f555.format(ip*a, xcor_av[ip], xcor_er[ip], dx, dxe)) 
 file16.write('\n')
 file16.write(' <x(0)x(t)> cooled correlation function\n') 
 file22.write('#<x(0)x(t)> cooled correlation function\n')
 for ip in range(n_p):
     dx  = dl(xcool_av[ip], xcool_av[ip+1], a)
     dxe = dle(xcool_av[ip], xcool_av[ip+1], xcool_er[ip], xcool_er[ip+1], a)
-    file16.write(fs.f555(ip*a, xcool_av[ip], xcool_er[ip], dx, dxe)) 
-    file22.write(fs.f555(ip*a, xcool_av[ip], xcool_er[ip], dx, dxe)) 
+    file16.write(fs.f555.format(ip*a, xcool_av[ip], xcool_er[ip], dx, dxe)) 
+    file22.write(fs.f555.format(ip*a, xcool_av[ip], xcool_er[ip], dx, dxe)) 
 
 #------------------------------------------------------------------------------
 #     <x^2(0)x^2(t) correlator requires subtraction                          
@@ -654,8 +654,8 @@ file27.write('#<x^2(0)x^2(t)> correlation function\n')
 for ip in range(n_p):
     dx  = dl(x2sub_av[ip], x2sub_av[ip+1],a)
     dxe = dle(x2sub_av[ip], x2sub_av[ip+1], x2sub_er[ip],x2sub_er(ip+1),a)
-    file16.write(fs.f555(ip*a, x2cor_av[ip], x2cor_er[ip], dx, dxe))
-    file26.write(fs.f555(ip*a, x2cor_av[ip], x2cor_er[ip], dx, dxe))     
+    file16.write(fs.f555.format(ip*a, x2cor_av[ip], x2cor_er[ip], dx, dxe))
+    file26.write(fs.f555.format(ip*a, x2cor_av[ip], x2cor_er[ip], dx, dxe))     
 xx_sub = x2cool_av(n_p)
 xx_er  = x2cool_er(n_p)
 for ip in range(n_p):
@@ -667,8 +667,8 @@ file27.write('#<x^2(0)x^2(t)> cooled correlation function\n')
 for ip in range(n_p):
     dx = dl(x2cool_sub_av(ip), x2cool_sub_av(ip+1), a)
     dxe=dle(x2cool_sub_av(ip), x2cool_sub_av(ip+1), x2cool_sub_er(ip), x2cool_sub_er(ip+1), a)
-    file16.write(fs.f555(ip*a, x2cool_av[ip], x2cool_er[ip], dx, dxe))
-    file27.write(fs.f555(ip*a, x2cool_av[ip], x2cool_er[ip], dx, dxe))
+    file16.write(fs.f555.format(ip*a, x2cool_av[ip], x2cool_er[ip], dx, dxe))
+    file27.write(fs.f555.format(ip*a, x2cool_av[ip], x2cool_er[ip], dx, dxe))
     
 #------------------------------------------------------------------------------
 #     x^3(0)x^3(t) correlator                                                
@@ -680,16 +680,16 @@ file28.write('#<x^3(0)x^3(t)> correlation function\n')
 for ip in range(n_p):
     dx  = dl(x3cor_av[ip], x3cor_av[ip+1],a)
     dxe = dle(x3cor_av[ip],x3cor_av[ip+1], x3cor_er[ip],x3cor_er[ip+1],a)
-    file16.write(fs.f555(ip*a,x3cor_av[ip],x3cor_er[ip],dx,dxe))
-    file28.write(fs.f555(ip*a,x3cor_av[ip],x3cor_er[ip],dx,dxe))     
+    file16.write(fs.f555.format(ip*a,x3cor_av[ip],x3cor_er[ip],dx,dxe))
+    file28.write(fs.f555.format(ip*a,x3cor_av[ip],x3cor_er[ip],dx,dxe))     
 file16.write('\n')
 file16.write(' <x^3(0)x^3(t)> cooled correlation function\n')
 file29.write('#<x^3(0)x^3(t)> cooled correlation function\n')
 for ip in range(n_p):
     dx  = dl(x3cool_av[ip],x3cool_av[ip+1],a)
     dxe = dle(x3cool_av[ip],x3cool_av[ip+1], x3cool_er[ip],x3cool_er[ip+1],a)
-    file16.write(fs.f555(ip*a,x3cool_av[ip],x3cool_er[ip],dx,dxe))
-    file29.write(fs.f555(ip*a,x3cool_av[ip],x3cool_er[ip],dx,dxe))
+    file16.write(fs.f555.format(ip*a,x3cool_av[ip],x3cool_er[ip],dx,dxe))
+    file29.write(fs.f555.format(ip*a,x3cool_av[ip],x3cool_er[ip],dx,dxe))
 
 #------------------------------------------------------------------------------
 #     instanton density                                                      
@@ -699,15 +699,15 @@ file16.write('\n')
 file16.write(' number of instantons\n')
 file23.write('#number of instantons\n')
 for ic in range(icool+1):
-    file16.write(fs.f556(ic, nin_av[ic], nin_er[ic], de*tmax, de2*tmax)) 
-    file23.write(fs.f556(ic, nin_av[ic], nin_er[ic], de*tmax, de2*tmax))       
+    file16.write(fs.f556.format(ic, nin_av[ic], nin_er[ic], de*tmax, de2*tmax)) 
+    file23.write(fs.f556.format(ic, nin_av[ic], nin_er[ic], de*tmax, de2*tmax))       
 file16.write('\n')
 file16.write(' action vs cooling sweeps\n')
 file24.write('#action vs cooling sweeps\n')
 for ic in range(icool+1):    
     sin = nin_av(ic)*s0
-    file16.write(fs.f433(ic,nin_av[ic], nin_er[ic], de*tmax, de2*tmax)) 
-    file24.write(fs.f433(ic,nin_av[ic], nin_er[ic], de*tmax, de2*tmax))                          
+    file16.write(fs.f433.format(ic,nin_av[ic], nin_er[ic], de*tmax, de2*tmax)) 
+    file24.write(fs.f433.format(ic,nin_av[ic], nin_er[ic], de*tmax, de2*tmax))                          
 file16.write('\n')
 file16.write(' action per instanton, S_0 = ', 4.0/3.0*f**3, '\n')
 file25.write('#action vs cooling sweeps\n', 4.0/3.0*f**3, '\n') 
@@ -715,8 +715,8 @@ for ic in range(icool+1):
     si_av= scool_av[ic]/nin_av[ic]                    
     del2 =(scool_er[ic]/scool_av[ic])**2+(nin_er[ic]/nin_av[ic])**2
     si_er= si_av*np.sqrt(del2)
-    file16.write(fs.f443(ic,si_av,si_er,s0))
-    file25.write(fs.f443(ic,si_av,si_er,s0))
+    file16.write(fs.f443.format(ic,si_av,si_er,s0))
+    file25.write(fs.f443.format(ic,si_av,si_er,s0))
 
 #------------------------------------------------------------------------------
 #   histograms                                                             
