@@ -92,7 +92,7 @@ def inst(f, a, delx, n, x, xi, xa, z):
     ni = 0
     na = 0
     nin= 0
-    ix = int(np.copysign(1.0, x[0]))
+    ix = int(np.sign(1.0, x[0]))
     for i in range(1, n):
         tau = a * i
         ixp = int(np.sign(1.0, x[i]))
@@ -107,7 +107,7 @@ def inst(f, a, delx, n, x, xi, xa, z):
             xa[na-1] = tau
             z[nin-1] = tau
         ix = ixp
-    return ni, na
+    return ni, na, xi, xa, z
 
 #------------------------------------------------------------------------------
 #   Estimate average and error from xtot and x2tot
@@ -490,7 +490,7 @@ for i in tqdm(range(nmc)):
     if i % kp == 0:
         ncoolconf += 1
         xs = [0.0] * (n + 1)
-        ni, na = inst(f, a, delx, xs, n, xi, xa, z)
+        ni, na, xi, xa, z = inst(f, a, delx, n, xs, xi, xa, z)
         ss, ts, vs = act(f, a, delx, n, xs)
         nin = ni + na
         nin_sum[0]   += nin
@@ -499,7 +499,7 @@ for i in tqdm(range(nmc)):
         scool2_sum[0]+= ss**2
         for icool in range(ncool):
             xs = [0.0] * (n + 1)
-            ni, na = inst(f, a, delx, xs, n, xi, xa, z)
+            ni, na, xi, xa, z = inst(f, a, delx, n, xs, xi, xa, z)
             ss, ts, vs = act(f, a, delx, n, xs)
             nin = ni + na
             nin_sum[0]   += nin
