@@ -84,13 +84,10 @@ def setup(nin,z,tmax, seed):
 def xsum(nin, z, f, t):
     neven = nin - nin % 2
     xsum = -f
-    
     for i in range(1, neven, 2):
         xsum += f * np.tanh(2.0 * f * (t - z[i])) - f * np.tanh(2.0 * f * (t - z[i+1]))
-
     if nin % 2 != 0:
-        xsum += f * np.tanh(2.0 * f * (t - z[nin])) + f
-    
+        xsum += f * np.tanh(2.0 * f * (t - z[nin])) + f   
     return xsum
 
 #------------------------------------------------------------------------------
@@ -148,27 +145,17 @@ def plot_histogram2(amin, m , ist):
     
 #------------------------------------------------------------------------------
 #------------------------------------------------------------------------------
-x  =  np.zeros(10000)
-z  =  np.zeros(100)     
-xcor_av    =  np.zeros(100)
-xcor_er    =  np.zeros(100)
-x2cor_av   =  np.zeros(100)
-x2cor_er   =  np.zeros(100)
-x3cor_av   =  np.zeros(100)
-x3cor_er   =  np.zeros(100)
-x2sub_av   =  np.zeros(100)
-x2sub_er   =  np.zeros(100)
 
 pi  = np.pi
 #file6  = open('I dont know the name')
-file16 = open('rilm.dat',       'w')
-file17 = open('config.dat',     'w')
-file18 = open('trajectory.dat', 'w')
-file19 = open('qmdist.dat',     'w')
-file20 = open('rcor.dat',       'w')
-file21 = open('rcor2.dat',      'w')
-file22 = open('rcor3.dat',      'w') 
-file30 = open('zdist.dat',      'w')
+file16 = open('Data/rilm.dat',       'w')
+file17 = open('Data/config.dat',     'w')
+file18 = open('Data/trajectory.dat', 'w')
+file19 = open('Data/qmdist.dat',     'w')
+file20 = open('Data/rcor.dat',       'w')
+file21 = open('Data/rcor2.dat',      'w')
+file22 = open('Data/rcor3.dat',      'w') 
+file30 = open('Data/zdist.dat',      'w')
 
 #separation of wells f (f=1.4)
 f = 1.4
@@ -198,7 +185,17 @@ n_p = 20
 nc = 5
 #file6.write('write every kth config') 
 kp = 5
-      
+
+x  =  np.zeros(n)
+z  =  np.zeros(n)     
+xcor_av    =  np.zeros(n_p)
+xcor_er    =  np.zeros(n_p)
+x2cor_av   =  np.zeros(n_p)
+x2cor_er   =  np.zeros(n_p)
+x3cor_av   =  np.zeros(n_p)
+x3cor_er   =  np.zeros(n_p)
+x2sub_av   =  np.zeros(n_p)
+x2sub_er   =  np.zeros(n_p)      
 #------------------------------------------------------------------------------
 #     echo input parameters                                                  
 #------------------------------------------------------------------------------
@@ -249,12 +246,12 @@ x2_sum    = 0.0
 x4_sum    = 0.0
 x8_sum    = 0.0
 
-xcor_sum   = np.zeros(100)
-xcor2_sum  = np.zeros(100)
-x2cor_sum  = np.zeros(100)
-x2cor2_sum = np.zeros(100)
-x3cor_sum  = np.zeros(100)
-x3cor2_sum = np.zeros(100)
+xcor_sum   = np.zeros(n_p)
+xcor2_sum  = np.zeros(n_p)
+x2cor_sum  = np.zeros(n_p)
+x2cor2_sum = np.zeros(n_p)
+x3cor_sum  = np.zeros(n_p)
+x3cor2_sum = np.zeros(n_p)
 
 ix = np.zeros(nxhist)
 iz = np.zeros(nzhist)
