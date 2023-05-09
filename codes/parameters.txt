@@ -1,13 +1,13 @@
-Minimum of anharmonic oscillator potential V(x) = (x^2 − f^2)^2
+Minimum of anharmonic oscillator potential V(x) = (x^2 - f^2)^2
 f      = 1.4
 
-Dimension of basis used for diagonalizing H (choose N ≥ 40)
+Dimension of basis used for diagonalizing H (choose N >= 40)
 ndim   = 40
 
-Unperturbed oscillator frequency (choose w0 ∼ 4f)
+Unperturbed oscillator frequency (choose w0 ~ 4f)
 w0     = 5.6
 
-Number of lattice points in the euclidean time direction (n ∼ 800)
+Number of lattice points in the euclidean time direction (n = 800)
 n      = 800
 
 Lattice spacing (a ∼ 0.05)
@@ -32,6 +32,6 @@ Number of sweeps between writeout of complete configuration
 kp     = 5
 
 Number of steps in adiabatic switching (nswitch ∼ 20)
-nalpha = 20
+nalpha = 5
 
 

@@ -231,8 +231,8 @@ for i in tqdm(range(nmc)):
         if np.exp(-dels) > random.random():
             x[j]  = xnew
             nacc += 1
-    x[n-1]= x[0]
-    x     = np.append(x, x[1])
+    x[n-1] = x[0]
+    x[n]   = x[1]
 		
 #--------------------------------------------------------------------------
 #   calculate action and other things                                                  

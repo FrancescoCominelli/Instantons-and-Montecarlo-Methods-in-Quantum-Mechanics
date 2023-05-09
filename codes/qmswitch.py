@@ -3,6 +3,7 @@ import format_strings as fs
 import random
 import functions as fn
 import re
+from tqdm import tqdm 
 
 #------------------------------------------------------------------------------
 # Lattice calculation in quantum mechanics.
@@ -142,14 +143,14 @@ for i in range(n):
     stot += s
 
 #------------------------------------------------------------------------------
-#     loop over coupling constant                                                       
+#     loop over coupling constant alpha                                                  
 #------------------------------------------------------------------------------
 
 e0 = w/2.0
-f0 = 1.0/beta*np.log(2.0*np.sinh(w/2.0*beta))
+f0 = 1.0/beta*np.log(2.0*np.sinh(e0*beta))
 ei = e0
 
-for ialpha in range(2 * nalpha + 1):
+for ialpha in tqdm(range(2 * nalpha + 1)):
     if ialpha <= nalpha:
         alpha = ialpha * dalpha
     else:
@@ -160,9 +161,9 @@ for ialpha in range(2 * nalpha + 1):
     nconf= 0
     ncor = 0
 
-#------------------------------------------------------------------------------
-#    monte carlo sweeps                                                     
-#------------------------------------------------------------------------------
+    #--------------------------------------------------------------------------
+    #   monte carlo sweeps                                                     
+    #--------------------------------------------------------------------------
     for i in range(nmc):
         nconf += 1
         if i == neq:
@@ -178,84 +179,84 @@ for ialpha in range(2 * nalpha + 1):
             x4_sum = 0.0
             x8_sum = 0.0
 
-#--------------------------------------------------------------------------
-#   one sweep thorough configuration                                       
-#--------------------------------------------------------------------------
-    for j in range(1,n):
-        nhit += 1
+        #--------------------------------------------------------------------------
+        #   one sweep thorough configuration                                       
+        #--------------------------------------------------------------------------
+        for j in range(1,n):
+            nhit += 1
         
-        xpm   = (x[j]-x[j-1])/a
-        xpp   = (x[j+1]-x[j])/a
-        t     = 1.0/4.0*(xpm**2+xpp**2)
-        v0    = 1.0/4.0*w**2*x[j]**2
-        v1    = (x[j]**2-f**2)**2
-        v     = alpha*(v1-v0) + v0
-        sold  = a*(t+v)
+            xpm   = (x[j]-x[j-1])/a
+            xpp   = (x[j+1]-x[j])/a
+            t     = 1.0/4.0*(xpm**2+xpp**2)
+            v0    = 1.0/4.0*w**2*x[j]**2
+            v1    = (x[j]**2-f**2)**2
+            v     = alpha*(v1-v0) + v0
+            sold  = a*(t+v)
         
-        xnew  = x[j] + delx*(2.0*random.random()-1.0)
+            xnew  = x[j] + delx*(2.0*random.random()-1.0)
         
-        xpm   = (xnew-x[j-1])/a
-        xpp   = (x[j+1]-xnew)/a
-        t     = 1.0/4.0*(xpm**2+xpp**2)
-        v0    = 1.0/4.0*w**2*xnew**2
-        v1    = (xnew**2-f**2)**2
-        v     = alpha*(v1-v0) + v0
+            xpm   = (xnew-x[j-1])/a
+            xpp   = (x[j+1]-xnew)/a
+            t     = 1.0/4.0*(xpm**2+xpp**2)
+            v0    = 1.0/4.0*w**2*xnew**2
+            v1    = (xnew**2-f**2)**2
+            v     = alpha*(v1-v0) + v0
         
-        snew  = a*(t+v)
-        dels  = snew-sold
+            snew  = a*(t+v)
+            dels  = snew-sold
         
-        dels  = min(dels,70.0)
-        dels  = max(dels,-70.0)
-        if np.exp(-dels) > random.random():
-            x[j]  = xnew
-            nacc += 1
-    x[n-1]= x[0]
-    x     = np.append(x, x[1])
+            dels  = min(dels,70.0)
+            dels  = max(dels,-70.0)
+            if np.exp(-dels) > random.random():
+                x[j]  = xnew
+                nacc += 1
+            x[n-1] = x[0]
+            x[n]   = x[1]
 
-#--------------------------------------------------------------------------
-#   calculate action and other things                                                  
-#--------------------------------------------------------------------------
-    stot = 0.0
-    ttot = 0.0
-    vtot = 0.0
-    ptot = 0.0
-    for j in range(n):
-        xp = (x[j+1]-x[j])/a
-        t  = 1.0/4.0*xp**2
-        v0 = 1.0/4.0*w**2*x[j]**2
-        v1 = (x[j]**2-f**2)**2
-        v  = alpha*(v1-v0) + v0
-        s  = a*(t+v)
-        ttot += a*t
-        vtot += a*v
-        stot += s
-        ptot += a*(v1-v0)
+        #--------------------------------------------------------------------------
+        #   calculate action etc.                                                  
+        #--------------------------------------------------------------------------
+        stot = 0.0
+        ttot = 0.0
+        vtot = 0.0
+        ptot = 0.0
+        for j in range(n):
+            xp = (x[j+1]-x[j])/a
+            t  = 1.0/4.0*xp**2
+            v0 = 1.0/4.0*w**2*x[j]**2
+            v1 = (x[j]**2-f**2)**2
+            v  = alpha*(v1-v0) + v0
+            s  = a*(t+v)
+            ttot += a*t
+            vtot += a*v
+            stot += s
+            ptot += a*(v1-v0)
+        '''
+        if i % kp == 0:
+            print("configuration:   ", i, "\n",
+                  "coupling:        ", alpha, "\n",
+                  "acceptance rate: ", float(nacc)/float(nhit), "\n",
+                  "action (T,V):    ", stot, ttot, vtot)
+        '''
+        #--------------------------------------------------------------------------
+        #   include in sample                                                     
+        #--------------------------------------------------------------------------
+        stot_sum    += stot
+        stot2_sum   += stot**2
+        vav_sum     += vtot/beta
+        vav2_sum    += vtot**2/beta
+        valpha_sum  += ptot/beta
+        valpha2_sum += ptot**2/beta
     
-    if i % kp == 0:
-        print("configuration:   ", i, "\n",
-              "coupling:        ", alpha, "\n",
-              "acceptance rate: ", float(nacc)/float(nhit), "\n",
-              "action (T,V):    ", stot, ttot, vtot)
+        for k in range(n):
+            x_sum  += x[k]
+            x2_sum += x[k]**2
+            x4_sum += x[k]**4
+            x8_sum += x[k]**8
 
-#--------------------------------------------------------------------------
-#   include in sample                                                     
-#--------------------------------------------------------------------------
-    stot_sum    += stot
-    stot2_sum   += stot**2
-    vav_sum     += vtot/beta
-    vav2_sum    += vtot**2/beta
-    valpha_sum  += ptot/beta
-    valpha2_sum += ptot**2/beta
-    
-    for k in range(n):
-        x_sum  += x[k]
-        x2_sum += x[k]**2
-        x4_sum += x[k]**4
-        x8_sum += x[k]**8
-
-#------------------------------------------------------------------------------
-#   averages                                                               
-#------------------------------------------------------------------------------
+    #------------------------------------------------------------------------------
+    #   averages                                                               
+    #------------------------------------------------------------------------------
     
     stot_av, stot_err     = fn.disp(nconf, stot_sum, stot2_sum)
     v_av, v_err           = fn.disp(nconf, vav_sum, vav2_sum)
@@ -274,9 +275,9 @@ for ialpha in range(2 * nalpha + 1):
     de = da * valpha_av
     ei += de
 
-#------------------------------------------------------------------------------
-#   output                                                               
-#------------------------------------------------------------------------------
+    #------------------------------------------------------------------------------
+    #   output                                                               
+    #------------------------------------------------------------------------------
     file16.write('\n')
     file16.write(fs.f800.format(alpha))
     file16.write(fs.f801.format(stot_av, stot_err))
