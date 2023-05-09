@@ -73,12 +73,12 @@ def act(n,x,f,a):
         stot += s  
     return stot,ttot,vtot
 
-subroutine 
 #-------------------------------------------------------------------------c
 #     hard core                                                           c
 #-------------------------------------------------------------------------c
 def sshort(z,nin,tcore,score,tmax):
     shc = 0.0
+    tcore2 = tcore**2
     if tcore == 0 and tcore2 == 0:
         return shc
     for i in range(1, nin+1):
@@ -90,8 +90,61 @@ def sshort(z,nin,tcore,score,tmax):
         shc = shc + score * np.exp(-dz/tcore)
     return shc
 
-    
+#------------------------------------------------------------------------------
+#     sort array ra(n)                                                   
+#------------------------------------------------------------------------------      
+def sort(n, ra):
+    l = n//2 + 1
+    ir = n
+    while True:
+        if l > 1:
+            l = l - 1
+            rra = ra[l-1]
+        else:
+            rra = ra[ir-1]
+            ra[ir-1] = ra[0]
+            ir = ir - 1
+            if ir == 1:
+                ra[0] = rra
+                return
+        i = l
+        j = l + l
+        while j <= ir:
+            if j < ir and ra[j-1] < ra[j]:
+                j = j + 1
+            if rra < ra[j-1]:
+                ra[i-1] = ra[j-1]
+                i = j
+                j = j + j
+            else:
+                j = ir + 1
+        ra[i-1] = rra
+        
+#------------------------------------------------------------------------------
+#   initialize instanton configuration                               
+#------------------------------------------------------------------------------
+def setup(nin,z,tmax, seed):
+    random.seed(seed)
+    for i in range(nin):
+        z[i] = random.random()*tmax
+        sort(nin,z)
+    return    
 
+#------------------------------------------------------------------------c
+#   save array z in zstore                                             c
+#------------------------------------------------------------------------c
+def store(nin,z,zstore):
+    for i in range(nin):
+         zstore[i] = z[i]
+    return 
+
+#------------------------------------------------------------------------c
+#   restore array z from zstore                                        c
+#------------------------------------------------------------------------c
+def restore(nin,z,zstore):
+    for i in range(nin):
+         zstore[i] = z[i]
+    return
 
 #------------------------------------------------------------------------------
 #   open the files
@@ -188,22 +241,140 @@ for na in range(ni, ni*2+1):
     z = [ni*a, na*a]
     xconf(n, x, nin, z, f, a)
     stot, ttot, vtot = act(n, x, f, a)
-    shc = sshort(z, nin, tcore,score,tmax)
+    shc = sshort(z, nin, tcore, score, tmax)
     stot += shc
     file31.write(fs.f222.format((na-ni)*a, stot/s0-2.0))
     
 #------------------------------------------------------------------------------
 #     parameters for histograms                                              
 #------------------------------------------------------------------------------
+
 nxhist = 50
 xhist_min = -1.5*f
 stxhist= 3.0*f/float(nxhist)
 nzhist = 40
 stzhist= 4.01/float(nzhist)
 ix= np.zeros(nxhist)
-iz= np.zeros(nzhist) 
+iz= np.zeros(nzhist)
+#------------------------------------------------------------------------------
+#   Read input values from console
+#------------------------------------------------------------------------------
 
+#while True:
+#   try:
+#       seed = int(input("Enter the random seed: ")) #change to int() if expecting int-point input
+#       break # Break out of the loop if input is numeric
+#   except ValueError:
+#       print("Invalid input. Please enter a number.")
+seed = -1234
+random.seed(seed)
 
+#----------------------------------------------------------------------------c
+#   clear summation arrays                                                 c
+#----------------------------------------------------------------------------c
+
+stot_sum  = 0.0
+stot2_sum = 0.0
+vtot_sum  = 0.0
+vtot2_sum = 0.0
+ttot_sum  = 0.0
+ttot2_sum = 0.0
+tvir_sum  = 0.0
+tvir2_sum = 0.0
+x_sum     = 0.0
+x2_sum    = 0.0
+x4_sum    = 0.0
+x8_sum    = 0.0
+nconf     = 0
+ncor      = 0
+nacc      = 0
+nhit      = 0  
+#----------------------------------------------------------------------------c
+#   setup and intial action                                                c
+#----------------------------------------------------------------------------c
+
+setup(nin, z, tmax, seed)
+xconf(n, x, nin, z, f, a)
+stot, ttot, vtot = act(n, x, f, a)
+shc = sshort(z, nin, tcore, score, tmax)
+stot += shc
+
+#----------------------------------------------------------------------------c
+#   loop over configs                                                      c
+#----------------------------------------------------------------------------c
+
+for i in range(nmc):
+    nconf = nconf+1
+    if i == neq :
+        ncor       = 0
+        nconf      = 0
+        stot_sum   = 0.0
+        stot2_sum  = 0.0
+        vtot_sum   = 0.0
+        vtot2_sum  = 0.0
+        ttot_sum   = 0.0
+        ttot2_sum  = 0.0
+        tvir_sum   = 0.0
+        tvir2_sum  = 0.0
+        x_sum      = 0.0
+        x2_sum     = 0.0
+        x4_sum     = 0.0
+        x8_sum     = 0.0
+        xcor_sum   = np.zeros(n_p)
+        xcor2_sum  = np.zeros(n_p)
+        x2cor_sum  = np.zeros(n_p)
+        x2cor2_sum = np.zeros(n_p)
+        x3cor_sum  = np.zeros(n_p)
+        x3cor2_sum = np.zeros(n_p)
+        ix         = np.zeros(nxhist)
+        iz         = np.zeros(nzhist)
+    #----------------------------------------------------------------------------c
+    #   generate new configuration: loop over instantons                       c
+    #----------------------------------------------------------------------------c
+    zstore = np.zeros(nin)
+    for iin in range(nin):
+        nhit  += 1
+        sold  = stot 
+        store(nin,z,zstore)
+        zold  = z[iin]
+        znew  = zold + (random.random()-0.5)*dz
+        if znew > tmax:
+            znew=znew-tmax
+        if znew < 0.0:
+                znew=znew+tmax
+        z[iin]= znew
+        sort(nin,z)
+        #----------------------------------------------------------------------------c
+        #   calculate new action                                                   c
+        #----------------------------------------------------------------------------c
+        xconf(n,x,nin,z)
+        snew, tnew, vnew = act(n,x, f, a)
+        shc = sshort(z, nin, tcore, score, tmax)
+        snew += shc
+        #----------------------------------------------------------------------------c
+        #   accept with probability exp(-delta S)                                  c
+        #----------------------------------------------------------------------------c
+        dels = snew-sold 
+        p  = random.random()
+        if np.exp(-dels) > p :
+            nacc += 1
+            stot = snew
+        else:
+            restore(nin,z,zstore)
+        if i < 400 :
+            file23.write(" ".join([f"{z[ipr-1]:7.4f}" for ipr in range(1, 11)]) + "\n")
+    #----------------------------------------------------------------------------c
+    #   new configuration: instanton distribution                              c
+    #----------------------------------------------------------------------------c
+    for ii in range(1, nin, 2):
+        if ii == 1:
+            zm = z[nin-1] - tmax
+        else:
+            zm = z[ii-2]
+        z0 = z[ii-1]
+        zp = z[ii]
+        zia = min(zp - z0, z0 - zm)
+        lens(zia, 0.0, stzhist, nzhist, iz)
 
 
 
