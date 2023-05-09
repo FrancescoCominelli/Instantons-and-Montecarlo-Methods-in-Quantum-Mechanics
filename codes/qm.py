@@ -1,9 +1,9 @@
 import format_strings as fs
 import numpy as np
+import re
 import random
 import functions as fn
 from tqdm import tqdm
-import re
 #------------------------------------------------------------------------------
 #------------------------------------------------------------------------------
 #   lattice calculation in quantum mechanics                              
@@ -40,17 +40,7 @@ import re
 #               results are given in the format: tau, Pi(tau), DeltaPi(tau), dlog(Pi)/dtau,
 #               Delta[dlog(Pi)/dtau], where DeltaPi(tau) is the statistical error in Pi(tau)
 #------------------------------------------------------------------------------
-#------------------------------------------------------------------------------
-#     function to include value a in histogram array hist(n)
-#     def histogramarray(a, amin, st, m, hist)                
-#------------------------------------------------------------------------------
-#     a       value to be added to histogram array                        
-#     amin    minimum value in histogram                                  
-#     st      bin width                                                   
-#     m       number of bins                                              
-#     hist(n) histogram array                                             
-#------------------------------------------------------------------------------
-    
+
 #------------------------------------------------------------------------------
 #   Read input values from console
 #------------------------------------------------------------------------------
@@ -61,6 +51,7 @@ while True:
         break # Break out of the loop if input is numeric
     except ValueError:
         print("Invalid input. Please enter a number.")
+  
 
 #------------------------------------------------------------------------------
 #   set the values
@@ -71,31 +62,31 @@ with open('parameters.txt', 'r') as file:
     contents = file.read()
    
 # search for the values of f and a using regular expressions
-f    = re.search(r'f\s*=\s*(\d+\.\d+)', contents).group(1)
-n    = re.search(r'n\s*=\s*(\d+)', contents).group(1)
-a    = re.search(r'w0\s*=\s*(\d+\.\d+)', contents).group(1)
-icold= re.search(r'icold\s*=\s*(\d+)', contents).group(1)
-neq  = re.search(r'neq\s*=\s*(\d+)', contents).group(1)
-nmc  = re.search(r'nmc\s*=\s*(\d+)', contents).group(1)
-delx = re.search(r'delx\s*=\s*(\d+\.\d+)', contents).group(1)
-n_p  = re.search(r'n_p\s*=\s*(\d+)', contents).group(1)
-kp   = re.search(r'kp\s*=\s*(\d+)', contents).group(1)
+f      = re.search(r'f\s*=\s*(\d+\.\d+)', contents).group(1)
+n      = re.search(r'n\s*=\s*(\d+)', contents).group(1)
+a      = re.search(r'a\s*=\s*(\d+\.\d+)', contents).group(1)
+icold  = re.search(r'icold\s*=\s*(\d+)', contents).group(1)
+neq    = re.search(r'neq\s*=\s*(\d+)', contents).group(1)
+nmc    = re.search(r'nmc\s*=\s*(\d+)', contents).group(1)
+n_p    = re.search(r'n_p\s*=\s*(\d+)', contents).group(1)
+delx   = re.search(r'delx\s*=\s*(\d+\.\d+)', contents).group(1)
+kp     = re.search(r'kp\s*=\s*(\d+)', contents).group(1)
 
 # convert the values to integers
-f    = float(f)
-n    = int(n)
-a    = float(a)
-icold= int(icold)
-neq  = int(neq)
-nmc  = int(nmc)
-delx = float(delx)
-n_p  = int(n_p)
-kp   = int(kp)
+f      = float(f)
+n      = int(n)
+a      = float(a)
+icold  = int(icold)
+neq    = int(neq)
+nmc    = int(nmc)
+delx   = float(delx)
+kp     = int(kp)
+n_p    = int(n_p)
+
 
 nc     = 5
 tmax   = n*a
 nxhist = 50
-
 #------------------------------------------------------------------------------
 # echo input parameters
 #------------------------------------------------------------------------------
@@ -231,8 +222,9 @@ for i in tqdm(range(nmc)):
         if np.exp(-dels) > random.random():
             x[j]  = xnew
             nacc += 1
-    x[n-1] = x[0]
-    x[n]   = x[1]
+    x[n-1]= x[0]
+    #x     = np.append(x, x[1])
+    x[n]  = x[1] 
 		
 #--------------------------------------------------------------------------
 #   calculate action and other things                                                  
@@ -255,9 +247,11 @@ for i in tqdm(range(nmc)):
     file18.write(fs.f444.format(i,stot,ttot,vtot))
     
     if i % kp == 0:
+        '''
         print("configuration   ", i, "\n",
               "acceptance rate ", float(nacc)/float(nhit), "\n",
               "action (T,V)    ", stot, ttot, vtot)
+        '''
         file17.write('configuration: ')
         file17.write(str(i))
         file17.write('\n')
@@ -395,7 +389,7 @@ for ip in range(n_p-1):
 #   wave function                                                              
 #------------------------------------------------------------------------------
 
-fn.plot_histogram2(xhist_min, nxhist, histo_x)
+fn.plot_histogram(xhist_min, nxhist, histo_x)
 
 file19.write('x distribution\n')
 xnorm = 0.0
