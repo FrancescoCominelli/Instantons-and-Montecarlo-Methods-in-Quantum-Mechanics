@@ -1,8 +1,9 @@
 import format_strings as fs
 import numpy as np
 import random
-import matplotlib.pyplot as plt
 from tqdm import tqdm
+import functions as fn
+import re
 #------------------------------------------------------------------------------
 #     interacting instanton calculation in quantum mechanics.                
                      
@@ -33,159 +34,7 @@ from tqdm import tqdm
 #------------------------------------------------------------------------------
 #   Output:
 #------------------------------------------------------------------------------
-
-#------------------------------------------------------------------------------
-#     sum ansatz path                                                  
-#------------------------------------------------------------------------------
-def xsum(nin, z, f, t):
-    neven = nin - nin % 2
-    xsum = -f
-    for i in range(1, neven, 2):
-        xsum += f * np.tanh(2.0 * f * (t - z[i])) - f * np.tanh(2.0 * f * (t - z[i+1]))
-    if nin % 2 != 0:
-        xsum += f * np.tanh(2.0 * f * (t - z[nin])) + f   
-    return xsum
-#------------------------------------------------------------------------------
-#   sumansatz configuration on grid x(n)                                
-#------------------------------------------------------------------------------
-def xconf(n,x,nin,z,f,a):
-    for j in range(1,n):  
-         xx = a*j
-         x[j] = xsum(nin,z,f,xx)        
-    x[0] = x[n-1]
-    x    = np.append(x, x[1])
-    return
-
-#------------------------------------------------------------------------------
-#     discretized action for configuration x(n)                           
-#------------------------------------------------------------------------------
-def act(n,x,f,a):
-    stot = 0.0
-    ttot = 0.0
-    vtot = 0.0  
-    for j in range(n):
-        xp = (x[j+1]-x[j])/a
-        t  = 1.0/4.0*xp**2
-        v  = (x[j]**2-f**2)**2
-        s  = a*(t+v)
-        ttot += a*t
-        vtot += a*v
-        stot += s  
-    return stot,ttot,vtot
-
-#-------------------------------------------------------------------------c
-#     hard core                                                           c
-#-------------------------------------------------------------------------c
-def sshort(z,nin,tcore,score,tmax):
-    shc = 0.0
-    tcore2 = tcore**2
-    if tcore == 0 and tcore2 == 0:
-        return shc
-    for i in range(1, nin+1):
-        if i == 1:
-            zm = z[nin-1] - tmax
-        else:
-            zm = z[i-2]
-        dz = z[i-1] - zm
-        shc = shc + score * np.exp(-dz/tcore)
-    return shc
-
-#------------------------------------------------------------------------------
-#     sort array ra(n)                                                   
-#------------------------------------------------------------------------------      
-def sort(n, ra):
-    l = n//2 + 1
-    ir = n
-    while True:
-        if l > 1:
-            l = l - 1
-            rra = ra[l-1]
-        else:
-            rra = ra[ir-1]
-            ra[ir-1] = ra[0]
-            ir = ir - 1
-            if ir == 1:
-                ra[0] = rra
-                return
-        i = l
-        j = l + l
-        while j <= ir:
-            if j < ir and ra[j-1] < ra[j]:
-                j = j + 1
-            if rra < ra[j-1]:
-                ra[i-1] = ra[j-1]
-                i = j
-                j = j + j
-            else:
-                j = ir + 1
-        ra[i-1] = rra
-        
-#------------------------------------------------------------------------------
-#   initialize instanton configuration                               
-#------------------------------------------------------------------------------
-def setup(nin,z,tmax, seed):
-    random.seed(seed)
-    for i in range(nin):
-        z[i] = random.random()*tmax
-        sort(nin,z)
-    return    
-
-#------------------------------------------------------------------------c
-#   save array z in zstore                                             c
-#------------------------------------------------------------------------c
-def store(nin,z,zstore):
-    for i in range(nin):
-         zstore[i] = z[i]
-    return 
-
-#------------------------------------------------------------------------c
-#   restore array z from zstore                                        c
-#------------------------------------------------------------------------c
-def restore(nin,z,zstore):
-    for i in range(nin):
-         zstore[i] = z[i]
-    return
-
-#------------------------------------------------------------------------------
-#   Estimate average and error from xtot and x2tot
-#------------------------------------------------------------------------------
-#   Input:
-#           n: number of measurements
-#           xtot: sum of x_i
-#           x2tot: sum of x**2
-#   Output:
-#           xav: average
-#           xerr: error estimate
-#------------------------------------------------------------------------------  
-def disp(n, xtot, x2tot):
-    if n < 1:
-        raise ValueError("Number of measurements must be at least 1")
-    xav = xtot / float(n)
-    del2 = x2tot / float(n*n) - xav*xav / float(n)
-    if del2 < 0:
-        del2 = 0      
-    xerr = np.sqrt(del2)  
-    return xav, xerr
-
-#------------------------------------------------------------------------------
-#     function to include value a in histogram array hist(n)
-#     def histogramarray(a, amin, st, m, hist)                
-#------------------------------------------------------------------------------
-#     a       value to be added to histogram array                        
-#     amin    minimum value in histogram                                  
-#     st      bin width                                                   
-#     m       number of bins                                              
-#     hist(n) histogram array                                             
-#------------------------------------------------------------------------------
-def histogramarray(a, amin, st, m, hist):
-    j = (a - amin)/st + 1.000001
-    if (j < 1):
-        j = 1
-    if (j > m):
-        j = m
-    hist[int(j)-1] += 1
-    return
-
+    
 #------------------------------------------------------------------------------
 #   open the files
 #------------------------------------------------------------------------------
@@ -234,6 +83,8 @@ kp = 5
 rcore = 0.3              
 #file6.write('hard core strength A (score=A*s0) (3.0)')
 acore = 3.0
+
+
 tcore = rcore/f
 tmax = n*a
 s0   = 4.0/3.0*f**3
@@ -244,7 +95,7 @@ xnin = dens*tmax
 xnin2= dens2*tmax
 nexp = int(xnin+0.5)
 nexp2= int(xnin2+0.5)
-pi  = np.pi
+
 x     = np.zeros(n)
 z     = np.zeros(n)
 zcore = np.zeros(n)    
@@ -279,9 +130,9 @@ file16.write('\n')
 ni = n // 4
 for na in range(ni, ni*2+1):
     z = [ni*a, na*a]
-    xconf(n, x, nin, z, f, a)
-    stot, ttot, vtot = act(n, x, f, a)
-    shc = sshort(z, nin, tcore, score, tmax)
+    fn.xconf(n, x, nin, z, f, a)
+    stot, ttot, vtot = fn.action(n, x, f, a)
+    shc = fn.sshort(z, nin, tcore, score, tmax)
     stot += shc
     file31.write(fs.f222.format((na-ni)*a, stot/s0-2.0))
     
@@ -333,17 +184,17 @@ nhit      = 0
 #   setup and intial action                                                
 #------------------------------------------------------------------------------
 
-setup(nin, z, tmax, seed)
-xconf(n, x, nin, z, f, a)
-stot, ttot, vtot = act(n, x, f, a)
-shc = sshort(z, nin, tcore, score, tmax)
+fn.setup(nin, z, tmax, seed)
+fn.xconf(n, x, nin, z, f, a)
+stot, ttot, vtot = fn.action(f, a, n, x)
+shc = fn.sshort(z, nin, tcore, score, tmax)
 stot += shc
 
 #------------------------------------------------------------------------------
 #   loop over configs                                                      
 #------------------------------------------------------------------------------
 
-for i in range(nmc):
+for i in tqdm(range(nmc)):
     nconf = nconf+1
     if i == neq :
         ncor       = 0
@@ -375,7 +226,7 @@ for i in range(nmc):
     for iin in range(nin):
         nhit  += 1
         sold  = stot 
-        store(nin,z,zstore)
+        fn.store(nin,z,zstore)
         zold  = z[iin]
         znew  = zold + (random.random()-0.5)*dz
         if znew > tmax:
@@ -383,13 +234,13 @@ for i in range(nmc):
         if znew < 0.0:
                 znew=znew+tmax
         z[iin]= znew
-        sort(nin,z)
+        fn.sort(nin,z)
         #----------------------------------------------------------------------
         #   calculate new action
         #----------------------------------------------------------------------
-        xconf(n,x,nin,z)
-        snew, tnew, vnew = act(n,x, f, a)
-        shc = sshort(z, nin, tcore, score, tmax)
+        fn.xconf(n,x,nin,z, f, a)
+        snew, tnew, vnew = fn.action(n,x, f, a)
+        shc = fn.sshort(z, nin, tcore, score, tmax)
         snew += shc
         #----------------------------------------------------------------------
         #   accept with probability exp(-delta S)                                  
@@ -399,9 +250,13 @@ for i in range(nmc):
             nacc += 1
             stot = snew
         else:
-            restore(nin,z,zstore)
-        if i < 400 :
-            file23.write(" ".join([f"{z[ipr-1]:7.4f}" for ipr in range(1, 11)]) + "\n")
+            fn.restore(nin,z,zstore)
+        if i < 400:
+            for ipr in range(1, min(11, len(z) + 1)):
+                file23.write(f"{z[ipr-1]:7.4f} ")
+                if ipr % 10 == 0:
+                    file23.write('\n')
+
     #--------------------------------------------------------------------------
     #   new configuration: instanton distribution                              
     #--------------------------------------------------------------------------
@@ -413,7 +268,7 @@ for i in range(nmc):
         z0 = z[ii-1]
         zp = z[ii]
         zia = min(zp - z0, z0 - zm)
-        histogramarray(zia, 0.0, stzhist, nzhist, iz)
+        fn.histogramarray(zia, 0.0, stzhist, nzhist, iz)
     #--------------------------------------------------------------------------
     #   action etc.                                                            
     #--------------------------------------------------------------------------
@@ -430,7 +285,7 @@ for i in range(nmc):
               "s/(n*s_0)       ", stot,ttot,vtot, \n)
         '''
         file17.write('configuration')
-        file17.write(i)
+        file17.write(str(i))
         file17.write('\n')
         for k in range(n):
             file17.write(fs.f222.format(k*a,x[k]))
@@ -445,7 +300,7 @@ for i in range(nmc):
     ttot_sum  += ttot
     ttot2_sum += ttot**2
     for k in range(n):
-        histogramarray(x[k],xhist_min,stxhist,nxhist,ix)
+        fn.histogramarray(x[k],xhist_min,stxhist,nxhist,ix)
         x_sum  += x[k]
         x2_sum += x[k]**2
         x4_sum += x[k]**4
@@ -455,10 +310,10 @@ for i in range(nmc):
     #--------------------------------------------------------------------------
     for ic in range(nc):
         ncor = ncor + 1 
-        ip0  = int( (n-np)*random.random() ) 
+        ip0  = int( (n-n_p)*random.random() ) 
         x0   = x[ip0]
         for ip in range(n_p):
-            x1    = x(ip0+ip)
+            x1    = x[ip0+ip]
             xcor  = x0*x1
             x2cor = xcor**2
             x3cor = xcor**3
@@ -472,16 +327,16 @@ for i in range(nmc):
 #   averages                                                               
 #------------------------------------------------------------------------------
 
-stot_av,stot_err = disp(nconf,stot_sum,stot2_sum)
-vtot_av,vtot_err = disp(nconf,vtot_sum,vtot2_sum)
-ttot_av,ttot_err = disp(nconf,ttot_sum,ttot2_sum)
-x_av,x_err       = disp(nconf*n,x_sum,x2_sum)
-x2_av,x2_err     = disp(nconf*n,x2_sum,x4_sum)
-x4_av,x4_err     = disp(nconf*n,x4_sum,x8_sum)
+stot_av,stot_err = fn.disp(nconf,stot_sum,stot2_sum)
+vtot_av,vtot_err = fn.disp(nconf,vtot_sum,vtot2_sum)
+ttot_av,ttot_err = fn.disp(nconf,ttot_sum,ttot2_sum)
+x_av,x_err       = fn.disp(nconf*n,x_sum,x2_sum)
+x2_av,x2_err     = fn.disp(nconf*n,x2_sum,x4_sum)
+x4_av,x4_err     = fn.disp(nconf*n,x4_sum,x8_sum)
 for ip in range(n_p): 
-    xcor_av[ip],xcor_er[ip]   = disp(ncor,xcor_sum[ip],xcor2_sum[ip])
-    x2cor_av[ip],x2cor_er[ip] = disp(ncor,x2cor_sum[ip],x2cor2_sum[ip])  
-    x3cor_av[ip],x3cor_er[ip] = disp(ncor,x3cor_sum[ip],x3cor2_sum[ip])     
+    xcor_av[ip],xcor_er[ip]   = fn.disp(ncor,xcor_sum[ip],xcor2_sum[ip])
+    x2cor_av[ip],x2cor_er[ip] = fn.disp(ncor,x2cor_sum[ip],x2cor2_sum[ip])  
+    x3cor_av[ip],x3cor_er[ip] = fn.disp(ncor,x3cor_sum[ip],x3cor2_sum[ip])     
 v_av  = vtot_av/tmax
 v_err = vtot_err/tmax
 t_av  = ttot_av/tmax
@@ -502,7 +357,7 @@ file16.write(fs.f906.format(t_av,t_err))
 file16.write(fs.f908.format(e_av,e_err)) 
 file16.write(fs.f905.format(x_av,x_err)) 
 file16.write(fs.f910.format(x2_av,x2_err)) 
-file16.write(fs.f911.format(x4_av,x4_err)) 
+file16.write(fs.f808.format(x4_av,x4_err)) 
 file16.write('\n') 
       
 #------------------------------------------------------------------------------
@@ -521,8 +376,8 @@ for ip in range(n_p-1):
 #------------------------------------------------------------------------------
 #   subtracted x^2 correlation function, log derivative                    
 #------------------------------------------------------------------------------
-xx_sub = x2cor_av(np)
-xx_er  = x2cor_er(np)
+xx_sub = x2cor_av[n_p-1]
+xx_er  = x2cor_er[n_p-1]
 for ip in range(n_p):
     x2sub_av[ip] = x2cor_av[ip]-xx_sub
     x2sub_er[ip] = np.sqrt(x2cor_er[ip]**2+xx_er**2)
@@ -552,7 +407,15 @@ for ip in range(n_p-1):
 #------------------------------------------------------------------------------
 #   histograms                                                             
 #------------------------------------------------------------------------------
-        
+file16.write('\n')
+file16.write(' x distribution ')
+fn.plot_histogram(xhist_min, nxhist, ix)
+file16.write('\n')
+file16.write(' Z_IA distribution ')
+fn.plot_histogram(0.0, nzhist, iz)
+for i in range(nzhist):
+    xx = (i+0.5)*stzhist
+    file30.write(fs.f222.format(xx,iz[i]))      
 
 
 

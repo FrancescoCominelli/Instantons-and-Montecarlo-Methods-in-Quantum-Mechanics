@@ -177,3 +177,115 @@ def cool(f,a,delx, seed, xs, n, ncool):
                 if snew < sold :
                     xs[i]=xnew
     return
+
+#------------------------------------------------------------------------------
+#     sort array ra(n)                                                   
+#------------------------------------------------------------------------------      
+def sort(n, ra):
+    l = n//2 + 1
+    ir = n
+    while True:
+        if l > 1:
+            l = l - 1
+            rra = ra[l-1]
+        else:
+            rra = ra[ir-1]
+            ra[ir-1] = ra[0]
+            ir = ir - 1
+            if ir == 1:
+                ra[0] = rra
+                return
+        i = l
+        j = l + l
+        while j <= ir:
+            if j < ir and ra[j-1] < ra[j]:
+                j = j + 1
+            if rra < ra[j-1]:
+                ra[i-1] = ra[j-1]
+                i = j
+                j = j + j
+            else:
+                j = ir + 1
+        ra[i-1] = rra
+        
+#------------------------------------------------------------------------------
+#   initialize instanton configuration                               
+#------------------------------------------------------------------------------
+def setup(nin,z,tmax, seed):
+    random.seed(seed)
+    for i in range(nin):
+        z[i] = random.random()*tmax
+        sort(nin,z)
+    return
+
+#------------------------------------------------------------------------------
+#     sum ansatz path                                                  
+#------------------------------------------------------------------------------
+def xsum(nin, z, f, t):
+    neven = nin - nin % 2
+    xsum = -f
+    for i in range(1, neven, 2):
+        xsum += f * np.tanh(2.0 * f * (t - z[i])) - f * np.tanh(2.0 * f * (t - z[i+1]))
+    if nin % 2 != 0:
+        xsum += f * np.tanh(2.0 * f * (t - z[nin])) + f   
+    return xsum
+
+#------------------------------------------------------------------------------
+#   save array z in zstore                                             
+#------------------------------------------------------------------------------
+def store(nin,z,zstore):
+    for i in range(nin):
+         zstore[i] = z[i]
+    return 
+
+#------------------------------------------------------------------------------
+#   restore array z from zstore                                        
+#------------------------------------------------------------------------------
+def restore(nin,z,zstore):
+    for i in range(nin):
+         zstore[i] = z[i]
+    return
+#------------------------------------------------------------------------------
+#     discretized action for configuration x(n)                           
+#------------------------------------------------------------------------------
+def action(n,x,f,a):
+    stot = 0.0
+    ttot = 0.0
+    vtot = 0.0  
+    for j in range(n-1):
+        xp = (x[j+1]-x[j])/a
+        t  = 1.0/4.0*xp**2
+        v  = (x[j]**2-f**2)**2
+        s  = a*(t+v)
+        ttot += a*t
+        vtot += a*v
+        stot += s  
+    return stot,ttot,vtot
+
+#------------------------------------------------------------------------------
+#   sumansatz configuration on grid x(n)                                
+#------------------------------------------------------------------------------
+def xconf(n,x,nin,z,f,a):
+    for j in range(1,n):  
+         xx = a*j
+         x[j] = xsum(nin,z,f,xx)        
+    x[0] = x[n-1]
+    x    = np.append(x, x[1])
+    return
+
+#------------------------------------------------------------------------------
+#     hard core                                                           
+#------------------------------------------------------------------------------
+def sshort(z,nin,tcore,score,tmax):
+    shc = 0.0
+    tcore2 = tcore**2
+    if tcore == 0 and tcore2 == 0:
+        return shc
+    for i in range(1, nin+1):
+        if i == 1:
+            zm = z[nin-1] - tmax
+        else:
+            zm = z[i-2]
+        dz = z[i-1] - zm
+        shc = shc + score * np.exp(-dz/tcore)
+    return shc

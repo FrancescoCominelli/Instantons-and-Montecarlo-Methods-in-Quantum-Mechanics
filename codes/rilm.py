@@ -1,8 +1,9 @@
 import format_strings as fs
 import numpy as np
 import random
-import matplotlib.pyplot as plt
 from tqdm import tqdm
+import functions as fn
+import re
 #------------------------------------------------------------------------------
 #------------------------------------------------------------------------------
 #     random instanton calculation in quantum mechanics.                     
@@ -39,115 +40,8 @@ from tqdm import tqdm
 #               DeltaPi(tau) is the statistical error in Pi(tau)
 #------------------------------------------------------------------------------
 #------------------------------------------------------------------------------
-#     sort array ra(n)                                                   
-#------------------------------------------------------------------------------      
-def sort(n, ra):
-    l = n//2 + 1
-    ir = n
-    while True:
-        if l > 1:
-            l = l - 1
-            rra = ra[l-1]
-        else:
-            rra = ra[ir-1]
-            ra[ir-1] = ra[0]
-            ir = ir - 1
-            if ir == 1:
-                ra[0] = rra
-                return
-        i = l
-        j = l + l
-        while j <= ir:
-            if j < ir and ra[j-1] < ra[j]:
-                j = j + 1
-            if rra < ra[j-1]:
-                ra[i-1] = ra[j-1]
-                i = j
-                j = j + j
-            else:
-                j = ir + 1
-        ra[i-1] = rra
-
+#   open files
 #------------------------------------------------------------------------------
-#   initialize instanton configuration                               
-#------------------------------------------------------------------------------
-def setup(nin,z,tmax, seed):
-    random.seed(seed)
-    for i in range(nin):
-        z[i] = random.random()*tmax
-        sort(nin,z)
-    return
-
-#------------------------------------------------------------------------------
-#     sum ansatz path                                                  
-#------------------------------------------------------------------------------
-def xsum(nin, z, f, t):
-    neven = nin - nin % 2
-    xsum = -f
-    for i in range(1, neven, 2):
-        xsum += f * np.tanh(2.0 * f * (t - z[i])) - f * np.tanh(2.0 * f * (t - z[i+1]))
-    if nin % 2 != 0:
-        xsum += f * np.tanh(2.0 * f * (t - z[nin])) + f   
-    return xsum
-
-#------------------------------------------------------------------------------
-#     function to include value a in histogram array hist(n)
-#     def histogramarray(a, amin, st, m, hist)                
-#------------------------------------------------------------------------------
-#     a       value to be added to histogram array                        
-#     amin    minimum value in histogram                                  
-#     st      bin width                                                   
-#     m       number of bins                                              
-#     hist(n) histogram array                                             
-#------------------------------------------------------------------------------
-def histogramarray(a, amin, st, m, hist):
-    j = (a - amin)/st + 1.000001
-    if (j < 1):
-        j = 1
-    if (j > m):
-        j = m
-    hist[int(j)-1] += 1
-    return
-#------------------------------------------------------------------------------
-#   Estimate average and error from xtot and x2tot
-#------------------------------------------------------------------------------
-#   Input:
-#           n: number of measurements
-#           xtot: sum of x_i
-#           x2tot: sum of x**2
-#   Output:
-#           xav: average
-#           xerr: error estimate
-#------------------------------------------------------------------------------  
-def disp(n, xtot, x2tot):
-    if n < 1:
-        raise ValueError("Number of measurements must be at least 1")
-    xav = xtot / float(n)
-    del2 = x2tot / float(n*n) - xav*xav / float(n)
-    if del2 < 0:
-        del2 = 0      
-    xerr = np.sqrt(del2)  
-    return xav, xerr
-
-#------------------------------------------------------------------------------
-#   plot histogram
-#------------------------------------------------------------------------------
-#       Input:  amin    minimum value in histogram
-#               m       number of bins 
-#               ist()   histogram array
-#------------------------------------------------------------------------------
-def plot_histogram2(amin, m , ist):
-    bins = np.linspace(amin, -amin, m+1)
-    plt.hist(bins[:-1], bins, density=True ,weights=ist, histtype='step')
-    plt.xlabel('x')
-    plt.ylabel('P(x)')
-    plt.show()
-    
-#------------------------------------------------------------------------------
-#------------------------------------------------------------------------------
-
-pi  = np.pi
-#file6  = open('I dont know the name')
 file16 = open('Data/rilm.dat',       'w')
 file17 = open('Data/config.dat',     'w')
 file18 = open('Data/trajectory.dat', 'w')
@@ -157,13 +51,41 @@ file21 = open('Data/rcor2.dat',      'w')
 file22 = open('Data/rcor3.dat',      'w') 
 file30 = open('Data/zdist.dat',      'w')
 
-#separation of wells f (f=1.4)
-f = 1.4
-#grid size n<1000 (n=100)
-n = 100
-#grid spacing a (dtau=0.05)
-a = 0.05         
-      
+#------------------------------------------------------------------------------
+#   input parameters                                                                 
+#------------------------------------------------------------------------------
+# open the file for reading
+with open('parameters.txt', 'r') as file:
+    # read the contents of the file
+    contents = file.read()
+   
+# search for the values of f and a using regular expressions
+f      = re.search(r'f\s*=\s*(\d+\.\d+)', contents).group(1)
+n      = re.search(r'n\s*=\s*(\d+)', contents).group(1)
+a      = re.search(r'a\s*=\s*(\d+\.\d+)', contents).group(1)
+icold  = re.search(r'icold\s*=\s*(\d+)', contents).group(1)
+neq    = re.search(r'neq\s*=\s*(\d+)', contents).group(1)
+nmc    = re.search(r'nmc\s*=\s*(\d+)', contents).group(1)
+delx   = re.search(r'delx\s*=\s*(\d+\.\d+)', contents).group(1)
+n_p    = re.search(r'n_p\s*=\s*(\d+)', contents).group(1)
+kp     = re.search(r'kp\s*=\s*(\d+)', contents).group(1)
+
+
+# convert the values to integers
+f      = float(f)   #separation of wells f (f=1.4)
+n      = int(n)     #grid size n<10000 (n=100)
+a      = float(a)   #grid spacing a (dtau=0.05)
+icold  = int(icold) #cold/hot start (0,1)
+neq    = int(neq)   #equilibration sweeps
+nmc    = int(nmc)   #monte carlo sweeps
+delx   = float(delx)#update x (delx)
+n_p    = int(n_p)   #number of points in correlator
+kp     = int(kp)    #number of sweeps between cooling
+
+nin = 10
+nc = 5
+pi  = np.pi
+
 tmax  = n*a
 s0    = 4.0/3.0*f**3
 dens  = 8*np.sqrt(2.0/pi)*f**2.5*np.exp(-s0)
@@ -172,19 +94,6 @@ xnin  = dens*tmax
 xnin2 = dens2*tmax
 nexp  = int(xnin+0.5)
 nexp2 = int(xnin2+0.5)
-      
-#file6.write('number of instantons (even)') 
-#file6.write('semiclassical result',nexp) 
-#file6.write('two loop result     ',nexp2) 
-nin = 10
-#file6.write('number of configurations') 
-nmc = 1000
-#file6.write('number of points in correlator') 
-n_p = 20
-#file6.write('number of measurements per config') 
-nc = 5
-#file6.write('write every kth config') 
-kp = 5
 
 x  =  np.zeros(n)
 z  =  np.zeros(n)     
@@ -265,13 +174,13 @@ ncor  = 0
 
 for i in tqdm(range(nmc)):
     nconf = nconf+1
-    setup(nin,z,tmax, seed)
+    fn.setup(nin,z,tmax, seed)
     #--------------------------------------------------------------------------
     #   new configuration                                                      
     #--------------------------------------------------------------------------
     for j in range(n):
         xx = a*j
-        x[j] = xsum(nin, z, f, xx)
+        x[j] = fn.xsum(nin, z, f, xx)
         x[n-1]= x[0]
         x     = np.append(x, x[1])
     #--------------------------------------------------------------------------
@@ -285,7 +194,7 @@ for i in tqdm(range(nmc)):
         z0 = z[ii-1]
         zp = z[ii]
         zia = min([abs(zp-z0), abs(z0-zm)])
-        histogramarray(zia, 0.0, stzhist, nzhist, iz)
+        fn.histogramarray(zia, 0.0, stzhist, nzhist, iz)
     #--------------------------------------------------------------------------
     #   correlation function                                                   
     #--------------------------------------------------------------------------
@@ -308,18 +217,18 @@ for i in tqdm(range(nmc)):
 #   averages                                                               
 #------------------------------------------------------------------------------
 
-stot_av,stot_err = disp(  nconf, stot_sum, stot2_sum)
-vtot_av,vtot_err = disp(  nconf, vtot_sum, vtot2_sum)
-ttot_av,ttot_err = disp(  nconf, ttot_sum, ttot2_sum)
-tvir_av,tvir_err = disp(  nconf, tvir_sum, tvir2_sum)
-x_av,x_err       = disp(nconf*n,    x_sum, x2_sum)
-x2_av,x2_err     = disp(nconf*n,   x2_sum, x4_sum)
-x4_av,x4_err     = disp(nconf*n,   x4_sum, x8_sum)
+stot_av,stot_err = fn.disp(  nconf, stot_sum, stot2_sum)
+vtot_av,vtot_err = fn.disp(  nconf, vtot_sum, vtot2_sum)
+ttot_av,ttot_err = fn.disp(  nconf, ttot_sum, ttot2_sum)
+tvir_av,tvir_err = fn.disp(  nconf, tvir_sum, tvir2_sum)
+x_av,x_err       = fn.disp(nconf*n,    x_sum, x2_sum)
+x2_av,x2_err     = fn.disp(nconf*n,   x2_sum, x4_sum)
+x4_av,x4_err     = fn.disp(nconf*n,   x4_sum, x8_sum)
  
 for ip in range(n_p):
-    xcor_av[ip],  xcor_er[ip]  = disp(ncor, xcor_sum[ip], xcor2_sum[ip])
-    x2cor_av[ip], x2cor_er[ip] = disp(ncor, x2cor_sum[ip], x2cor2_sum[ip])
-    x3cor_av[ip], x3cor_er[ip] = disp(ncor, x3cor_sum[ip], x3cor2_sum[ip])
+    xcor_av[ip],  xcor_er[ip]  = fn.disp(ncor, xcor_sum[ip], xcor2_sum[ip])
+    x2cor_av[ip], x2cor_er[ip] = fn.disp(ncor, x2cor_sum[ip], x2cor2_sum[ip])
+    x3cor_av[ip], x3cor_er[ip] = fn.disp(ncor, x3cor_sum[ip], x3cor2_sum[ip])
 
 v_av  = vtot_av/tmax
 v_err = vtot_err/tmax
@@ -367,8 +276,8 @@ for ip in range(1,n_p):
 #     subtracted x^2 correlation function, log derivative                    
 #------------------------------------------------------------------------------
 
-xx_sub = x2cor_av[n_p]
-xx_er  = x2cor_er[n_p]
+xx_sub = x2cor_av[n_p-1]
+xx_er  = x2cor_er[n_p-1]
 for ip in range(n_p):
     x2sub_av[ip] = x2cor_av[ip]-xx_sub
     x2sub_er[ip] = np.sqrt(x2cor_er[ip]**2+xx_er**2)
@@ -405,10 +314,10 @@ for ip in range(n_p-1):
 
 file16.write('\n')
 file16.write(' x distribution \n')
-plot_histogram2(xhist_min, nxhist, ix)
+fn.plot_histogram(xhist_min, nxhist, ix)
 file16.write('\n')
 file16.write(' Z_IA distribution \n')
-plot_histogram2(0.0, nzhist, iz)
+fn.plot_histogram(0.0, nzhist, iz)
 for i in range(nzhist):
     xx = (i+0.5)*stzhist
     file30.write(fs.f222.format(xx,iz[i]) )
