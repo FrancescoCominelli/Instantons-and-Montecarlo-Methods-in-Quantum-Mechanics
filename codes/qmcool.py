@@ -184,8 +184,15 @@ def cool(f,a,delx, seed, xs, n, ncool):
                 if snew < sold :
                     xs[i]=xnew
     return
-  
- 
+
+def plot_hist(xmin, st, n, ist):    
+    bins = [xmin + st*i for i in range(n+1)]
+    plt.hist(ist, bins=bins)
+    plt.xlabel('x')
+    plt.xlabel('y')
+    plt.show()
+    return
+
 #------------------------------------------------------------------------------
 
 file16 = open('Data/qm.dat', 'w')
@@ -762,14 +769,16 @@ for ic in range(icool+1):
          
 file16.write('\n')
 file16.write(' x distribution \n')
-plot_histogram2(xhist_min, nxhist , ix)
+#plot_histogram2(xhist_min, nxhist , ix)
+plot_hist(xhist_min, stxhist, n, nxhist)
 file16.write('\n')
 file16.write(' z distribution \n')
-plot_histogram2(0.0,nzhist,iz)
+#plot_histogram2(0.0,nzhist,iz)
+plot_hist(0.0, stzhist, n, nzhist)
 for i in range(nzhist): 
     xx = (i+0.5)*stzhist
     file30.write(fs.f222.format(xx,iz[i]))
-print(iz)
+
 #------------------------------------------------------------------------------
 #------------------------------------------------------------------------------
 
