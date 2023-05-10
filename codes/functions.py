@@ -1,6 +1,7 @@
 # Definition of functions
 import numpy as np
 import matplotlib.pyplot as plt
+import random
 
 #------------------------------------------------------------------------------
 #     function to include value a in histogram array hist(n)
@@ -49,7 +50,7 @@ def disp(n, xtot, x2tot):
 #               ist()   histogram array
 #------------------------------------------------------------------------------
 
-def plot_histogram2(amin, m , ist):
+def plot_histogram(amin, m , ist):
     bins = np.linspace(amin, -amin, m+1)
     plt.hist(bins[:-1], bins, density=True ,weights=ist, histtype='step')
     plt.xlabel('x')
@@ -95,3 +96,84 @@ def psiosc(m, w, n, x, psi):
         psi[i] = xnorm * h[i] * np.exp(-m * w / 2.0 * x ** 2)
 
     return psi
+
+#------------------------------------------------------------------------------
+#   discretized action for configuration x(n)                           
+#------------------------------------------------------------------------------
+def act(f, a, delx, n, x):
+    stot = 0.0
+    ttot = 0.0
+    vtot = 0.0
+    for j in range(n):
+        xp = (x[j+1] - x[j]) / a
+        t = 1.0 / 4.0 * xp**2
+        v = (x[j]**2 - f**2)**2
+        s = a * (t + v)
+        ttot += a * t
+        vtot += a * v
+        stot += s
+    return stot, ttot, vtot
+
+#------------------------------------------------------------------------------
+#     return number and location of (anti) instantons                    
+#------------------------------------------------------------------------------
+def inst(f, a, delx, n, x, xi, xa, z):
+    ni = 0
+    na = 0
+    nin= 0
+    ix = int(np.sign(x[0]))
+    for i in range(1,n):
+        tau = a * i
+        ixp = int(np.sign(x[i]))
+        if ixp > ix:
+            xi[ni] = tau
+            z[nin] = tau
+            ni  += 1
+            nin += 1         
+        elif ixp < ix:
+            xa[na] = tau
+            z[nin] = tau
+            na  += 1
+            nin += 1            
+        ix = ixp
+    return ni, na
+
+#------------------------------------------------------------------------------
+#   log derivative                                                         
+#------------------------------------------------------------------------------
+def dl(xcor1,xcor2,a):      
+    dl = (xcor1-xcor2)/(xcor1*a)
+    return dl
+
+#------------------------------------------------------------------------------
+#     log derivative, error                                                  
+#------------------------------------------------------------------------------
+def dle(xcor1,xcor2,xcor1e,xcor2e,a):      
+    dle2 = (xcor2e/xcor1)**2+(xcor1e*xcor2/xcor1**2)**2
+    dle  = np.sqrt(dle2)
+    return dle
+
+#------------------------------------------------------------------------------
+#   local cooling algorithm                                                
+#------------------------------------------------------------------------------ 
+def cool(f,a,delx, seed, xs, n, ncool):     
+    random.seed(seed)
+    nhit = 10
+    delxp= 0.1*delx
+    for k in range(ncool+1):
+        for i in range(1,n):
+            xpm = (xs[i]-xs[i-1])/a
+            xpp = (xs[i+1]-xs[i])/a
+            t = 1.0/4.0*(xpm**2+xpp**2)
+            v = (xs[i]**2-f**2)**2
+            sold = a*(t+v)
+            for j in range(nhit):          
+                xnew = xs[i] + delxp*(2.0*random.random()-1.0)
+                xpm = (xnew-xs[i-1])/a
+                xpp = (xs[i+1]-xnew)/a
+                t = 1.0/4.0*(xpm**2+xpp**2)
+                v = (xnew**2-f**2)**2
+                snew = a*(t+v)
+                if snew < sold :
+                    xs[i]=xnew
+    return
