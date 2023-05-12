@@ -164,3 +164,36 @@ plt.xlabel('τ')
 plt.ylabel('d[log<xⁿ(0)xⁿ(τ)>]/dτ')
 
 plt.show()
+
+#------------------------------------------------------------------------------
+#   FIG. 2: Typical euclidean path obtained in a Monte Carlo simulation of the 
+#   discretized euclidean action of the double well potential for  = 1.4.
+#------------------------------------------------------------------------------
+
+with open('Data/qm/config.dat', 'r') as file:
+    lines = file.readlines()[2693765:2694565]
+
+column1 = []
+column2 = []
+
+for line in lines:
+    if "configuration: " in line:
+        continue
+    # split the line and append the values to the corresponding lists
+    values = line.split()
+    column1.append(float(values[0]))
+    column2.append(float(values[1]))
+
+
+
+x     = np.array(column1)
+y     = np.array(column2)
+
+
+plt.plot(x, y, color = 'black',linewidth = 0.8, label = 'Monte Carlo')
+
+plt.xlim(0, 20)
+plt.xlabel('τ')
+plt.ylabel('x')
+
+plt.show()
