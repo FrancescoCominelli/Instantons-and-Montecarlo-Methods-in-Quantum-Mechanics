@@ -103,7 +103,7 @@ nc    = 5
 #write every kth config
 kp2   = 10
 #number of cooling sweeps (ncool<5000)
-ncool = 5          
+ncool = 20      
 tmax  = n*a
 
 #------------------------------------------------------------------------------
@@ -116,7 +116,7 @@ tmax  = n*a
 #       break # Break out of the loop if input is numeric
 #   except ValueError:
 #       print("Invalid input. Please enter a number.")
-seed = -1234
+seed = 12345
 random.seed(seed)
 #------------------------------------------------------------------------------
 #     echo input parameters                                                  
@@ -142,7 +142,7 @@ file20.write(fs.f444.format(n,nmc/kp,n*a,f))
 #------------------------------------------------------------------------------
 
 nxhist = 50
-xhist_min = -1.5 * f
+xhist_min = -2.0 * f
 stxhist = -2 * xhist_min / float(nxhist)
 nzhist = 40
 stzhist = 4.01 / float(nzhist)
@@ -444,22 +444,22 @@ for i in tqdm(range(nmc)):
     #--------------------------------------------------------------------------
     #     write configuration                                                    
     #--------------------------------------------------------------------------
-    '''
     if i % kp == 0:
+        '''
         print("configuration:   ", i, "\n",
               "coupling:        ", alpha, "\n",
               "acceptance rate: ", float(nacc)/float(nhit), "\n",
               "action (T,V):    ", stot, ttot, vtot)
-    '''
-    file17.write('configuration: ')
-    file17.write(str(i))
-    file17.write('\n')
-    file20.write('configuration: ')
-    file20.write(str(i))
-    file20.write('\n')
-    for k in range(n):
-        file17.write(fs.f222.format(k*a, x[k]))
-        file20.write(fs.f222.format(k*a, xs[k]))
+        '''
+        file17.write('configuration: ')
+        file17.write(str(i))
+        file17.write('\n')
+        file20.write('configuration: ')
+        file20.write(str(i))
+        file20.write('\n')
+        for k in range(n):
+            file17.write(fs.f222.format(k*a, x[k]))
+            file20.write(fs.f222.format(k*a, xs[k]))
 #------------------------------------------------------------------------------
 #   averages
 #------------------------------------------------------------------------------
@@ -663,7 +663,6 @@ file27.close()
 file28.close()
 file29.close()
 file30.close()
-
 
 
 

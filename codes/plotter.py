@@ -170,30 +170,57 @@ plt.show()
 #   discretized euclidean action of the double well potential for  = 1.4.
 #------------------------------------------------------------------------------
 
-with open('Data/qm/config.dat', 'r') as file:
-    lines = file.readlines()[2693765:2694565]
+with open('Data/qmcool/config.dat', 'r') as file:
+    lines = file.readlines()
 
-column1 = []
-column2 = []
+start_line = None
+end_line   = None
+for i, line in enumerate(lines):
+    if line.startswith('configuration: 500'):
+        start_line = i
+    elif line.startswith('configuration: 501'):
+        end_line = i
+        break
+data_lines = lines[start_line+1: end_line]
 
-for line in lines:
-    if "configuration: " in line:
-        continue
-    # split the line and append the values to the corresponding lists
-    values = line.split()
-    column1.append(float(values[0]))
-    column2.append(float(values[1]))
-
-
-
+column1 = [float(line.split()[0]) for line in data_lines]
+column2 = [float(line.split()[1]) for line in data_lines]
+ 
 x     = np.array(column1)
 y     = np.array(column2)
 
 
 plt.plot(x, y, color = 'black',linewidth = 0.8, label = 'Monte Carlo')
 
+with open('Data/qmcool/coolconfig.dat', 'r') as file:
+    lines = file.readlines()
+
+start_line = None
+end_line   = None
+for i, line in enumerate(lines):
+    if line.startswith('configuration: 500'):
+        start_line = i
+    elif line.startswith('configuration: 501'):
+        end_line = i
+        break
+data_lines = lines[start_line+1: end_line]
+
+column2 = [float(line.split()[1]) for line in data_lines]
+ 
+y     = np.array(column2)
+
+
+plt.plot(x, y, color = 'green',linewidth = 0.8, label = 'Cooled')
+
 plt.xlim(0, 20)
 plt.xlabel('τ')
 plt.ylabel('x')
+plt.legend()
 
 plt.show()
+
+
+
+
+
+
