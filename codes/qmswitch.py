@@ -84,7 +84,7 @@ beta   = n*a
 #------------------------------------------------------------------------------
 #open txt files
 
-file16 = open('Data/qmswitch.dat', 'w')
+file16 = open('Data/qmswitch/qmswitch.dat', 'w')
 
 
 # write on a txt file the values
@@ -352,4 +352,3 @@ file16.write(fs.f812.format(ei, de_tot))
 file16.write(fs.f813.format(de_err, de_dif, de_dis))
     
 file16.close()
-
