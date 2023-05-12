@@ -51,21 +51,21 @@ import re
 #------------------------------------------------------------------------------
 #------------------------------------------------------------------------------
 
-file16 = open('Data/qm.dat', 'w')
-file17 = open('Data/config.dat', 'w')
-file18 = open('Data/trajectory.dat', 'w')
-file19 = open('Data/qmdist.dat', 'w')
-file20 = open('Data/coolconfig.dat', 'w')
-file21 = open('Data/cor.dat', 'w')
-file22 = open('Data/coolcor.dat', 'w')
-file23 = open('Data/nin.dat', 'w')
-file24 = open('Data/scool.dat', 'w')
-file25 = open('Data/sinst.dat', 'w')
-file26 = open('Data/cor2.dat', 'w')
-file27 = open('Data/coolcor2.dat', 'w')
-file28 = open('Data/cor3.dat', 'w')
-file29 = open('Data/coolcor3.dat', 'w')
-file30 = open('Data/zdist.dat', 'w')
+file16 = open('Data/qmcool/qm.dat', 'w')
+file17 = open('Data/qmcool/config.dat', 'w')
+file18 = open('Data/qmcool/trajectory.dat', 'w')
+file19 = open('Data/qmcool/qmdist.dat', 'w')
+file20 = open('Data/qmcool/coolconfig.dat', 'w')
+file21 = open('Data/qmcool/cor.dat', 'w')
+file22 = open('Data/qmcool/coolcor.dat', 'w')
+file23 = open('Data/qmcool/nin.dat', 'w')
+file24 = open('Data/qmcool/scool.dat', 'w')
+file25 = open('Data/qmcool/sinst.dat', 'w')
+file26 = open('Data/qmcool/cor2.dat', 'w')
+file27 = open('Data/qmcool/coolcor2.dat', 'w')
+file28 = open('Data/qmcool/cor3.dat', 'w')
+file29 = open('Data/qmcool/coolcor3.dat', 'w')
+file30 = open('Data/qmcool/zdist.dat', 'w')
 
 #------------------------------------------------------------------------------
 #     input                                                                  
@@ -134,8 +134,8 @@ file16.write(fs.f203.format(n_p,nc))
 file16.write(fs.f204.format(delx,icold,ncool))
 file16.write(fs.f205.format(s0,de,de*n*a))
 file16.write(fs.f206.format(s0,de2,de2*n*a))
-#file17.write('#',n,nmc/kp,n*a,f)
-#file20.write('#',n,nmc/kp,n*a,f)
+file17.write(fs.f444.format(n,nmc/kp,n*a,f))
+file20.write(fs.f444.format(n,nmc/kp,n*a,f))
 
 #------------------------------------------------------------------------------
 #     parameters for histograms                                              
@@ -451,13 +451,15 @@ for i in tqdm(range(nmc)):
               "acceptance rate: ", float(nacc)/float(nhit), "\n",
               "action (T,V):    ", stot, ttot, vtot)
     '''
-    file17.write('# configuration')
+    file17.write('configuration: ')
     file17.write(str(i))
-    file20.write('# configuration')
+    file17.write('\n')
+    file20.write('configuration: ')
     file20.write(str(i))
+    file20.write('\n')
     for k in range(n):
         file17.write(fs.f222.format(k*a, x[k]))
-        file20.write(fs.f222.format(k*a, x[k]))
+        file20.write(fs.f222.format(k*a, xs[k]))
 #------------------------------------------------------------------------------
 #   averages
 #------------------------------------------------------------------------------
@@ -661,7 +663,6 @@ file27.close()
 file28.close()
 file29.close()
 file30.close()
-
 
 
 
