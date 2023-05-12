@@ -20,13 +20,13 @@ Number of equilibration sweeps before first measurement (neq ∼ 100)
 neq    = 100
 
 Number of Monte Carlo sweeps (nmc ∼ 10^5)
-nmc    = 1000
+nmc    = 100000
 
 Width of Gaussian distribution used for Monte Carlo update x(n) (delx ∼ 0.5)
 delx   = 0.5
 
 Number of points on which correlation functions are measured
-n_p    = 20
+n_p    = 35
 
 Number of sweeps between writeout of complete configuration
 kp     = 5

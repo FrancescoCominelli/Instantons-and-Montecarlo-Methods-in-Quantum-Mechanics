@@ -47,12 +47,12 @@ x3corp = np.zeros((ntau + 1, ntau + 1), dtype=np.float32)
 x2corp = np.zeros((ntau + 1, ntau + 1), dtype=np.float32)
 
 # Open files with specified file names and modes
-file16 = open('Data/qmdiag.dat', 'w')
-file17 = open('Data/cor.dat', 'w')
-file18 = open('Data/cor2.dat', 'w')
-file19 = open('Data/z.dat', 'w')
-file20 = open('Data/psi.dat', 'w')
-file21 = open('Data/dcor.dat', 'w')
+file16 = open('Data/qmdiag/qmdiag.dat', 'w')
+file17 = open('Data/qmdiag/cor.dat', 'w')
+file18 = open('Data/qmdiag/cor2.dat', 'w')
+file19 = open('Data/qmdiag/z.dat', 'w')
+file20 = open('Data/qmdiag/psi.dat', 'w')
+file21 = open('Data/qmdiag/dcor.dat', 'w')
 
 # Write information to the files
 
@@ -108,9 +108,7 @@ e, v = np.linalg.eigh(h)
 sorted_indices = np.argsort(e)
 e = e[sorted_indices]
 v = v[:, sorted_indices]
-#positive_indices = (e >= 0)
-#e = e[positive_indices]
-#v = v[:, positive_indices]
+
 
 # Energy eigenvalues and matrix elements <0|x|n>
 
@@ -140,9 +138,9 @@ for n in range(ndim):
               + 3*(k+1)*np.sqrt(float(k+1))*v[kp1,0]
               + np.sqrt(float((k+1)*(k+2)*(k+3)))*v[kp3,0]) * v[k,n] 
         
-    rho[n] = cw**2 * cn**2  #dipole matrix element squared
-    rho2[n] = cw**4 * dn**2 #quadrupole matrix element squared
-    rho3[n] = cw**6 * en**2 #octupole matrix element squared
+    rho[n] = cw**2/2.0 * cn**2  #dipole matrix element squared
+    rho2[n] = cw**4/4.0 * dn**2 #quadrupole matrix element squared
+    rho3[n] = cw**6/8.0 * en**2 #octupole matrix element squared
     
     print(fs.f551.format(n, e[n], rho[n], rho2[n], rho3[n]))
     file16.write(fs.f551.format(n, e[n], rho[n], rho2[n], rho3[n]))
@@ -287,6 +285,5 @@ file18.close()
 file19.close()
 file20.close()
 file21.close()
-
 
 
