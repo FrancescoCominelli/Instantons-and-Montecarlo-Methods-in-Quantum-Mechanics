@@ -4,6 +4,9 @@ import re
 import random
 import functions as fn
 from tqdm import tqdm
+
+
+
 #------------------------------------------------------------------------------
 #------------------------------------------------------------------------------
 #   lattice calculation in quantum mechanics                              
@@ -23,7 +26,7 @@ from tqdm import tqdm
 #   neq     number of equlibration sweeps before the first measurement (neq=100)
 #   nmc     number of Monte Carlo sweeps (nmc=10^5)
 #   dx      width of Gaussian distribution used for MonteCarlo update: x_i^(n)-->x_i^(n+1)
-#   np      number of points on which the correlation functions are measured: 
+#   n_p      number of points on which the correlation functions are measured: 
 #           <x_i x_(i+1)>,...,<x_i x_(i+np)> (np=20)
 #   nmea    number of measurement of the correlation function given MonteCarlo configuration x_i
 #           (nmea=5)
@@ -92,13 +95,13 @@ nxhist = 50
 #------------------------------------------------------------------------------
 # open txt files
 
-file16 = open('Data/qm.dat', 'w')
-file17 = open('Data/config.dat', 'w')
-file18 = open('Data/trajectory.dat', 'w')
-file19 = open('Data/qmdist.dat', 'w')
-file20 = open('Data/qmcor.dat', 'w')
-file21 = open('Data/qmcor2.dat', 'w')
-file22 = open('Data/qmcor3.dat', 'w')
+file16 = open('Data/qm/qm.dat', 'w')
+file17 = open('Data/qm/config.dat', 'w')
+file18 = open('Data/qm/trajectory.dat', 'w')
+file19 = open('Data/qm/qmdist.dat', 'w')
+file20 = open('Data/qm/qmcor.dat', 'w')
+file21 = open('Data/qm/qmcor2.dat', 'w')
+file22 = open('Data/qm/qmcor3.dat', 'w')
 
 # write on a txt file the values
 
@@ -338,7 +341,7 @@ file16.write('\n')
 #------------------------------------------------------------------------------
 
 file16.write("x correlation function\n")
-file20.write("tau       x(tau)       dx(tau)     dlog\n")
+file20.write("          tau       x(tau)      dx(tau)         dlog\n")
 
 for ip in range(n_p-1):
     dx  = (xcor_av[ip]-xcor_av[ip+1])/xcor_av[ip]/a
@@ -359,7 +362,7 @@ for ip in range(n_p):
     x2sub_er[ip] = np.sqrt(x2cor_er[ip]**2+xx_er**2)
     
 file16.write("x2 correlation function\n")
-file21.write("tau       x2(tau)       dx2(tau)     dlog\n")
+file21.write("          tau      x2(tau)     dx2(tau)         dlog\n")
 
 for ip in range(n_p-1):
     dx  = (x2sub_av[ip]-x2sub_av[ip+1])/x2sub_av[ip]/a
@@ -375,7 +378,7 @@ for ip in range(n_p-1):
 #------------------------------------------------------------------------------
 
 file16.write("x3 correlation function\n")
-file22.write("tau       x3(tau)       dx3(tau)     dlog\n")
+file22.write("          tau      x3(tau)     dx3(tau)         dlog\n")
 
 for ip in range(n_p-1):
     dx  = (x3cor_av[ip]-x3cor_av[ip+1])/x3cor_av[ip]/a
@@ -390,13 +393,12 @@ for ip in range(n_p-1):
 #------------------------------------------------------------------------------
 
 fn.plot_histogram(xhist_min, nxhist, histo_x)
-
 file19.write('x distribution\n')
 xnorm = 0.0
 for i in range(nxhist):
     xnorm += histo_x[i]*stxhist
 for i in range(nxhist):
-    xx = xhist_min + (i-1)*stxhist
+    xx = xhist_min + (i+1)*stxhist
     file19.write(fs.f222.format(xx, histo_x[i]/xnorm))
     
 #------------------------------------------------------------------------------
