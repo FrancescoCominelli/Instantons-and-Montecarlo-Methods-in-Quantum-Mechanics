@@ -4,9 +4,6 @@ import re
 import random
 import functions as fn
 from tqdm import tqdm
-
-
-
 #------------------------------------------------------------------------------
 #------------------------------------------------------------------------------
 #   lattice calculation in quantum mechanics                              
@@ -127,12 +124,12 @@ random.seed(seed)
 xcor_er   = np.zeros(n_p)
 x2cor_er  = np.zeros(n_p)
 x3cor_er  = np.zeros(n_p)
-xcor_sum  = np.zeros(neq)
-x2cor_sum = np.zeros(neq)
-x3cor_sum = np.zeros(neq)
-xcor2_sum = np.zeros(neq)
-x2cor2_sum= np.zeros(neq)
-x3cor2_sum= np.zeros(neq)
+xcor_sum  = np.zeros(n_p)
+x2cor_sum = np.zeros(n_p)
+x3cor_sum = np.zeros(n_p)
+xcor2_sum = np.zeros(n_p)
+x2cor2_sum= np.zeros(n_p)
+x3cor2_sum= np.zeros(n_p)
 histo_x   = np.zeros(nxhist)
 x2sub_av  = np.zeros(n_p)
 x2sub_er  = np.zeros(n_p)
@@ -199,9 +196,9 @@ for i in tqdm(range(nmc)):
         x2_sum = 0
         x4_sum = 0
         x8_sum = 0
-        xcor_sum  = np.zeros(neq)
-        x2cor_sum = np.zeros(neq)
-        x3cor_sum = np.zeros(neq)
+        xcor_sum  = np.zeros(n_p)
+        x2cor_sum = np.zeros(n_p)
+        x3cor_sum = np.zeros(n_p)
         histo_x   = np.zeros(nxhist)
 #--------------------------------------------------------------------------
 #   one sweep thorough configuration                                       
