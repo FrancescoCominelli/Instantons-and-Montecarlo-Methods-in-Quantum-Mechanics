@@ -103,7 +103,7 @@ nc    = 5
 #write every kth config
 kp2   = 10
 #number of cooling sweeps (ncool<5000)
-ncool = 20      
+ncool = 10      
 tmax  = n*a
 
 #------------------------------------------------------------------------------
@@ -333,11 +333,11 @@ for i in tqdm(range(nmc)):
         v  = (x[j]**2-f**2)**2
         tv = 2.0*x[j]**2*(x[j]**2-f**2)
         s  = a*(t+v)
-        xs[j]= x[j]
-        ttot  = ttot +a*t
-        vtot  = vtot +a*v
-        tvtot = tvtot+a*tv
-        stot  = stot + s
+        xs[j] = x[j]
+        ttot  += a*t
+        vtot  += a*v
+        tvtot += a*tv
+        stot  += s
     #write on a txt file
     if i <= 10000:
         file18.write(fs.f444.format(i,stot,ttot,vtot))
@@ -346,14 +346,14 @@ for i in tqdm(range(nmc)):
     #--------------------------------------------------------------------------
     #     populate histogram include in sample                                                     
     #--------------------------------------------------------------------------
-    stot_sum += stot
-    stot2_sum+= stot**2
-    vtot_sum += vtot
-    vtot2_sum+= vtot**2
-    ttot_sum += ttot
-    ttot2_sum+= ttot**2
-    tvir_sum += tvtot
-    tvir2_sum+= tvtot**2
+    stot_sum  += stot
+    stot2_sum += stot**2
+    vtot_sum  += vtot
+    vtot2_sum += vtot**2
+    ttot_sum  += ttot
+    ttot2_sum += ttot**2
+    tvir_sum  += tvtot
+    tvir2_sum += tvtot**2
 
     for k in range(n):
         fn.histogramarray(x[k], xhist_min, stxhist, nxhist, ix)
@@ -410,9 +410,9 @@ for i in tqdm(range(nmc)):
         #     cooled configuration: instanton distribution                            
         #----------------------------------------------------------------------
         
-        for ii in range(0, nin, 2):
+        for ii in range(1, nin, 2):
             if ii == 1:
-                zm = z[nin-1] - tmax
+                zm = z[nin] - tmax
             else:
                 zm = z[ii-1]
             z0  = z[ii]
@@ -444,7 +444,7 @@ for i in tqdm(range(nmc)):
     #--------------------------------------------------------------------------
     #     write configuration                                                    
     #--------------------------------------------------------------------------
-    if i % kp == 0:
+    if i % kp2 == 0:
         '''
         print("configuration:   ", i, "\n",
               "coupling:        ", alpha, "\n",
@@ -467,8 +467,8 @@ stot_av, stot_err = fn.disp(nconf  , stot_sum, stot2_sum)
 vtot_av, vtot_err = fn.disp(nconf  , vtot_sum, vtot2_sum)
 ttot_av, ttot_err = fn.disp(nconf  , ttot_sum, ttot2_sum)
 tvir_av, tvir_err = fn.disp(nconf  , tvir_sum, tvir2_sum)
-x_av   ,  x_err   = fn.disp(nconf*n, x_sum   , x2_sum)
-x2_av  ,  x2_err  = fn.disp(nconf*n, x2_sum  , x4_sum)
+x_av   , x_err    = fn.disp(nconf*n, x_sum   , x2_sum)
+x2_av  , x2_err   = fn.disp(nconf*n, x2_sum  , x4_sum)
 x4_av  , x4_err   = fn.disp(nconf*n, x4_sum  , x8_sum)
 #------------------------------------------------------------------------------
 #     correlators                                                            
@@ -527,20 +527,20 @@ file16.write('\n')
       
 file16.write('\n')
 file16.write(' <x(0)x(t)> correlation function\n') 
-file21.write('#<x(0)x(t)> correlation function\n')
-for ip in range(1,n_p):
-    dx  = fn.dl(xcor_av[ip-1], xcor_av[ip], a)
-    dxe = fn.dle(xcor_av[ip-1], xcor_av[ip], xcor_er[ip-1], xcor_er[ip], a)
-    file16.write(fs.f555.format(ip*a, xcor_av[ip-1], xcor_er[ip-1], dx, dxe)) 
-    file21.write(fs.f555.format(ip*a, xcor_av[ip-1], xcor_er[ip-1], dx, dxe)) 
+file21.write(' <x(0)x(t)> correlation function\n')
+for ip in range(n_p-1):
+    dx  = fn.dl(xcor_av[ip], xcor_av[ip+1], a)
+    dxe = fn.dle(xcor_av[ip], xcor_av[ip+1], xcor_er[ip-1], xcor_er[ip+1], a)
+    file16.write(fs.f555.format(ip*a, xcor_av[ip], xcor_er[ip], dx, dxe)) 
+    file21.write(fs.f555.format(ip*a, xcor_av[ip], xcor_er[ip], dx, dxe)) 
 file16.write('\n')
 file16.write(' <x(0)x(t)> cooled correlation function\n') 
-file22.write('#<x(0)x(t)> cooled correlation function\n')
-for ip in range(1,n_p):
-    dx  = fn.dl(xcool_av[ip-1], xcool_av[ip], a)
-    dxe = fn.dle(xcool_av[ip-1], xcool_av[ip], xcool_er[ip-1], xcool_er[ip], a)
-    file16.write(fs.f555.format(ip*a, xcool_av[ip-1], xcool_er[ip-1], dx, dxe)) 
-    file22.write(fs.f555.format(ip*a, xcool_av[ip-1], xcool_er[ip-1], dx, dxe)) 
+file22.write(' <x(0)x(t)> cooled correlation function\n')
+for ip in range(n_p-1):
+    dx  = fn.dl(xcool_av[ip], xcool_av[ip+1], a)
+    dxe = fn.dle(xcool_av[ip], xcool_av[ip+1], xcool_er[ip], xcool_er[ip+1], a)
+    file16.write(fs.f555.format(ip*a, xcool_av[ip], xcool_er[ip], dx, dxe)) 
+    file22.write(fs.f555.format(ip*a, xcool_av[ip], xcool_er[ip], dx, dxe)) 
 
 #------------------------------------------------------------------------------
 #     <x^2(0)x^2(t) correlator requires subtraction                          
@@ -551,18 +551,14 @@ xx_er  = x2cor_er[n_p-1]
 for ip in range(n_p):
     x2sub_av[ip] = x2cor_av[ip]-xx_sub
     x2sub_er[ip] = np.sqrt(x2cor_er[ip]**2+xx_er**2)
-#------------------------------------------------------------------------------
-#     x^3(0)x^3(t) correlator                                                
-#------------------------------------------------------------------------------
-
 file16.write('\n')
 file16.write(' <x^2(0)x^2(t)> correlation function\n')
-file27.write('#<x^2(0)x^2(t)> correlation function\n')      
-for ip in range(1,n_p):
-    dx  = fn.dl(x2sub_av[ip-1], x2sub_av[ip],a)
-    dxe = fn.dle(x2sub_av[ip-1], x2sub_av[ip], x2sub_er[ip-1],x2sub_er[ip],a)
-    file16.write(fs.f555.format(ip*a, x2cor_av[ip-1], x2cor_er[ip-1], dx, dxe))
-    file26.write(fs.f555.format(ip*a, x2cor_av[ip-1], x2cor_er[ip-1], dx, dxe))     
+file26.write(' <x^2(0)x^2(t)> correlation function\n')      
+for ip in range(n_p-1):
+    dx  = fn.dl(x2sub_av[ip], x2sub_av[ip+1],a)
+    dxe = fn.dle(x2sub_av[ip], x2sub_av[ip+1], x2sub_er[ip],x2sub_er[ip+1],a)
+    file16.write(fs.f555.format(ip*a, x2cor_av[ip], x2cor_er[ip], dx, dxe))
+    file26.write(fs.f555.format(ip*a, x2cor_av[ip], x2cor_er[ip], dx, dxe))     
 xx_sub = x2cool_av[n_p-1]
 xx_er  = x2cool_er[n_p-1]
 for ip in range(n_p):
@@ -570,12 +566,12 @@ for ip in range(n_p):
     x2cool_sub_er[ip] = np.sqrt(x2cool_er[ip]**2+xx_er**2)
 file16.write('\n')
 file16.write(' <x^2(0)x^2(t)> cooled correlation function\n')
-file27.write('#<x^2(0)x^2(t)> cooled correlation function\n')
-for ip in range(1,n_p):
-    dx = fn.dl(x2cool_sub_av[ip-1], x2cool_sub_av[ip], a)
-    dxe= fn.dle(x2cool_sub_av[ip-1], x2cool_sub_av[ip], x2cool_sub_er[ip-1], x2cool_sub_er[ip], a)
-    file16.write(fs.f555.format(ip*a, x2cool_av[ip-1], x2cool_er[ip-1], dx, dxe))
-    file27.write(fs.f555.format(ip*a, x2cool_av[ip-1], x2cool_er[ip-1], dx, dxe))
+file27.write(' <x^2(0)x^2(t)> cooled correlation function\n')
+for ip in range(n_p-1):
+    dx = fn.dl(x2cool_sub_av[ip], x2cool_sub_av[ip+1], a)
+    dxe= fn.dle(x2cool_sub_av[ip], x2cool_sub_av[ip+1], x2cool_sub_er[ip], x2cool_sub_er[ip+1], a)
+    file16.write(fs.f555.format(ip*a, x2cool_av[ip], x2cool_er[ip], dx, dxe))
+    file27.write(fs.f555.format(ip*a, x2cool_av[ip], x2cool_er[ip], dx, dxe))
     
 #------------------------------------------------------------------------------
 #     x^3(0)x^3(t) correlator                                                
@@ -583,20 +579,20 @@ for ip in range(1,n_p):
 
 file16.write('\n')
 file16.write(' <x^3(0)x^3(t)> correlation function\n')
-file28.write('#<x^3(0)x^3(t)> correlation function\n')      
-for ip in range(1,n_p):
-    dx  = fn.dl(x3cor_av[ip-1], x3cor_av[ip],a)
-    dxe = fn.dle(x3cor_av[ip-1],x3cor_av[ip], x3cor_er[ip-1],x3cor_er[ip],a)
-    file16.write(fs.f555.format(ip*a,x3cor_av[ip-1],x3cor_er[ip-1],dx,dxe))
-    file28.write(fs.f555.format(ip*a,x3cor_av[ip-1],x3cor_er[ip-1],dx,dxe))     
+file28.write(' <x^3(0)x^3(t)> correlation function\n')      
+for ip in range(n_p-1):
+    dx  = fn.dl(x3cor_av[ip], x3cor_av[ip+1],a)
+    dxe = fn.dle(x3cor_av[ip],x3cor_av[ip+1], x3cor_er[ip],x3cor_er[ip+1],a)
+    file16.write(fs.f555.format(ip*a,x3cor_av[ip],x3cor_er[ip],dx,dxe))
+    file28.write(fs.f555.format(ip*a,x3cor_av[ip],x3cor_er[ip],dx,dxe))     
 file16.write('\n')
 file16.write(' <x^3(0)x^3(t)> cooled correlation function\n')
-file29.write('#<x^3(0)x^3(t)> cooled correlation function\n')
-for ip in range(1,n_p):
-    dx  = fn.dl(x3cool_av[ip-1],x3cool_av[ip],a)
-    dxe = fn.dle(x3cool_av[ip-1],x3cool_av[ip], x3cool_er[ip-1],x3cool_er[ip],a)
-    file16.write(fs.f555.format(ip*a,x3cool_av[ip-1],x3cool_er[ip-1],dx,dxe))
-    file29.write(fs.f555.format(ip*a,x3cool_av[ip-1],x3cool_er[ip-1],dx,dxe))
+file29.write(' <x^3(0)x^3(t)> cooled correlation function\n')
+for ip in range(n_p-1):
+    dx  = fn.dl(x3cool_av[ip],x3cool_av[ip+1],a)
+    dxe = fn.dle(x3cool_av[ip],x3cool_av[ip+1], x3cool_er[ip-1],x3cool_er[ip+1],a)
+    file16.write(fs.f555.format(ip*a,x3cool_av[ip],x3cool_er[ip],dx,dxe))
+    file29.write(fs.f555.format(ip*a,x3cool_av[ip],x3cool_er[ip],dx,dxe))
 
 #------------------------------------------------------------------------------
 #     instanton density                                                      
@@ -604,13 +600,13 @@ for ip in range(1,n_p):
 
 file16.write('\n')
 file16.write(' number of instantons\n')
-file23.write('#number of instantons\n')
+file23.write(' number of instantons\n')
 for ic in range(icool+1):
     file16.write(fs.f556.format(ic, nin_av[ic], nin_er[ic], de*tmax, de2*tmax)) 
     file23.write(fs.f556.format(ic, nin_av[ic], nin_er[ic], de*tmax, de2*tmax))       
 file16.write('\n')
 file16.write(' action vs cooling sweeps\n')
-file24.write('#action vs cooling sweeps\n')
+file24.write(' action vs cooling sweeps\n')
 for ic in range(icool+1):    
     sin = nin_av[ic]*s0
     file16.write(fs.f556.format(ic,nin_av[ic], nin_er[ic], de*tmax, de2*tmax)) 
@@ -619,7 +615,7 @@ file16.write('\n')
 file16.write(' action per instanton, S_0 = ')
 file16.write(str(4.0/3.0*f**3))
 file16.write('\n')
-file25.write('#action vs cooling sweeps\n')
+file25.write(' action vs cooling sweeps\n')
 file25.write(str(4.0/3.0*f**3))
 file25.write('\n')
  
