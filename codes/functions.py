@@ -122,10 +122,10 @@ def inst(f, a, delx, n, x, xi, xa, z):
     na = 0
     nin= 0
     ix = int(np.sign(x[0]))
-    for i in range(1,n):
+    for i in range(2,n+1):
         tau = a * i
         ixp = int(np.sign(x[i]))
-        if ixp > ix:
+        if ixp > ix:          
             xi[ni] = tau
             z[nin] = tau
             ni  += 1
