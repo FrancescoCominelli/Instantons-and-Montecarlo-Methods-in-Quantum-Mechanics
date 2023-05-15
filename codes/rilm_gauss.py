@@ -110,9 +110,9 @@ stzhist= 4.01/float(nzhist)
 #------------------------------------------------------------------------------
 #     initialize                                                  
 #------------------------------------------------------------------------------
-x      =  np.zeros(n)
+x      =  np.zeros(n+1)
 z      =  np.zeros(n)  
-x_hot  =  np.zeros(n)
+x_hot  =  np.zeros(n+1)
 w      =  np.zeros(n)
 ix     = np.zeros(nxhist)
 iz     = np.zeros(nzhist)
@@ -178,9 +178,252 @@ nhit = 0
 nacc = 0
 
 #------------------------------------------------------------------------------
-#   Read input values from console
+#   loop over configs
+#------------------------------------------------------------------------------
+for i in tqdm(range(nmc)):
+    nconf += 1
+    fn.setup(nin, z, tmax, seed)
+    
+    #------------------------------------------------------------------------------
+    #   new configuration
+    #------------------------------------------------------------------------------
+    for j in range(n):
+        xx = a*j
+        x[j] = fn.xsum(nin, z, f, xx)
+    x[n-1]= x[0]
+    x[n]  = x[1]
+    #--------------------------------------------------------------------------
+    #   distribution of instantons                                             
+    #--------------------------------------------------------------------------
+    for ii in range(1, nin, 2):
+        if ii == 1:
+            zm = z[nin-1] - tmax
+        else:
+            zm = z[ii-2]
+        z0 = z[ii-1]
+        zp = z[ii]
+        zia = min([abs(zp-z0), abs(z0-zm)])
+        fn.histogramarray(zia, 0.0, stzhist, nzhist, iz)
+    
+    #------------------------------------------------------------------------------
+    #   calculate action etc.
+    #------------------------------------------------------------------------------
+    stot = 0.0
+    ttot = 0.0
+    tvtot= 0.0
+    vtot = 0.0  
+    for j in range(n):
+        xp = (x[j+1]-x[j])/a
+        t  = 1.0/4.0*xp**2
+        v  = (x[j]**2-f**2)**2
+        tv = 2.0*x[j]**2*(x[j]**2-f**2)
+        s  = a*(t+v)
+        ttot += a*t
+        vtot += a*v
+        tvtot+= a*tv
+        stot += s
+    file18.write(fs.f551.format(i,stot,ttot,vtot,stot/(nin*s0)))
+    '''
+    if (i % kp == 0):
+        print()
+    '''
+    #------------------------------------------------------------------------------
+    #   heat configuration: start from classical path  
+    #------------------------------------------------------------------------------
+    for k in range(n):
+        x_hot[k] = x[k]
+        w[k] = -4.0*(f**2-3.0*x[k]**2)
+    
+    #------------------------------------------------------------------------------
+    #   heating sweeps   
+    #------------------------------------------------------------------------------
+    for ih in range(nheat):
+        for j in range(1, n):
+            xpm = (x_hot[j]-x_hot[j-1])/a
+            xpp = (x_hot[j+1]-x_hot[j])/a
+            t = 1.0/4.0*(xpm**2+xpp**2)
+            v = 0.5*w[j]*(x_hot[j]-x[j])**2
+            sold = a*(t+v)
+         
+            #------------------------------------------------------------------------------
+            #   heating sweeps   
+            #------------------------------------------------------------------------------
+            xmin = abs(f*np.tanh(f*a))
+            if abs(x[j]) < xmin:
+                continue
+           
+            #------------------------------------------------------------------------------
+            #   update  
+            #------------------------------------------------------------------------------
+            xnew = x_hot[j] + delx*(2.0*random.random()-1.0)
+
+            xpm = (xnew-x_hot[j-1])/a
+            xpp = (x_hot[j+1]-xnew)/a
+            t = 1.0/4.0*(xpm**2+xpp**2)
+            v = 0.5*w[j]*(xnew-x[j])**2
+            snew = a*(t+v)
+            #------------------------------------------------------------------------------
+            #   accept/reject  
+            #------------------------------------------------------------------------------
+            dels  = snew-sold
+            dels  = min(dels,70.0)
+            dels  = max(dels,-70.0)
+            if np.exp(-dels) > random.random():
+                x[j]  = xnew
+                nacc += 1
+            
+        x[n-1]= x[0]
+        x[n]  = x[1]
+    #------------------------------------------------------------------------------
+    #   configuration  
+    #------------------------------------------------------------------------------
+    if i % kp == 0:
+        file17.write('configuraton: ')
+        file17.write(str(i))
+        file17.write(fs.f222.format(k*a,x_hot[k]))    
+    
+    #------------------------------------------------------------------------------
+    #   include in sample  
+    #------------------------------------------------------------------------------
+    stot_sum += stot
+    stot2_sum+= stot**2
+    vtot_sum += vtot
+    vtot2_sum+= vtot**2
+    ttot_sum += ttot
+    ttot2_sum+= ttot**2
+    tvir_sum += tvtot
+    tvir2_sum+= tvtot**2
+    
+    for k in range(n):
+        fn.histogramarray(x_hot[k], xhist_min, stxhist, nxhist, ix)
+        x_sum  += x[k]
+        x2_sum += x[k]**2
+        x4_sum += x[k]**4
+        x8_sum += x[k]**8
+    
+    #--------------------------------------------------------------------------
+    #     correlation function                                                   
+    #--------------------------------------------------------------------------
+    for ic in range(nc):
+        ncor += 1 
+        ip0  = int((n-n_p)*random.random()) 
+        x0   = x_hot[ip0] 
+        for ip in range(n_p):
+            x1 = x_hot[ip0+ip]
+            xcor  = x0*x1
+            x2cor = xcor**2
+            x3cor = xcor**3   
+            xcor_sum[ip]   += xcor
+            xcor2_sum[ip]  += xcor**2
+            x2cor_sum[ip]  += x2cor
+            x2cor2_sum[ip] += x2cor**2
+            x3cor_sum[ip]  += x3cor
+            x3cor2_sum[ip] += x3cor**2  
+
+#------------------------------------------------------------------------------
+#   averages                                                               
+#------------------------------------------------------------------------------
+stot_av,stot_err = fn.disp(nconf,stot_sum,stot2_sum)
+vtot_av,vtot_err = fn.disp(nconf,vtot_sum,vtot2_sum)
+ttot_av,ttot_err = fn.disp(nconf,ttot_sum,ttot2_sum)
+tvir_av,tvir_err = fn.disp(nconf,tvir_sum,tvir2_sum)
+x_av,x_err       = fn.disp(nconf*n,x_sum,x2_sum)
+x2_av,x2_err     = fn.disp(nconf*n,x2_sum,x4_sum)
+x4_av,x4_err     = fn.disp(nconf*n,x4_sum,x8_sum)
+for ip in range(n_p):
+    xcor_av[ip],xcor_er[ip]   = fn.disp(ncor,xcor_sum[ip],xcor2_sum[ip])
+    x2cor_av[ip],x2cor_er[ip] = fn.disp(ncor,x2cor_sum[ip],x2cor2_sum[ip],)
+    x3cor_av[ip],x3cor_er[ip] = fn.disp(ncor,x3cor_sum[ip],x3cor2_sum[ip],)
+v_av  = vtot_av/tmax
+v_err = vtot_err/tmax
+t_av  = ttot_av/tmax
+t_err = ttot_err/tmax
+tv_av = tvir_av/tmax
+tv_err= tvir_err/tmax
+e_av  = v_av + tv_av
+e_err = np.sqrt(v_err**2 + tv_err**2)
+
+#------------------------------------------------------------------------------
+#   output                                                               
+#------------------------------------------------------------------------------
+file16.write('\n')
+file16.write(fs.f801.format(stot_av, stot_err))
+file16.write(fs.f9902.format(stot_av/float(nin),stot_err/float(nin)))
+file16.write(fs.f9903.format(s0))
+file16.write(fs.f9904.format(stot_av/(nin*s0),stot_err/(nin*s0)))
+file16.write(fs.f802.format(v_av, v_err))
+file16.write(fs.f803.format(t_av, t_err))
+file16.write(fs.f804.format(tv_av, tv_err))
+file16.write(fs.f805.format(e_av, e_err))
+file16.write(fs.f806.format(x_av, x_err))
+file16.write(fs.f807.format(x2_av, x2_err))
+file16.write(fs.f808.format(x4_av, x4_err))
+file16.write('\n')
+
+#------------------------------------------------------------------------------
+#   correlation function, log derivative                                                                  
+#------------------------------------------------------------------------------
+file16.write("x correlation function\n")
+file20.write("          tau       x(tau)      dx(tau)         dlog\n")
+
+for ip in range(n_p-1):
+    dx  = (xcor_av[ip]-xcor_av[ip+1])/xcor_av[ip]/a
+    dxe2 = (xcor_er[ip+1]/xcor_av[ip])**2
+    + (xcor_er[ip]*xcor_av[ip+1]/xcor_av[ip]**2)**2
+    dxe  = np.sqrt(dxe2)/a
+    file16.write(fs.f555.format(ip*a, xcor_av[ip], xcor_er[ip], dx, dxe))
+    file20.write(fs.f555.format(ip*a, xcor_av[ip], xcor_er[ip], dx, dxe))
+
+#------------------------------------------------------------------------------
+#   subtracted x^2 correlation function, log derivative                                                              
+#------------------------------------------------------------------------------
+xx_sub = x2cor_av[n_p-1]
+xx_er  = x2cor_er[n_p-1]
+for ip in range(n_p):
+    x2sub_av[ip] = x2cor_av[ip]-xx_sub
+    x2sub_er[ip] = np.sqrt(x2cor_er[ip]**2+xx_er**2)
+    
+file16.write("x2 correlation function\n")
+file21.write("          tau      x2(tau)     dx2(tau)         dlog\n")
+
+for ip in range(n_p-1):
+    dx  = (x2sub_av[ip]-x2sub_av[ip+1])/x2sub_av[ip]/a
+    dxe2 = (x2sub_er[ip+1]/x2sub_av[ip])**2
+    + (x2sub_er[ip]*x2sub_av[ip+1]/x2sub_av[ip]**2)**2
+    dxe  = np.sqrt(dxe2)/a
+    file16.write(fs.f555.format(ip*a, x2cor_av[ip], x2cor_er[ip], dx, dxe))
+    file21.write(fs.f555.format(ip*a, x2cor_av[ip], x2cor_er[ip], dx, dxe))
+
+#------------------------------------------------------------------------------
+#   x^3 correlation function, log derivative                                                              
 #------------------------------------------------------------------------------
 
+file16.write("x3 correlation function\n")
+file22.write("          tau      x3(tau)     dx3(tau)         dlog\n")
 
+for ip in range(n_p-1):
+    dx  = (x3cor_av[ip]-x3cor_av[ip+1])/x3cor_av[ip]/a
+    dxe2 = (x3cor_er[ip+1]/x3cor_av[ip])**2
+    + (x3cor_er[ip]*x3cor_av[ip+1]/x3cor_av[ip]**2)**2
+    dxe  = np.sqrt(dxe2)/a
+    file16.write(fs.f555.format(ip*a, x3cor_av[ip], x3cor_er[ip], dx, dxe))
+    file22.write(fs.f555.format(ip*a, x3cor_av[ip], x3cor_er[ip], dx, dxe))
 
-
+#------------------------------------------------------------------------------
+#   histograms                                                              
+#------------------------------------------------------------------------------
+file16.write('Z_IA distribtion')
+for i in range(nzhist):
+    xx = (i+0.5)*stzhist
+    file30.write(fs.f222.format(xx, iz[i]))
+    
+fn.plot_histogram(xhist_min, nxhist, ix)
+    
+    
+    
+    
+    
+    
+    
+    
+    
