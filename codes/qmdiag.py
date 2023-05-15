@@ -273,7 +273,7 @@ for il in range(nl+1):
     t  = 1.0/xl
     z  = 1.0
     for i in range(1, ndim):
-        z = z + np.exp(-(e[1]-e[0])*xl)
+        z += np.exp(-(e[i]-e[0])*xl)
     p = t*np.log(z) - e[0]
     file19.write(fs.f333.format(t, xl, p))
 
