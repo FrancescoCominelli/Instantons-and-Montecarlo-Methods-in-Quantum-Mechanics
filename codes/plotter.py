@@ -164,7 +164,7 @@ plt.xlabel('τ')
 plt.ylabel('d[log<xⁿ(0)xⁿ(τ)>]/dτ')
 
 plt.show()
-'''
+
 #------------------------------------------------------------------------------
 #   FIG. 2: Typical euclidean path obtained in a Monte Carlo simulation of the 
 #   discretized euclidean action of the double well potential for  = 1.4.
@@ -176,9 +176,9 @@ with open('Data/qmcool/config.dat', 'r') as file:
 start_line = None
 end_line   = None
 for i, line in enumerate(lines):
-    if line.startswith('configuration: 500'):
+    if line.startswith('configuration: 120'):
         start_line = i
-    elif line.startswith('configuration: 501'):
+    elif line.startswith('configuration: 130'):
         end_line = i
         break
 data_lines = lines[start_line+1: end_line]
@@ -198,9 +198,9 @@ with open('Data/qmcool/coolconfig.dat', 'r') as file:
 start_line = None
 end_line   = None
 for i, line in enumerate(lines):
-    if line.startswith('configuration: 500'):
+    if line.startswith('configuration: 120'):
         start_line = i
-    elif line.startswith('configuration: 510'):
+    elif line.startswith('configuration: 130'):
         end_line = i
         break
 data_lines = lines[start_line+1: end_line]
@@ -218,7 +218,7 @@ plt.ylabel('x')
 plt.legend()
 
 plt.show()
-'''
+
 #------------------------------------------------------------------------------
 #   FIG. 5: Free energy F = −T log(Z) of the anharmonic oscillator as a 
 #   function of the temperature t = i/b
