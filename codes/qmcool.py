@@ -258,7 +258,6 @@ nconf     = 0
 ncor      = 0
 ncoolconf = 0
 ncoolcor  = 0
-
 for i in tqdm(range(nmc)):
     nconf += 1
     if i == neq:
@@ -317,9 +316,8 @@ for i in tqdm(range(nmc)):
         if np.exp(-dels) > random.random():
             x[j]  = xnew
             nacc += 1
-    x[n-1]= x[0]
-    x[n]  = x[1]
-    		
+    x[0] = x[n-1]
+    x[n] = x[1]
     #--------------------------------------------------------------------------
     #   calculate action and other things                                                  
     #--------------------------------------------------------------------------
@@ -333,16 +331,18 @@ for i in tqdm(range(nmc)):
         v  = (x[j]**2-f**2)**2
         tv = 2.0*x[j]**2*(x[j]**2-f**2)
         s  = a*(t+v)
-        xs[j] = x[j]
+        c  = x[j]
+        xs[j]  = c
         ttot  += a*t
         vtot  += a*v
         tvtot += a*tv
         stot  += s
-    #write on a txt file
+    #xs = x.copy()
     if i <= 10000:
         file18.write(fs.f444.format(i,stot,ttot,vtot))
-    xs[n-1]= xs[0]
-    xs[n]  = xs[1]
+    xs[0] = xs[n-1]
+    xs[n] = xs[1]
+    
     #--------------------------------------------------------------------------
     #     populate histogram include in sample                                                     
     #--------------------------------------------------------------------------
@@ -381,12 +381,12 @@ for i in tqdm(range(nmc)):
             x2cor_sum[ip]  += x2cor
             x2cor2_sum[ip] += x2cor**2
             x3cor_sum[ip]  += x3cor
-            x3cor2_sum[ip] += x3cor**2
+            x3cor2_sum[ip] += x3cor**2     
             
     #--------------------------------------------------------------------------
     #   cooling and topological charge                                         
     #--------------------------------------------------------------------------
-    
+     
     if i % kp == 0:
         ncoolconf += 1
         ni, na = fn.inst(f, a, delx, n, xs, xi, xa, z)
@@ -405,7 +405,7 @@ for i in tqdm(range(nmc)):
             nin2_sum[icool]  += nin**2
             scool_sum[icool] += ss
             scool2_sum[icool]+= ss**2
-            
+          
         #----------------------------------------------------------------------
         #     cooled configuration: instanton distribution                            
         #----------------------------------------------------------------------
@@ -441,6 +441,7 @@ for i in tqdm(range(nmc)):
                 x2cool2_sum[ip] += x2cor**2
                 x3cool_sum[ip]  += x3cor
                 x3cool2_sum[ip] += x3cor**2
+    
     #--------------------------------------------------------------------------
     #     write configuration                                                    
     #--------------------------------------------------------------------------
@@ -457,9 +458,9 @@ for i in tqdm(range(nmc)):
         file20.write('configuration: ')
         file20.write(str(i))
         file20.write('\n')
-        for k in range(n):
-            file17.write(fs.f222.format(k*a, x[k]))
-            file20.write(fs.f222.format(k*a, xs[k]))
+        for i in range(n):
+            file17.write(fs.f222.format(i*a, x[i]))
+            file20.write(fs.f222.format(i*a, xs[i]))
 #------------------------------------------------------------------------------
 #   averages
 #------------------------------------------------------------------------------
