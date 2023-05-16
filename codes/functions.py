@@ -122,10 +122,10 @@ def inst(f, a, delx, n, x, xi, xa, z):
     na = 0
     nin= 0
     ix = int(np.sign(x[0]))
-    for i in range(2,n+1):
+    for i in range(1,n):
         tau = a * i
         ixp = int(np.sign(x[i]))
-        if ixp > ix:          
+        if ixp > ix:
             xi[ni] = tau
             z[nin] = tau
             ni  += 1
@@ -160,7 +160,7 @@ def cool(f,a,delx, seed, xs, n, ncool):
     random.seed(seed)
     nhit = 10
     delxp= 0.1*delx
-    for k in range(ncool+1):
+    for k in range(ncool):
         for i in range(1,n):
             xpm = (xs[i]-xs[i-1])/a
             xpp = (xs[i+1]-xs[i])/a
