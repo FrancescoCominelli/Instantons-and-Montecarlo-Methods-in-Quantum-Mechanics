@@ -318,6 +318,7 @@ for i in tqdm(range(nmc)):
             nacc += 1
     x[0] = x[n-1]
     x[n] = x[1]
+    
     #--------------------------------------------------------------------------
     #   calculate action and other things                                                  
     #--------------------------------------------------------------------------
@@ -331,15 +332,15 @@ for i in tqdm(range(nmc)):
         v  = (x[j]**2-f**2)**2
         tv = 2.0*x[j]**2*(x[j]**2-f**2)
         s  = a*(t+v)
-        c  = x[j]
-        xs[j]  = c
+        xs[j]  = x[j]
         ttot  += a*t
         vtot  += a*v
         tvtot += a*tv
         stot  += s
-    #xs = x.copy()
+    '''    
     if i <= 10000:
         file18.write(fs.f444.format(i,stot,ttot,vtot))
+    '''
     xs[0] = xs[n-1]
     xs[n] = xs[1]
     
@@ -361,7 +362,7 @@ for i in tqdm(range(nmc)):
         x2_sum += x[k]**2
         x4_sum += x[k]**4
         x8_sum += x[k]**8
-        
+ 
     #--------------------------------------------------------------------------
     #     correlation function                                                   
     #--------------------------------------------------------------------------
@@ -385,8 +386,7 @@ for i in tqdm(range(nmc)):
             
     #--------------------------------------------------------------------------
     #   cooling and topological charge                                         
-    #--------------------------------------------------------------------------
-     
+    #-------------------------------------------------------------------------- 
     if i % kp == 0:
         ncoolconf += 1
         ni, na = fn.inst(f, a, delx, n, xs, xi, xa, z)
@@ -405,7 +405,6 @@ for i in tqdm(range(nmc)):
             nin2_sum[icool]  += nin**2
             scool_sum[icool] += ss
             scool2_sum[icool]+= ss**2
-          
         #----------------------------------------------------------------------
         #     cooled configuration: instanton distribution                            
         #----------------------------------------------------------------------
@@ -441,7 +440,7 @@ for i in tqdm(range(nmc)):
                 x2cool2_sum[ip] += x2cor**2
                 x3cool_sum[ip]  += x3cor
                 x3cool2_sum[ip] += x3cor**2
-    
+        
     #--------------------------------------------------------------------------
     #     write configuration                                                    
     #--------------------------------------------------------------------------
@@ -660,7 +659,6 @@ file27.close()
 file28.close()
 file29.close()
 file30.close()
-
 
 
 
