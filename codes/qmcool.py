@@ -103,7 +103,7 @@ nc    = 5
 #write every kth config
 kp2   = 10
 #number of cooling sweeps (ncool<5000)
-ncool = 10      
+ncool = 10     
 tmax  = n*a
 
 #------------------------------------------------------------------------------
@@ -397,7 +397,25 @@ for i in tqdm(range(nmc)):
         scool_sum[0] += ss
         scool2_sum[0]+= ss**2
         for icool in range(1,ncool+1):
-            fn.cool(f, a, delx, seed, xs, n, ncool)
+            #xs = fn.cool(f, a, delx, seed, xs, n, ncool)  
+            nhit = 10
+            delxp= 0.1*delx
+            for k in range(ncool):
+                for w in range(1,n):
+                    xpm = (xs[w]-xs[w-1])/a
+                    xpp = (xs[w+1]-xs[w])/a
+                    t = 1.0/4.0*(xpm**2+xpp**2)
+                    v = (xs[w]**2-f**2)**2
+                    sold = a*(t+v)
+                    for j in range(nhit):          
+                        xnew = xs[w] + delxp*(2.0*random.random()-1.0)
+                        xpm = (xnew-xs[w-1])/a
+                        xpp = (xs[w+1]-xnew)/a
+                        t = 1.0/4.0*(xpm**2+xpp**2)
+                        v = (xnew**2-f**2)**2
+                        snew = a*(t+v)
+                        if snew < sold :
+                            xs[w]=xnew                          
             ni, na = fn.inst(f, a, delx, n, xs, xi, xa, z)
             ss, ts, vs = fn.act(f, a, delx, n, xs)
             nin = ni + na
@@ -659,7 +677,6 @@ file27.close()
 file28.close()
 file29.close()
 file30.close()
-
 
 
 
