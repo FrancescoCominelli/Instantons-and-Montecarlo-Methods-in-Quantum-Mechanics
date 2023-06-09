@@ -85,7 +85,7 @@ nmc    = re.search(r'nmc\s*=\s*(\d+)', contents).group(1)
 delx   = re.search(r'delx\s*=\s*(\d+\.\d+)', contents).group(1)
 n_p    = re.search(r'n_p\s*=\s*(\d+)', contents).group(1)
 kp     = re.search(r'kp\s*=\s*(\d+)', contents).group(1)
-
+seed   = re.search(r'seed\s*=\s*(\d+)', contents).group(1)
 
 # convert the values to integers
 f      = float(f)   #separation of wells f (f=1.4)
@@ -97,6 +97,7 @@ nmc    = int(nmc)   #monte carlo sweeps
 delx   = float(delx)#update x (delx)
 n_p    = int(n_p)   #number of points in correlator
 kp     = int(kp)    #number of sweeps between cooling
+seed   = int(seed)
 
 #number of measurements per configuration
 nc    = 5
@@ -106,18 +107,6 @@ kp2   = 10
 ncool = 10     
 tmax  = n*a
 
-#------------------------------------------------------------------------------
-#   Read input values from console
-#------------------------------------------------------------------------------
-
-#while True:
-#   try:
-#       seed = int(input("Enter the random seed: ")) #change to int() if expecting int-point input
-#       break # Break out of the loop if input is numeric
-#   except ValueError:
-#       print("Invalid input. Please enter a number.")
-seed = 12345
-random.seed(seed)
 #------------------------------------------------------------------------------
 #     echo input parameters                                                  
 #------------------------------------------------------------------------------
@@ -677,7 +666,4 @@ file27.close()
 file28.close()
 file29.close()
 file30.close()
-
-
-
 
