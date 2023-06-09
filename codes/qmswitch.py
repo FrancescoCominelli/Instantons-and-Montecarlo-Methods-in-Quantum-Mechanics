@@ -33,17 +33,6 @@ from tqdm import tqdm
 #------------------------------------------------------------------------------
 
 #------------------------------------------------------------------------------
-#   Read input values from console
-#------------------------------------------------------------------------------
-
-while True:
-    try:
-        seed = int(input("Enter the random seed: ")) #change to int() if expecting int-point input
-        break # Break out of the loop if input is numeric
-    except ValueError:
-        print("Invalid input. Please enter a number.")
-
-#------------------------------------------------------------------------------
 #   set the values
 #------------------------------------------------------------------------------
 # open the file for reading
@@ -62,6 +51,7 @@ delx   = re.search(r'delx\s*=\s*(\d+\.\d+)', contents).group(1)
 kp     = re.search(r'kp\s*=\s*(\d+)', contents).group(1)
 w0     = re.search(r'w0\s*=\s*(\d+\.\d+)', contents).group(1)
 nalpha = re.search(r'nalpha\s*=\s*(\d+)', contents).group(1)
+seed   = re.search(r'seed\s*=\s*(\d+)', contents).group(1)
 
 # convert the values to integers
 f      = float(f)
@@ -74,6 +64,7 @@ delx   = float(delx)
 kp     = int(kp)
 w0     = float(w0)
 nalpha = int(nalpha)
+seed   = int(seed)
 
 w      = w0
 dalpha = 1.0/float(nalpha)
@@ -211,8 +202,8 @@ for ialpha in tqdm(range(2 * nalpha + 1)):
             if np.exp(-dels) > random.random():
                 x[j]  = xnew
                 nacc += 1
-            x[n-1] = x[0]
-            x[n]   = x[1]
+        x[n-1] = x[0]
+        x[n]   = x[1]
 
         #----------------------------------------------------------------------
         #   calculate action etc.                                                  
