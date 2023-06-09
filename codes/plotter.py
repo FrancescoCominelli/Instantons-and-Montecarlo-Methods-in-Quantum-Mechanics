@@ -239,6 +239,13 @@ plt.ylim(-2.5, -1)
 plt.xlabel('T')
 plt.ylabel('F')
 
+#data from qmswitch.py runned 6 times with different n
+y     = np.array([-2.24413, -2.23835, -2.22145, -2.10050, -1.94522,       -1.74119])
+y_err = np.array([ 0.02725,  0.05859,  0.03459,  0.05179,  0.03288,        0.02147])
+x     = np.array([ 0.2,      0.025,    0.1,      0.5,      0.740740740741, 1.0])
+plt.errorbar(x, y, yerr=y_err, fmt='s', markerfacecolor='none',
+             markeredgecolor = 'blue',markersize=8, capsize=5)
+
 plt.show()
 
 #------------------------------------------------------------------------------
@@ -376,5 +383,4 @@ plt.xlabel('τ')
 plt.ylabel('d[log<xⁿ(0)xⁿ(τ)>]/dτ')
 
 plt.show()
-
 
