@@ -42,18 +42,6 @@ from tqdm import tqdm
 #------------------------------------------------------------------------------
 
 #------------------------------------------------------------------------------
-#   Read input values from console
-#------------------------------------------------------------------------------
-
-while True:
-    try:
-        seed = int(input("Enter the random seed: ")) #change to int() if expecting int-point input
-        break # Break out of the loop if input is numeric
-    except ValueError:
-        print("Invalid input. Please enter a number.")
-  
-
-#------------------------------------------------------------------------------
 #   set the values
 #------------------------------------------------------------------------------
 # open the file for reading
@@ -71,6 +59,7 @@ nmc    = re.search(r'nmc\s*=\s*(\d+)', contents).group(1)
 n_p    = re.search(r'n_p\s*=\s*(\d+)', contents).group(1)
 delx   = re.search(r'delx\s*=\s*(\d+\.\d+)', contents).group(1)
 kp     = re.search(r'kp\s*=\s*(\d+)', contents).group(1)
+seed   = re.search(r'seed\s*=\s*(\d+)', contents).group(1)
 
 # convert the values to integers
 f      = float(f)
@@ -82,6 +71,7 @@ nmc    = int(nmc)
 delx   = float(delx)
 kp     = int(kp)
 n_p    = int(n_p)
+seed   = int(seed)
 
 
 nc     = 5
