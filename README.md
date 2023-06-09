@@ -7,9 +7,10 @@
 This program is written in python and is made up by:
   - 8 separate codes, every one with a specific issue needed to print the results of the calculations on some txt files;
  - a file to insert all the parameters needed to make the 8 codes work called: `parameters.py`;
- - a code in wich are present all the function which are needed to make the 8 codes run, called: `functions.py`;
+ - a code in which are present all the function which are needed to make the 8 codes run, called: `functions.py`;
  - a code to plot the results contained in the txt files, called: `plotter.py`;
 - a code which specifies the format to print values on the txt files, called: `format_strings.py`.
+
 The 8 codes which produce various txt files are the following:
  1. `qmdiag.py` ;
  2. `qm.py`;
