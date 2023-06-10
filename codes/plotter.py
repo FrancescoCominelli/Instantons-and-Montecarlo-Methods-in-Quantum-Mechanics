@@ -1,5 +1,19 @@
 import numpy as np
 import matplotlib.pyplot as plt
+import re
+#------------------------------------------------------------------------------
+#   Read useful values from parameters.txt
+#------------------------------------------------------------------------------
+with open('parameters.txt', 'r') as file:
+    # read the contents of the file
+    contents = file.read()
+   
+# search for the values of f and a using regular expressions
+n      = re.search(r'n\s*=\s*(\d+)', contents).group(1)
+a      = re.search(r'a\s*=\s*(\d+\.\d+)', contents).group(1)
+
+n      = int(n)
+a      = float(a)
 
 #------------------------------------------------------------------------------
 #   FIG. 3: Probability distribution in the double well potential for f = 1.4.
@@ -164,7 +178,7 @@ plt.xlabel('τ')
 plt.ylabel('d[log<xⁿ(0)xⁿ(τ)>]/dτ')
 
 plt.show()
-
+'''
 #------------------------------------------------------------------------------
 #   FIG. 2: Typical euclidean path obtained in a Monte Carlo simulation of the 
 #   discretized euclidean action of the double well potential for  = 1.4.
@@ -218,7 +232,7 @@ plt.ylabel('x')
 plt.legend()
 
 plt.show()
-
+'''
 #------------------------------------------------------------------------------
 #   FIG. 5: Free energy F = −T log(Z) of the anharmonic oscillator as a 
 #   function of the temperature t = i/b
@@ -383,4 +397,53 @@ plt.xlabel('τ')
 plt.ylabel('d[log<xⁿ(0)xⁿ(τ)>]/dτ')
 
 plt.show()
+
+#------------------------------------------------------------------------------
+#   FIG. 9: Quantum mechanical paths which appear in a Monte-Carlo calculation
+#   of the one-instanton partition function in the double well potential.
+#------------------------------------------------------------------------------
+for i in range(4):
+    with open('Data/qmidens/idens_conf.dat', 'r') as file:
+        lines = file.readlines()[i*n+1:(i+1)*n]
+
+    column1 = [float(line.split()[0]) for line in lines]
+    column2 = [float(line.split()[1]) for line in lines]
+
+    x     = np.array(column1)
+    y     = np.array(column2)
+    if i==0:
+        plt.plot(x, y, color = 'black', linewidth = 0.8)
+    else:
+        plt.plot(x, y, color = 'green', linewidth = 0.8)
+for i in range(4):
+    with open('Data/qmidens/vac_conf.dat', 'r') as file:
+        lines = file.readlines()[i*n+1:(i+1)*n]
+
+    column1 = [float(line.split()[0]) for line in lines]
+    column2 = [float(line.split()[1]) for line in lines]
+
+    x     = np.array(column1)
+    y     = np.array(column2)
+    if i==0:
+        plt.plot(x, y, color = 'black', linewidth = 0.8)
+    else:
+        plt.plot(x, y, color = 'blue', linewidth = 0.8)
+
+plt.xlabel('τ')
+plt.ylabel('X')
+plt.xlim(0, n*a-a)
+
+plt.show()
+
+
+
+
+
+
+
+
+
+
+
+
 
