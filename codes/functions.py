@@ -161,21 +161,21 @@ def cool(f,a,delx, seed, xs, n, ncool):
     nhit = 10
     delxp= 0.1*delx
     for k in range(ncool):
-        for i in range(1,n):
-            xpm = (xs[i]-xs[i-1])/a
-            xpp = (xs[i+1]-xs[i])/a
+        for w in range(1,n):
+            xpm = (xs[w]-xs[w-1])/a
+            xpp = (xs[w+1]-xs[w])/a
             t = 1.0/4.0*(xpm**2+xpp**2)
-            v = (xs[i]**2-f**2)**2
+            v = (xs[w]**2-f**2)**2
             sold = a*(t+v)
             for j in range(nhit):          
-                xnew = xs[i] + delxp*(2.0*random.random()-1.0)
-                xpm = (xnew-xs[i-1])/a
-                xpp = (xs[i+1]-xnew)/a
+                xnew = xs[w] + delxp*(2.0*random.random()-1.0)
+                xpm = (xnew-xs[w-1])/a
+                xpp = (xs[w+1]-xnew)/a
                 t = 1.0/4.0*(xpm**2+xpp**2)
                 v = (xnew**2-f**2)**2
                 snew = a*(t+v)
                 if snew < sold :
-                    xs[i]=xnew
+                    xs[w]=xnew 
     return
 
 #------------------------------------------------------------------------------
