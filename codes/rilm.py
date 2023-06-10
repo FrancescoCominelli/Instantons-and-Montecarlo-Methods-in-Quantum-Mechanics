@@ -42,14 +42,14 @@ import re
 #------------------------------------------------------------------------------
 #   open files
 #------------------------------------------------------------------------------
-file16 = open('Data/rilm.dat',       'w')
-file17 = open('Data/config.dat',     'w')
-file18 = open('Data/trajectory.dat', 'w')
-file19 = open('Data/qmdist.dat',     'w')
-file20 = open('Data/rcor.dat',       'w')
-file21 = open('Data/rcor2.dat',      'w')
-file22 = open('Data/rcor3.dat',      'w') 
-file30 = open('Data/zdist.dat',      'w')
+file16 = open('Data/rilm/rilm.dat',       'w')
+file17 = open('Data/rilm/config.dat',     'w')
+file18 = open('Data/rilm/trajectory.dat', 'w')
+file19 = open('Data/rilm/qmdist.dat',     'w')
+file20 = open('Data/rilm/rcor.dat',       'w')
+file21 = open('Data/rilm/rcor2.dat',      'w')
+file22 = open('Data/rilm/rcor3.dat',      'w') 
+file30 = open('Data/rilm/zdist.dat',      'w')
 
 #------------------------------------------------------------------------------
 #   input parameters                                                                 
@@ -69,7 +69,7 @@ nmc    = re.search(r'nmc\s*=\s*(\d+)', contents).group(1)
 delx   = re.search(r'delx\s*=\s*(\d+\.\d+)', contents).group(1)
 n_p    = re.search(r'n_p\s*=\s*(\d+)', contents).group(1)
 kp     = re.search(r'kp\s*=\s*(\d+)', contents).group(1)
-
+seed   = re.search(r'seed\s*=\s*(\d+)', contents).group(1)
 
 # convert the values to integers
 f      = float(f)   #separation of wells f (f=1.4)
@@ -81,6 +81,8 @@ nmc    = int(nmc)   #monte carlo sweeps
 delx   = float(delx)#update x (delx)
 n_p    = int(n_p)   #number of points in correlator
 kp     = int(kp)    #number of sweeps between cooling
+seed   = int(seed)
+
 
 nin = 10
 nc = 5
@@ -95,21 +97,27 @@ xnin2 = dens2*tmax
 nexp  = int(xnin+0.5)
 nexp2 = int(xnin2+0.5)
 
-x  =  np.zeros(n)
-z  =  np.zeros(n)     
-xcor_av    =  np.zeros(n_p)
-xcor_er    =  np.zeros(n_p)
-x2cor_av   =  np.zeros(n_p)
-x2cor_er   =  np.zeros(n_p)
-x3cor_av   =  np.zeros(n_p)
-x3cor_er   =  np.zeros(n_p)
-x2sub_av   =  np.zeros(n_p)
-x2sub_er   =  np.zeros(n_p)      
+x  =  np.zeros(n+1)
+z  =  np.zeros(nin+1)     
+xcor_av    = np.zeros(n_p)
+xcor_er    = np.zeros(n_p)
+x2cor_av   = np.zeros(n_p)
+x2cor_er   = np.zeros(n_p)
+x3cor_av   = np.zeros(n_p)
+x3cor_er   = np.zeros(n_p)
+x2sub_av   = np.zeros(n_p)
+x2sub_er   = np.zeros(n_p)   
+xcor_sum   = np.zeros(n_p)
+xcor2_sum  = np.zeros(n_p)
+x2cor_sum  = np.zeros(n_p)
+x2cor2_sum = np.zeros(n_p)
+x3cor_sum  = np.zeros(n_p)
+x3cor2_sum = np.zeros(n_p)   
 #------------------------------------------------------------------------------
 #     echo input parameters                                                  
 #------------------------------------------------------------------------------
-file16.write('qm rilm 1.0')   
-file16.write('-----------')   
+file16.write('qm rilm 1.0\n')   
+file16.write('-----------\n')   
 file16.write(fs.f101.format(f,n,a)) 
 file16.write(fs.f102.format(nin,nmc)) 
 file16.write(fs.f103.format(n_p,nc)) 
@@ -127,18 +135,6 @@ nzhist = 40
 stzhist= 4.01/float(nzhist)
 
 #------------------------------------------------------------------------------
-#   Read input values from console
-#------------------------------------------------------------------------------
-
-#while True:
-#   try:
-#       seed = int(input("Enter the random seed: ")) #change to int() if expecting int-point input
-#       break # Break out of the loop if input is numeric
-#   except ValueError:
-#       print("Invalid input. Please enter a number.")
-seed = -1234
-random.seed(seed)
-#------------------------------------------------------------------------------
 #     clear summation arrays                                                 
 #------------------------------------------------------------------------------
 
@@ -154,13 +150,6 @@ x_sum     = 0.0
 x2_sum    = 0.0
 x4_sum    = 0.0
 x8_sum    = 0.0
-
-xcor_sum   = np.zeros(n_p)
-xcor2_sum  = np.zeros(n_p)
-x2cor_sum  = np.zeros(n_p)
-x2cor2_sum = np.zeros(n_p)
-x3cor_sum  = np.zeros(n_p)
-x3cor2_sum = np.zeros(n_p)
 
 ix = np.zeros(nxhist)
 iz = np.zeros(nzhist)
@@ -181,20 +170,60 @@ for i in tqdm(range(nmc)):
     for j in range(n):
         xx = a*j
         x[j] = fn.xsum(nin, z, f, xx)
-        x[n-1]= x[0]
-        x     = np.append(x, x[1])
+    x[0] = x[n-1]
+    x[n] = x[1]
     #--------------------------------------------------------------------------
     #   distribution of instantons                                             
     #--------------------------------------------------------------------------
     for ii in range(1, nin, 2):
         if ii == 1:
-            zm = z[nin-1] - tmax
+            zm = z[nin] - tmax
         else:
             zm = z[ii-2]
         z0 = z[ii-1]
         zp = z[ii]
         zia = min([abs(zp-z0), abs(z0-zm)])
         fn.histogramarray(zia, 0.0, stzhist, nzhist, iz)
+
+    #--------------------------------------------------------------------------
+    #   calculate action etc.                                             
+    #--------------------------------------------------------------------------
+    stot = 0.0
+    ttot = 0.0
+    tvtot= 0.0
+    vtot = 0.0
+    
+    for j in range(1, n):
+        xp = (x[j+1]-x[j])/a
+        t  = 1.0/4.0*xp**2
+        v  = (x[j]**2-f**2)**2
+        tv = 2.0*x[j]**2*(x[j]**2-f**2)
+        s  = a*(t+v)
+        ttot += a*t
+        vtot += a*v
+        tvtot+= a*tv
+        stot += s
+    
+    file18.write(fs.f555.format(i,stot,ttot,vtot,stot/(nin*s0)))
+
+    #--------------------------------------------------------------------------
+    #   include in sample                                                   
+    #--------------------------------------------------------------------------
+    stot_sum  += stot
+    stot2_sum += stot**2
+    vtot_sum  += vtot
+    vtot2_sum += vtot**2
+    ttot_sum  += ttot 
+    ttot2_sum += ttot**2
+    tvir_sum  += tvtot
+    tvir2_sum += tvtot**2
+    
+    for k in range(n):
+        fn.histogramarray(x[k],xhist_min,stxhist,nxhist,ix)
+        x_sum  += x[k]
+        x2_sum += x[k]**2
+        x4_sum += x[k]**4
+        x8_sum += x[k]**8
     #--------------------------------------------------------------------------
     #   correlation function                                                   
     #--------------------------------------------------------------------------
@@ -307,17 +336,7 @@ for ip in range(n_p-1):
     dxe = np.sqrt(dxe2)/a
     file16.write(fs.f555.format(ip*a, x3cor_av[ip], x3cor_er[ip], dx, dxe)) 
     file22.write(fs.f555.format(ip*a, x3cor_av[ip], x3cor_er[ip], dx, dxe)) 
- 
-#------------------------------------------------------------------------------
-#   histograms                                                             
-#------------------------------------------------------------------------------
 
-file16.write('\n')
-file16.write(' x distribution \n')
-fn.plot_histogram(xhist_min, nxhist, ix)
-file16.write('\n')
-file16.write(' Z_IA distribution \n')
-fn.plot_histogram(0.0, nzhist, iz)
 for i in range(nzhist):
     xx = (i+0.5)*stzhist
     file30.write(fs.f222.format(xx,iz[i]) )
@@ -332,7 +351,6 @@ file20.close()
 file21.close()
 file22.close()
 file30.close()
-
 
 
 
