@@ -7,8 +7,8 @@ ndim   = 40
 Unperturbed oscillator frequency (choose w0 ~ 4f)
 w0     = 5.6
 
-Number of lattice points in the euclidean time direction (n = 800)
-n      = 800
+Number of lattice points in the euclidean time direction (n ~ 800)
+n      = 100
 
 Lattice spacing (a ∼ 0.05)
 a      = 0.05
@@ -20,7 +20,7 @@ Number of equilibration sweeps before first measurement (neq ∼ 100)
 neq    = 100
 
 Number of Monte Carlo sweeps (nmc ∼ 10^5)
-nmc    = 100000
+nmc    = 10000
 
 Width of Gaussian distribution used for Monte Carlo update x(n) (delx ∼ 0.5)
 delx   = 0.5
@@ -29,9 +29,12 @@ Number of points on which correlation functions are measured
 n_p    = 35
 
 Number of sweeps between writeout of complete configuration
-kp     = 5
+kp     = 20
 
 Number of steps in adiabatic switching (nswitch ∼ 20)
 nalpha = 5
+
+Random seed
+seed   = 12345
 
 
