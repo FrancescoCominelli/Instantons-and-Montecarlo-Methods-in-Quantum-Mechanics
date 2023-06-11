@@ -102,9 +102,9 @@ seed   = int(seed)
 #number of measurements per configuration
 nc    = 5
 #write every kth config
-kp2   = 10
+kp2   = 100
 #number of cooling sweeps (ncool<5000)
-ncool = 10     
+ncool = 50     
 tmax  = n*a
 
 #------------------------------------------------------------------------------
@@ -326,10 +326,6 @@ for i in tqdm(range(nmc)):
         vtot  += a*v
         tvtot += a*tv
         stot  += s
-    '''    
-    if i <= 10000:
-        file18.write(fs.f444.format(i,stot,ttot,vtot))
-    '''
     xs[0] = xs[n-1]
     xs[n] = xs[1]
     
@@ -616,8 +612,8 @@ file16.write(' action vs cooling sweeps\n')
 file24.write(' action vs cooling sweeps\n')
 for ic in range(icool+1):    
     sin = nin_av[ic]*s0
-    file16.write(fs.f556.format(ic,nin_av[ic], nin_er[ic], de*tmax, de2*tmax)) 
-    file24.write(fs.f556.format(ic,nin_av[ic], nin_er[ic], de*tmax, de2*tmax))                          
+    file16.write(fs.f443.format(ic, scool_av[ic], scool_er[ic], sin)) 
+    file24.write(fs.f443.format(ic, scool_av[ic], scool_er[ic], sin))
 file16.write('\n')
 file16.write(' action per instanton, S_0 = ')
 file16.write(str(4.0/3.0*f**3))
@@ -639,11 +635,9 @@ for ic in range(icool+1):
          
 file16.write('\n')
 file16.write(' x distribution \n')
-fn.plot_histogram(xhist_min, nxhist , ix)
 
 file16.write('\n')
 file16.write(' z distribution \n')
-fn.plot_histogram(0.0,nzhist,iz)
 for i in range(nzhist): 
     xx = (i+0.5)*stzhist
     file30.write(fs.f222.format(xx,iz[i]))
@@ -666,4 +660,3 @@ file27.close()
 file28.close()
 file29.close()
 file30.close()
-
