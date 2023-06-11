@@ -402,26 +402,32 @@ plt.show()
 #   FIG. 7: Fig. a. instanton density as a function of the number of cooling 
 #   sweeps for different values of the parameter η
 #------------------------------------------------------------------------------
-with open('Data/qmcool/sinst.dat', 'r') as file:
+with open('Data/qmcool/nin.dat', 'r') as file:
     lines = file.readlines()[1:]
 
 column1 = [float(line.split()[0]) for line in lines]
 column2 = [float(line.split()[1]) for line in lines]
-column3 = [float(line.split()[2]) for line in lines]
-column4 = [float(line.split()[3]) for line in lines]
+column3 = [float(line.split()[3]) for line in lines]
+column4 = [float(line.split()[4]) for line in lines]
 x     = np.array(column1)
-y     = np.array(column2)
-y_err = np.array(column3)
+y     = np.array(column2)/(n*a)
 
-plt.errorbar(x, y, yerr=y_err, fmt='s',markerfacecolor='none',
-             markeredgecolor = 'blue', markersize=8, capsize=5, label = 'η = 1.4')
 
-y     = np.array(column4)
+plt.errorbar(x, y, fmt ='s', markerfacecolor = 'none',
+             markeredgecolor = 'blue', markersize = 8, capsize = 5, label = 'η = 1.4')
 
-plt.plot(x, y, color='green', linewidth = 0.8)
+y     = np.array(column3)/(n*a)
+plt.plot(x, y, color = 'green', linewidth = 0.8, linestyle = '--')
+
+y     = np.array(column4)/(n*a)
+plt.plot(x, y, color = 'green', linewidth = 0.8)
+
+plt.xlabel('n_cool')
+plt.ylabel('N_top/\u03B2')
 
 plt.xscale('log')
-
+plt.yscale('log')
+plt.xlim(1, )
 plt.show()
 
 #------------------------------------------------------------------------------
@@ -446,7 +452,12 @@ y     = np.array(column4)
 
 plt.plot(x, y, color='green', linewidth = 0.8)
 
+plt.xlabel('n_cool')
+plt.ylabel('S/N_inst')
+
 plt.xscale('log')
+plt.yscale('log')
+plt.xlim(1, )
 
 plt.show()
 
