@@ -31,9 +31,9 @@ import re
 #   nst     number of MonteCarlo configurations between successive cooled
 #           configurations. The number of cooled configurations is nconf/nst
 #           (nst=20)
-#   kp      number of sweeps between cooling                              
+#   kp2      number of sweeps between cooling                              
 #   ncool   number of cooling sweeps in a single configuration (ncool=50)             
-#   kp2     number of sweeps between writeout of complete configuration     
+#   kp     number of sweeps between writeout of complete configuration     
 #------------------------------------------------------------------------------
 #   Output:
 #------------------------------------------------------------------------------
@@ -82,12 +82,15 @@ a      = re.search(r'a\s*=\s*(\d+\.\d+)', contents).group(1)
 icold  = re.search(r'icold\s*=\s*(\d+)', contents).group(1)
 neq    = re.search(r'neq\s*=\s*(\d+)', contents).group(1)
 nmc    = re.search(r'nmc\s*=\s*(\d+)', contents).group(1)
+nc     = re.search(r'nc\s*=\s*(\d+)', contents).group(1)
 delx   = re.search(r'delx\s*=\s*(\d+\.\d+)', contents).group(1)
 n_p    = re.search(r'n_p\s*=\s*(\d+)', contents).group(1)
 kp     = re.search(r'kp\s*=\s*(\d+)', contents).group(1)
+kp2    = re.search(r'kp2\s*=\s*(\d+)', contents).group(1)
+ncool  = re.search(r'ncool\s*=\s*(\d+)', contents).group(1)
 seed   = re.search(r'seed\s*=\s*(\d+)', contents).group(1)
 
-# convert the values to integers
+# convert the strings to numbers
 f      = float(f)   #separation of wells f (f=1.4)
 n      = int(n)     #grid size n<10000 (n=100)
 a      = float(a)   #grid spacing a (dtau=0.05)
@@ -96,26 +99,22 @@ neq    = int(neq)   #equilibration sweeps
 nmc    = int(nmc)   #monte carlo sweeps
 delx   = float(delx)#update x (delx)
 n_p    = int(n_p)   #number of points in correlator
-kp     = int(kp)    #number of sweeps between cooling
-seed   = int(seed)
-
-#number of measurements per configuration
-nc    = 5
-#write every kth config
-kp2   = 100
-#number of cooling sweeps (ncool<5000)
-ncool = 50     
-tmax  = n*a
+nc     = int(nc)    #number of measurements per configuration
+kp     = int(kp)    #write every kth config
+kp2    = int(kp2)   #number of sweeps between cooling
+ncool  = int(ncool) #number of cooling sweeps (ncool<5000)
+seed   = int(seed)  #seed to generate random numbers
 
 #------------------------------------------------------------------------------
 #     echo input parameters                                                  
 #------------------------------------------------------------------------------
 
+tmax  = n*a
 pi  = np.pi
 s0  = 4.0/3.0*f**3
 de  = 8*np.sqrt(2.0/pi)*f**2.5*np.exp(-s0)
 de2 = de*(1.0-71.0/72.0/s0)
-file16.write('lattice qm 1.1')
+file16.write('lattice qm 1.1\n')
 file16.write('--------------\n')
 file16.write(fs.f201.format(f,n,a))
 file16.write(fs.f202.format(nmc,neq))
@@ -123,8 +122,8 @@ file16.write(fs.f203.format(n_p,nc))
 file16.write(fs.f204.format(delx,icold,ncool))
 file16.write(fs.f205.format(s0,de,de*n*a))
 file16.write(fs.f206.format(s0,de2,de2*n*a))
-file17.write(fs.f444.format(n,nmc/kp,n*a,f))
-file20.write(fs.f444.format(n,nmc/kp,n*a,f))
+file17.write(fs.f444.format(n,nmc/kp2,n*a,f))
+file20.write(fs.f444.format(n,nmc/kp2,n*a,f))
 
 #------------------------------------------------------------------------------
 #     parameters for histograms                                              
@@ -372,7 +371,7 @@ for i in tqdm(range(nmc)):
     #--------------------------------------------------------------------------
     #   cooling and topological charge                                         
     #-------------------------------------------------------------------------- 
-    if i % kp == 0:
+    if i % kp2 == 0:
         ncoolconf += 1
         ni, na = fn.inst(f, a, delx, n, xs, xi, xa, z)
         ss, ts, vs = fn.act(f, a, delx, n, xs)
@@ -447,13 +446,7 @@ for i in tqdm(range(nmc)):
     #--------------------------------------------------------------------------
     #     write configuration                                                    
     #--------------------------------------------------------------------------
-    if i % kp2 == 0:
-        '''
-        print("configuration:   ", i, "\n",
-              "coupling:        ", alpha, "\n",
-              "acceptance rate: ", float(nacc)/float(nhit), "\n",
-              "action (T,V):    ", stot, ttot, vtot)
-        '''
+    if i % kp == 0:
         file17.write('configuration: ')
         file17.write(str(i))
         file17.write('\n')
@@ -513,7 +506,8 @@ file16.write('\n')
 file16.write('nconf = ')
 file16.write(str(nconf))
 file16.write('\nncoolc= ')
-file16.write(str(ncoolconf))     
+file16.write(str(ncoolconf))
+file16.write('\n')     
 file16.write(fs.f801.format(stot_av,stot_err)) 
 file16.write(fs.f802.format(v_av,v_err)) 
 file16.write(fs.f803.format(t_av,t_err)) 
