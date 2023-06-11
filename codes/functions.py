@@ -126,15 +126,17 @@ def inst(f, a, delx, n, x, xi, xa, z):
         tau = a * i
         ixp = int(np.sign(x[i]))
         if ixp > ix:
+            ni  += 1
+            nin += 1
             xi[ni] = tau
             z[nin] = tau
-            ni  += 1
-            nin += 1         
+                     
         elif ixp < ix:
+            na  += 1
+            nin += 1 
             xa[na] = tau
             z[nin] = tau
-            na  += 1
-            nin += 1            
+                       
         ix = ixp
     return ni, na
 
@@ -152,32 +154,32 @@ def dle(xcor1,xcor2,xcor1e,xcor2e,a):
     dle2 = (xcor2e/xcor1)**2+(xcor1e*xcor2/xcor1**2)**2
     dle  = np.sqrt(dle2)
     return dle
-
+'''
 #------------------------------------------------------------------------------
 #   local cooling algorithm                                                
 #------------------------------------------------------------------------------ 
 def cool(f,a,delx, seed, xs, n, ncool):     
     random.seed(seed)
-    nhit = 10
+    nhit2 = 10
     delxp= 0.1*delx
     for k in range(ncool):
         for w in range(1,n):
-            xpm = (xs[w]-xs[w-1])/a
-            xpp = (xs[w+1]-xs[w])/a
-            t = 1.0/4.0*(xpm**2+xpp**2)
-            v = (xs[w]**2-f**2)**2
-            sold = a*(t+v)
-            for j in range(nhit):          
-                xnew = xs[w] + delxp*(2.0*random.random()-1.0)
-                xpm = (xnew-xs[w-1])/a
-                xpp = (xs[w+1]-xnew)/a
-                t = 1.0/4.0*(xpm**2+xpp**2)
-                v = (xnew**2-f**2)**2
-                snew = a*(t+v)
-                if snew < sold :
-                    xs[w]=xnew 
+            xpm2 = (xs[w]-xs[w-1])/a
+            xpp2 = (xs[w+1]-xs[w])/a
+            t2 = 1.0/4.0*(xpm2**2+xpp2**2)
+            v2 = (xs[w]**2-f**2)**2
+            sold2 = a*(t2+v2)
+            for j in range(nhit2):          
+                xnew2 = xs[w] + delxp*(2.0*random.random()-1.0)
+                xpm2 = (xnew2-xs[w-1])/a
+                xpp2 = (xs[w+1]-xnew2)/a
+                t2 = 1.0/4.0*(xpm2**2+xpp2**2)
+                v2 = (xnew2**2-f**2)**2
+                snew2 = a*(t2+v2)
+                if snew2 < sold2 :
+                    xs[w]=xnew2                          
     return
-
+'''
 #------------------------------------------------------------------------------
 #     sort array ra(n)                                                   
 #------------------------------------------------------------------------------      

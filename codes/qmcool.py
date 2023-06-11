@@ -381,25 +381,23 @@ for i in tqdm(range(nmc)):
         scool_sum[0] += ss
         scool2_sum[0]+= ss**2
         for icool in range(1,ncool+1):
-            #xs = fn.cool(f, a, delx, seed, xs, n, ncool)  
-            nhit = 10
+            nhit2 = 10
             delxp= 0.1*delx
-            for k in range(ncool):
-                for w in range(1,n):
-                    xpm = (xs[w]-xs[w-1])/a
-                    xpp = (xs[w+1]-xs[w])/a
-                    t = 1.0/4.0*(xpm**2+xpp**2)
-                    v = (xs[w]**2-f**2)**2
-                    sold = a*(t+v)
-                    for j in range(nhit):          
-                        xnew = xs[w] + delxp*(2.0*random.random()-1.0)
-                        xpm = (xnew-xs[w-1])/a
-                        xpp = (xs[w+1]-xnew)/a
-                        t = 1.0/4.0*(xpm**2+xpp**2)
-                        v = (xnew**2-f**2)**2
-                        snew = a*(t+v)
-                        if snew < sold :
-                            xs[w]=xnew                          
+            for w in range(1,n):
+                xpm2 = (xs[w]-xs[w-1])/a
+                xpp2 = (xs[w+1]-xs[w])/a
+                t2 = 1.0/4.0*(xpm2**2+xpp2**2)
+                v2 = (xs[w]**2-f**2)**2
+                sold2 = a*(t2+v2)
+                for j in range(nhit2):          
+                    xnew2 = xs[w] + delxp*(2.0*random.random()-1.0)
+                    xpm2 = (xnew2-xs[w-1])/a
+                    xpp2 = (xs[w+1]-xnew2)/a
+                    t2 = 1.0/4.0*(xpm2**2+xpp2**2)
+                    v2 = (xnew2**2-f**2)**2
+                    snew2 = a*(t2+v2)
+                    if snew2 < sold2 :
+                        xs[w]=xnew2         
             ni, na = fn.inst(f, a, delx, n, xs, xi, xa, z)
             ss, ts, vs = fn.act(f, a, delx, n, xs)
             nin = ni + na
@@ -411,8 +409,8 @@ for i in tqdm(range(nmc)):
         #     cooled configuration: instanton distribution                            
         #----------------------------------------------------------------------
         
-        for ii in range(1, nin, 2):
-            if ii == 1:
+        for ii in range(0, nin, 2):
+            if ii == 0:
                 zm = z[nin] - tmax
             else:
                 zm = z[ii-1]
@@ -598,13 +596,13 @@ for ip in range(n_p-1):
 file16.write('\n')
 file16.write(' number of instantons\n')
 file23.write(' number of instantons\n')
-for ic in range(icool+1):
+for ic in range(ncool+1):
     file16.write(fs.f556.format(ic, nin_av[ic], nin_er[ic], de*tmax, de2*tmax)) 
     file23.write(fs.f556.format(ic, nin_av[ic], nin_er[ic], de*tmax, de2*tmax))       
 file16.write('\n')
 file16.write(' action vs cooling sweeps\n')
 file24.write(' action vs cooling sweeps\n')
-for ic in range(icool+1):    
+for ic in range(ncool+1):    
     sin = nin_av[ic]*s0
     file16.write(fs.f443.format(ic, scool_av[ic], scool_er[ic], sin)) 
     file24.write(fs.f443.format(ic, scool_av[ic], scool_er[ic], sin))
@@ -612,11 +610,11 @@ file16.write('\n')
 file16.write(' action per instanton, S_0 = ')
 file16.write(str(4.0/3.0*f**3))
 file16.write('\n')
-file25.write(' action vs cooling sweeps\n')
+file25.write(' action per instanton, S_0 = ')
 file25.write(str(4.0/3.0*f**3))
 file25.write('\n')
  
-for ic in range(icool+1):
+for ic in range(ncool+1):
     si_av= scool_av[ic]/nin_av[ic]                    
     del2 =(scool_er[ic]/scool_av[ic])**2+(nin_er[ic]/nin_av[ic])**2
     si_er= si_av*np.sqrt(del2)

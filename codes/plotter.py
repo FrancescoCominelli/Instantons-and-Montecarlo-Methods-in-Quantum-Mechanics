@@ -178,7 +178,7 @@ plt.xlabel('τ')
 plt.ylabel('d[log<xⁿ(0)xⁿ(τ)>]/dτ')
 
 plt.show()
-'''
+
 #------------------------------------------------------------------------------
 #   FIG. 2: Typical euclidean path obtained in a Monte Carlo simulation of the 
 #   discretized euclidean action of the double well potential for  = 1.4.
@@ -190,9 +190,9 @@ with open('Data/qmcool/config.dat', 'r') as file:
 start_line = None
 end_line   = None
 for i, line in enumerate(lines):
-    if line.startswith('configuration: 120'):
+    if line.startswith('configuration: 100'):
         start_line = i
-    elif line.startswith('configuration: 130'):
+    elif line.startswith('configuration: 150'):
         end_line = i
         break
 data_lines = lines[start_line+1: end_line]
@@ -212,9 +212,9 @@ with open('Data/qmcool/coolconfig.dat', 'r') as file:
 start_line = None
 end_line   = None
 for i, line in enumerate(lines):
-    if line.startswith('configuration: 120'):
+    if line.startswith('configuration: 100'):
         start_line = i
-    elif line.startswith('configuration: 130'):
+    elif line.startswith('configuration: 150'):
         end_line = i
         break
 data_lines = lines[start_line+1: end_line]
@@ -232,7 +232,7 @@ plt.ylabel('x')
 plt.legend()
 
 plt.show()
-'''
+
 #------------------------------------------------------------------------------
 #   FIG. 5: Free energy F = −T log(Z) of the anharmonic oscillator as a 
 #   function of the temperature t = i/b
@@ -399,6 +399,58 @@ plt.ylabel('d[log<xⁿ(0)xⁿ(τ)>]/dτ')
 plt.show()
 
 #------------------------------------------------------------------------------
+#   FIG. 7: Fig. a. instanton density as a function of the number of cooling 
+#   sweeps for different values of the parameter η
+#------------------------------------------------------------------------------
+with open('Data/qmcool/sinst.dat', 'r') as file:
+    lines = file.readlines()[1:]
+
+column1 = [float(line.split()[0]) for line in lines]
+column2 = [float(line.split()[1]) for line in lines]
+column3 = [float(line.split()[2]) for line in lines]
+column4 = [float(line.split()[3]) for line in lines]
+x     = np.array(column1)
+y     = np.array(column2)
+y_err = np.array(column3)
+
+plt.errorbar(x, y, yerr=y_err, fmt='s',markerfacecolor='none',
+             markeredgecolor = 'blue', markersize=8, capsize=5, label = 'η = 1.4')
+
+y     = np.array(column4)
+
+plt.plot(x, y, color='green', linewidth = 0.8)
+
+plt.xscale('log')
+
+plt.show()
+
+#------------------------------------------------------------------------------
+#   FIG. 7: Fig. b. instanton action as a function of the number of cooling 
+#   sweeps for different values of the parameter eta
+#------------------------------------------------------------------------------
+with open('Data/qmcool/sinst.dat', 'r') as file:
+    lines = file.readlines()[1:]
+
+column1 = [float(line.split()[0]) for line in lines]
+column2 = [float(line.split()[1]) for line in lines]
+column3 = [float(line.split()[2]) for line in lines]
+column4 = [float(line.split()[3]) for line in lines]
+x     = np.array(column1)
+y     = np.array(column2)
+y_err = np.array(column3)
+
+plt.errorbar(x, y, yerr=y_err, fmt='s',markerfacecolor='none',
+             markeredgecolor = 'blue', markersize=8, capsize=5, label = 'η = 1.4')
+
+y     = np.array(column4)
+
+plt.plot(x, y, color='green', linewidth = 0.8)
+
+plt.xscale('log')
+
+plt.show()
+
+#------------------------------------------------------------------------------
 #   FIG. 9: Quantum mechanical paths which appear in a Monte-Carlo calculation
 #   of the one-instanton partition function in the double well potential.
 #------------------------------------------------------------------------------
@@ -434,7 +486,6 @@ plt.ylabel('X')
 plt.xlim(0, n*a-a)
 
 plt.show()
-
 
 
 
