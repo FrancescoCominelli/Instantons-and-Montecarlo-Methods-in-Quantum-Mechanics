@@ -107,7 +107,7 @@ stzhist= 4.01/float(nzhist)
 x      =  np.zeros(n+1)
 z      =  np.zeros(n)  
 x_hot  =  np.zeros(n+1)
-w      =  np.zeros(n)
+w      =  np.zeros(n+1)
 ix     = np.zeros(nxhist)
 iz     = np.zeros(nzhist)
 xcor_sum   =  np.zeros(n_p)
@@ -228,7 +228,7 @@ for i in tqdm(range(nmc)):
     #------------------------------------------------------------------------------
     #   heat configuration: start from classical path  
     #------------------------------------------------------------------------------
-    for k in range(n):
+    for k in range(n+1):
         x_hot[k] = x[k]
         w[k] = -4.0*(f**2-3.0*x[k]**2)
     
@@ -265,7 +265,7 @@ for i in tqdm(range(nmc)):
             dels  = min(dels,70.0)
             dels  = max(dels,-70.0)
             if np.exp(-dels) > random.random():
-                x[j]  = xnew
+                x_hot[j]  = xnew
                 nacc += 1
             
         x_hot[n-1]= x_hot[0]
