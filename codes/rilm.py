@@ -107,7 +107,8 @@ file16.write(fs.f101.format(f,n,a))
 file16.write(fs.f1102.format(nin,nmc,neq)) 
 file16.write(fs.f103.format(n_p,nc)) 
 file16.write('\n')
-file17.write(fs.f444.format(n, nmc/kp, n*a, f)) 
+file17.write(fs.f444.format(n, nmc/kp, n*a, f))
+file17.write('\n') 
 
 #------------------------------------------------------------------------------
 #     parameters for histograms                                              

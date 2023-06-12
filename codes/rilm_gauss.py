@@ -146,7 +146,8 @@ file16.write(fs.f1102.format(nin,nmc,0))
 file16.write(fs.f103.format(n_p,nc))
 file16.write(fs.f107.format(delx,nheat)) 
 file16.write('\n')
-file17.write(fs.f444.format(n, nmc/kp, n*a, f)) 
+file17.write(fs.f444.format(n, nmc/kp, n*a, f))
+file17.write('\n') 
 
 #------------------------------------------------------------------------------
 #     clear summation arrays                                                 
@@ -276,6 +277,7 @@ for i in tqdm(range(nmc)):
     if i % kp == 0:
         file17.write('configuraton: ')
         file17.write(str(i))
+        file17.write('\n')
         for k in range(n):
             file17.write(fs.f222.format(k*a,x_hot[k]))    
     
