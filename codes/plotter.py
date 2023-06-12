@@ -16,6 +16,33 @@ n      = int(n)
 a      = float(a)
 
 #------------------------------------------------------------------------------
+#   Fig. 1.a: Double well potential with the position of the ground state
+#   and the first three excited state.
+#------------------------------------------------------------------------------
+def f(x):
+    return (x**2 - 1.4**2)**2
+
+with open('Data/qmdiag/qmdiag.dat', 'r') as file:
+    lines = file.readlines()[7:11]
+
+column1 = [float(line.split()[1]) for line in lines]
+
+x = np.linspace(-2.8, 2.8, 100)
+y = f(x)
+
+plt.plot(x, y)
+
+y = np.array(column1)
+for i in range(4):
+    plt.axhline(y[i], color='green',linewidth = 0.8, linestyle='--')
+
+plt.xlabel('x')
+plt.ylabel('V(x)')
+
+plt.xlim(-2.5, 2.5)
+plt.ylim(0, 10)
+plt.show()
+#------------------------------------------------------------------------------
 #   FIG. 2: Typical euclidean path obtained in a Monte Carlo simulation of the 
 #   discretized euclidean action of the double well potential for  = 1.4.
 #------------------------------------------------------------------------------
@@ -28,7 +55,7 @@ end_line   = None
 for i, line in enumerate(lines):
     if line.startswith('configuration: 100'):
         start_line = i
-    elif line.startswith('configuration: 150'):
+    elif line.startswith('configuration: 200'):
         end_line = i
         break
 data_lines = lines[start_line+1: end_line]
@@ -50,7 +77,7 @@ end_line   = None
 for i, line in enumerate(lines):
     if line.startswith('configuration: 100'):
         start_line = i
-    elif line.startswith('configuration: 150'):
+    elif line.startswith('configuration: 200'):
         end_line = i
         break
 data_lines = lines[start_line+1: end_line]
