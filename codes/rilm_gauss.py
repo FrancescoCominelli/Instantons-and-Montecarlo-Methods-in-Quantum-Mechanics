@@ -275,7 +275,7 @@ for i in tqdm(range(nmc)):
     #   configuration  
     #------------------------------------------------------------------------------
     if i % kp == 0:
-        file17.write('configuraton: ')
+        file17.write('configuration: ')
         file17.write(str(i))
         file17.write('\n')
         for k in range(n):
