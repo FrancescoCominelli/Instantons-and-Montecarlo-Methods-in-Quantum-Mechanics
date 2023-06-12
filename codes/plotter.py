@@ -42,6 +42,7 @@ plt.ylabel('V(x)')
 plt.xlim(-2.5, 2.5)
 plt.ylim(0, 10)
 plt.show()
+'''
 #------------------------------------------------------------------------------
 #   FIG. 2: Typical euclidean path obtained in a Monte Carlo simulation of the 
 #   discretized euclidean action of the double well potential for  = 1.4.
@@ -95,7 +96,7 @@ plt.ylabel('x')
 plt.legend()
 
 plt.show()
-
+'''
 #------------------------------------------------------------------------------
 #   FIG. 3: Probability distribution in the double well potential for f = 1.4.
 #------------------------------------------------------------------------------
@@ -614,7 +615,7 @@ plt.plot(x, y, color = 'black')
 y = np.array(column4)
 plt.plot(x, y, color = 'black')
 
-with open('Data/qmcool/coolcor.dat', 'r') as file:
+with open('Data/rilm/rcor.dat', 'r') as file:
     lines = file.readlines()[1:]
 
 column1 = [float(line.split()[0]) for line in lines]
@@ -627,7 +628,7 @@ y_err = np.array(column3)
 plt.errorbar(x, y, yerr=y_err, fmt='s', markerfacecolor='none',
              markeredgecolor = 'blue', markersize=8, capsize=5, label = '<x(0)x(τ)>')
 
-with open('Data/qmcool/coolcor2.dat', 'r') as file:
+with open('Data/rilm/rcor2.dat', 'r') as file:
     lines = file.readlines()[1:]
 
 column1 = [float(line.split()[0]) for line in lines]
@@ -640,7 +641,7 @@ y_err = np.array(column3)
 plt.errorbar(x, y, yerr=y_err, fmt='o', markerfacecolor='none',
              markeredgecolor = 'red',markersize=8, capsize=5, label = '<x²(0)x²(τ)>')
 
-with open('Data/qmcool/coolcor3.dat', 'r') as file:
+with open('Data/rilm/rcor3.dat', 'r') as file:
     lines = file.readlines()[1:]
 
 column1 = [float(line.split()[0]) for line in lines]
@@ -660,8 +661,194 @@ plt.xlabel('τ')
 plt.ylabel('d[log<xⁿ(0)xⁿ(τ)>]/dτ')
 
 plt.show()
+#------------------------------------------------------------------------------
+#   FIG. 12: Typical euclidean path obtained in a Monte Carlo simulation of the 
+#   discretized euclidean action of the double well potential for  = 1.4.
+#------------------------------------------------------------------------------
+
+with open('Data/rilm/config.dat', 'r') as file:
+    lines = file.readlines()
+
+start_line = None
+end_line   = None
+for i, line in enumerate(lines):
+    if line.startswith('configuration: 6000'):
+        start_line = i
+    elif line.startswith('configuration: 6050'):
+        end_line = i
+        break
+data_lines = lines[start_line+1: end_line]
+
+column1 = [float(line.split()[0]) for line in data_lines]
+column2 = [float(line.split()[1]) for line in data_lines]
+ 
+x     = np.array(column1)
+y     = np.array(column2)
 
 
+plt.plot(x, y, color = 'black',linewidth = 0.8, label = 'RILM')
+
+with open('Data/rilm_gauss/config_gauss.dat', 'r') as file:
+    lines = file.readlines()
+
+start_line = None
+end_line   = None
+for i, line in enumerate(lines):
+    if line.startswith('configuration: 6000'):
+        start_line = i
+    elif line.startswith('configuration: 6050'):
+        end_line = i
+        break
+data_lines = lines[start_line+1: end_line]
+
+column2 = [float(line.split()[1]) for line in data_lines]
+ 
+y     = np.array(column2)
+
+
+plt.plot(x, y, color = 'green',linewidth = 0.8, label = 'Gaussian fl')
+
+plt.xlim(0, 20)
+plt.xlabel('τ')
+plt.ylabel('x')
+plt.legend()
+
+plt.show()
+#------------------------------------------------------------------------------
+#   FIG. 13.a Shows the correlation functions
+#------------------------------------------------------------------------------
+
+with open('Data/qmdiag/dcor.dat', 'r') as file:
+    lines = file.readlines()
+
+column1 = [float(line.split()[0]) for line in lines]
+column2 = [float(line.split()[1]) for line in lines]
+column3 = [float(line.split()[2]) for line in lines]
+column4 = [float(line.split()[3]) for line in lines]
+
+x = np.array(column1)
+y = np.array(column2)
+plt.plot(x, y, color = 'black')
+
+y = np.array(column3)
+plt.plot(x, y, color = 'black')
+
+y = np.array(column4)
+plt.plot(x, y, color = 'black')
+
+with open('Data/rilm_gauss/rcor_gauss.dat', 'r') as file:
+    lines = file.readlines()[1:]
+
+column1 = [float(line.split()[0]) for line in lines]
+column2 = [float(line.split()[1]) for line in lines]
+column3 = [float(line.split()[2]) for line in lines]
+
+x     = np.array(column1)
+y     = np.array(column2)
+y_err = np.array(column3)
+plt.errorbar(x, y, yerr=y_err, fmt='s', markerfacecolor='none',
+             markeredgecolor = 'blue', markersize=8, capsize=5, label = '<x(0)x(τ)>')
+
+with open('Data/rilm_gauss/rcor2_gauss.dat', 'r') as file:
+    lines = file.readlines()[1:]
+
+column1 = [float(line.split()[0]) for line in lines]
+column2 = [float(line.split()[1]) for line in lines]
+column3 = [float(line.split()[2]) for line in lines]
+
+x     = np.array(column1)
+y     = np.array(column2)
+y_err = np.array(column3)
+plt.errorbar(x, y, yerr=y_err, fmt='o', markerfacecolor='none',
+             markeredgecolor = 'red',markersize=8, capsize=5, label = '<x²(0)x²(τ)>')
+
+with open('Data/rilm_gauss/rcor3_gauss.dat', 'r') as file:
+    lines = file.readlines()[1:]
+
+column1 = [float(line.split()[0]) for line in lines]
+column2 = [float(line.split()[1]) for line in lines]
+column3 = [float(line.split()[2]) for line in lines]
+
+x     = np.array(column1)
+y     = np.array(column2)
+y_err = np.array(column3)
+plt.errorbar(x, y, yerr=y_err, fmt='D',markerfacecolor='none',
+             markeredgecolor = 'green', markersize=8, capsize=5, label = '<x³(0)x³(τ)>')
+
+plt.xlim(0, 1.5)
+plt.ylim(0, 8)
+plt.legend()
+plt.xlabel('τ')
+plt.ylabel('<xⁿ(0)xⁿ(τ)>')
+plt.show()
+
+#------------------------------------------------------------------------------
+#   FIG. 13.b Shows the logarithmic derivative of the correlators
+#------------------------------------------------------------------------------
+with open('Data/qmdiag/dcor.dat', 'r') as file:
+    lines = file.readlines()
+
+column1 = [float(line.split()[0]) for line in lines]
+column2 = [float(line.split()[4]) for line in lines]
+column3 = [float(line.split()[5]) for line in lines]
+column4 = [float(line.split()[6]) for line in lines]
+
+x = np.array(column1)
+y = np.array(column2)
+plt.plot(x, y, color = 'black')
+
+y = np.array(column3)
+plt.plot(x, y, color = 'black')
+
+y = np.array(column4)
+plt.plot(x, y, color = 'black')
+
+with open('Data/rilm_gauss/rcor_gauss.dat', 'r') as file:
+    lines = file.readlines()[1:]
+
+column1 = [float(line.split()[0]) for line in lines]
+column2 = [float(line.split()[3]) for line in lines]
+column3 = [float(line.split()[4]) for line in lines]
+
+x     = np.array(column1)
+y     = np.array(column2)
+y_err = np.array(column3)
+plt.errorbar(x, y, yerr=y_err, fmt='s', markerfacecolor='none',
+             markeredgecolor = 'blue', markersize=8, capsize=5, label = '<x(0)x(τ)>')
+
+with open('Data/rilm_gauss/rcor2_gauss.dat', 'r') as file:
+    lines = file.readlines()[1:]
+
+column1 = [float(line.split()[0]) for line in lines]
+column2 = [float(line.split()[3]) for line in lines]
+column3 = [float(line.split()[4]) for line in lines]
+
+x     = np.array(column1)
+y     = np.array(column2)
+y_err = np.array(column3)
+plt.errorbar(x, y, yerr=y_err, fmt='o', markerfacecolor='none',
+             markeredgecolor = 'red',markersize=8, capsize=5, label = '<x²(0)x²(τ)>')
+
+with open('Data/rilm_gauss/rcor3_gauss.dat', 'r') as file:
+    lines = file.readlines()[1:]
+
+column1 = [float(line.split()[0]) for line in lines]
+column2 = [float(line.split()[3]) for line in lines]
+column3 = [float(line.split()[4]) for line in lines]
+
+x     = np.array(column1)
+y     = np.array(column2)
+y_err = np.array(column3)
+plt.errorbar(x, y, yerr=y_err, fmt='D',markerfacecolor='none',
+             markeredgecolor = 'green', markersize=8, capsize=5, label = '<x³(0)x³(τ)>')
+
+plt.xlim(0, 1.5)
+plt.ylim(0, 4.5)
+plt.legend()
+plt.xlabel('τ')
+plt.ylabel('d[log<xⁿ(0)xⁿ(τ)>]/dτ')
+
+plt.show()
 
 
 
