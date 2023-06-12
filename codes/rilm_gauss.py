@@ -177,8 +177,8 @@ nacc = 0
 #------------------------------------------------------------------------------
 for i in tqdm(range(nmc)):
     nconf += 1
-    for i in range(nin+1):
-        z[i] = random.random()*tmax
+    for l in range(nin+1):
+        z[l] = random.random()*tmax
     z = np.sort(z)
     
     #--------------------------------------------------------------------------
