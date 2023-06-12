@@ -162,7 +162,6 @@ ncor  = 0
 #------------------------------------------------------------------------------
 for i in tqdm(range(nmc)):
     nconf += 1
-    #fn.setup(nin, z, tmax, seed)
     for i in range(nin+1):
         z[i] = random.random()*tmax
     z = np.sort(z)
@@ -174,6 +173,7 @@ for i in tqdm(range(nmc)):
         x[j] = fn.xsum(nin, z, f, xx)
     x[0] = x[n-1]
     x[n] = x[1]
+    
     #--------------------------------------------------------------------------
     #   distribution of instantons                                             
     #--------------------------------------------------------------------------
@@ -186,6 +186,7 @@ for i in tqdm(range(nmc)):
         zp  = z[ii+1]
         zia = min(zp-z0, z0-zm)
         fn.histogramarray( zia, 0.0, stzhist, nzhist, iz)
+        
     #--------------------------------------------------------------------------
     #   calculate action etc.                                             
     #--------------------------------------------------------------------------
@@ -355,7 +356,6 @@ file20.close()
 file21.close()
 file22.close()
 file30.close()
-
 
 
 

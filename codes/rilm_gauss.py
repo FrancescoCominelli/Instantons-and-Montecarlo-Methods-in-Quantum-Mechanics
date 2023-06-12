@@ -69,10 +69,13 @@ n      = re.search(r'n\s*=\s*(\d+)', contents).group(1)
 a      = re.search(r'a\s*=\s*(\d+\.\d+)', contents).group(1)
 icold  = re.search(r'icold\s*=\s*(\d+)', contents).group(1)
 nmc    = re.search(r'nmc\s*=\s*(\d+)', contents).group(1)
+nc     = re.search(r'nc\s*=\s*(\d+)', contents).group(1)
 delx   = re.search(r'delx\s*=\s*(\d+\.\d+)', contents).group(1)
 n_p    = re.search(r'n_p\s*=\s*(\d+)', contents).group(1)
 kp     = re.search(r'kp\s*=\s*(\d+)', contents).group(1)
-
+nin    = re.search(r'nin\s*=\s*(\d+)', contents).group(1)
+nheat  = re.search(r'nheat\s*=\s*(\d+)', contents).group(1)
+seed   = re.search(r'seed\s*=\s*(\d+)', contents).group(1)
 
 # convert the values to integers
 f      = float(f)   #separation of wells f (f=1.4)
@@ -83,20 +86,12 @@ nmc    = int(nmc)   #monte carlo sweeps
 delx   = float(delx)#update x (delx)
 n_p    = int(n_p)   #number of points in correlator
 kp     = int(kp)    #number of sweeps between cooling
+nc     = int(nc)    #number of measurements per configuration
+nin    = int(nin)   #number of instantons
+nheat  = int(nheat) #number of heating steps
+seed   = int(seed)  #seed to generate random numbers
 
-nin = 10
-nc = 5
-nheat= 5
-pi  = np.pi
 
-tmax  = n*a
-s0    = 4.0/3.0*f**3
-dens  = 8*np.sqrt(2.0/pi)*f**2.5*np.exp(-s0)
-dens2 = 8*np.sqrt(2.0/pi)*f**2.5*np.exp(-s0-71.0/72.0/s0)
-xnin  = dens*tmax 
-xnin2 = dens2*tmax
-nexp  = int(xnin+0.5)
-nexp2 = int(xnin2+0.5)
 
 #------------------------------------------------------------------------------
 #     parameters for histograms                                              
@@ -134,6 +129,17 @@ x2sub_er   =  np.zeros(n_p)
 #------------------------------------------------------------------------------
 #     echo input parameters                                                  
 #------------------------------------------------------------------------------
+pi  = np.pi
+
+tmax  = n*a
+s0    = 4.0/3.0*f**3
+dens  = 8*np.sqrt(2.0/pi)*f**2.5*np.exp(-s0)
+dens2 = 8*np.sqrt(2.0/pi)*f**2.5*np.exp(-s0-71.0/72.0/s0)
+xnin  = dens*tmax 
+xnin2 = dens2*tmax
+nexp  = int(xnin+0.5)
+nexp2 = int(xnin2+0.5)
+
 file16.write('qm rilm gauss 1.0')   
 file16.write('-----------------')   
 file16.write(fs.f101.format(f,n,a)) 
@@ -160,16 +166,6 @@ x4_sum    = 0.0
 x8_sum    = 0.0
 
 #------------------------------------------------------------------------------
-#   Read input values from console
-#------------------------------------------------------------------------------
-while True:
-   try:
-       seed = int(input("Enter the random seed: ")) #change to int() if expecting int-point input
-       break # Break out of the loop if input is numeric
-   except ValueError:
-       print("Invalid input. Please enter a number.")
-
-#------------------------------------------------------------------------------
 #   initialize
 #------------------------------------------------------------------------------
 nconf= 0
@@ -182,29 +178,32 @@ nacc = 0
 #------------------------------------------------------------------------------
 for i in tqdm(range(nmc)):
     nconf += 1
-    fn.setup(nin, z, tmax, seed)
+    for i in range(nin+1):
+        z[i] = random.random()*tmax
+    z = np.sort(z)
     
-    #------------------------------------------------------------------------------
-    #   new configuration
-    #------------------------------------------------------------------------------
-    for j in range(n):
+    #--------------------------------------------------------------------------
+    #   new configuration                                                      
+    #--------------------------------------------------------------------------
+    for j in range(1,n):
         xx = a*j
         x[j] = fn.xsum(nin, z, f, xx)
-    x[n-1]= x[0]
-    x[n]  = x[1]
+    x[0] = x[n-1]
+    x[n] = x[1]
+    
     #--------------------------------------------------------------------------
     #   distribution of instantons                                             
     #--------------------------------------------------------------------------
-    for ii in range(1, nin, 2):
-        if ii == 1:
-            zm = z[nin-1] - tmax
+    for ii in range(0, nin, 2):
+        if ii == 0:
+            zm = z[nin] - tmax
         else:
-            zm = z[ii-2]
-        z0 = z[ii-1]
-        zp = z[ii]
-        zia = min([abs(zp-z0), abs(z0-zm)])
-        fn.histogramarray(zia, 0.0, stzhist, nzhist, iz)
-    
+            zm = z[ii-1]
+        z0  = z[ii]
+        zp  = z[ii+1]
+        zia = min(zp-z0, z0-zm)
+        fn.histogramarray( zia, 0.0, stzhist, nzhist, iz)
+        
     #------------------------------------------------------------------------------
     #   calculate action etc.
     #------------------------------------------------------------------------------
@@ -212,7 +211,8 @@ for i in tqdm(range(nmc)):
     ttot = 0.0
     tvtot= 0.0
     vtot = 0.0  
-    for j in range(n):
+    
+    for j in range(1, n):
         xp = (x[j+1]-x[j])/a
         t  = 1.0/4.0*xp**2
         v  = (x[j]**2-f**2)**2
@@ -222,11 +222,15 @@ for i in tqdm(range(nmc)):
         vtot += a*v
         tvtot+= a*tv
         stot += s
-    file18.write(fs.f551.format(i,stot,ttot,vtot,stot/(nin*s0)))
-    '''
-    if (i % kp == 0):
-        print()
-    '''
+    
+    file18.write(fs.f555.format(i,stot,ttot,vtot,stot/(nin*s0)))
+    if i % kp == 0:
+        file17.write('configuration: ')
+        file17.write(str(i))
+        file17.write('\n')
+        for i in range(n):
+            file17.write(fs.f222.format(i*a, x[i]))
+            
     #------------------------------------------------------------------------------
     #   heat configuration: start from classical path  
     #------------------------------------------------------------------------------
