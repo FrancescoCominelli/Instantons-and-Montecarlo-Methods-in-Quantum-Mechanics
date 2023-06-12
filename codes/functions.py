@@ -154,79 +154,14 @@ def dle(xcor1,xcor2,xcor1e,xcor2e,a):
     dle2 = (xcor2e/xcor1)**2+(xcor1e*xcor2/xcor1**2)**2
     dle  = np.sqrt(dle2)
     return dle
-'''
-#------------------------------------------------------------------------------
-#   local cooling algorithm                                                
-#------------------------------------------------------------------------------ 
-def cool(f,a,delx, seed, xs, n, ncool):     
-    random.seed(seed)
-    nhit2 = 10
-    delxp= 0.1*delx
-    for k in range(ncool):
-        for w in range(1,n):
-            xpm2 = (xs[w]-xs[w-1])/a
-            xpp2 = (xs[w+1]-xs[w])/a
-            t2 = 1.0/4.0*(xpm2**2+xpp2**2)
-            v2 = (xs[w]**2-f**2)**2
-            sold2 = a*(t2+v2)
-            for j in range(nhit2):          
-                xnew2 = xs[w] + delxp*(2.0*random.random()-1.0)
-                xpm2 = (xnew2-xs[w-1])/a
-                xpp2 = (xs[w+1]-xnew2)/a
-                t2 = 1.0/4.0*(xpm2**2+xpp2**2)
-                v2 = (xnew2**2-f**2)**2
-                snew2 = a*(t2+v2)
-                if snew2 < sold2 :
-                    xs[w]=xnew2                          
-    return
-'''
-#------------------------------------------------------------------------------
-#     sort array ra(n)                                                   
-#------------------------------------------------------------------------------      
-def sort(n, ra):
-    l = n//2 + 1
-    ir = n
-    while True:
-        if l > 1:
-            l = l - 1
-            rra = ra[l-1]
-        else:
-            rra = ra[ir-1]
-            ra[ir-1] = ra[0]
-            ir = ir - 1
-            if ir == 1:
-                ra[0] = rra
-                return
-        i = l
-        j = l + l
-        while j <= ir:
-            if j < ir and ra[j-1] < ra[j]:
-                j = j + 1
-            if rra < ra[j-1]:
-                ra[i-1] = ra[j-1]
-                i = j
-                j = j + j
-            else:
-                j = ir + 1
-        ra[i-1] = rra
-        
-#------------------------------------------------------------------------------
-#   initialize instanton configuration                               
-#------------------------------------------------------------------------------
-def setup(nin,z,tmax, seed):
-    random.seed(seed)
-    for i in range(nin):
-        z[i] = random.random()*tmax
-        sort(nin,z)
-    return
 
 #------------------------------------------------------------------------------
 #     sum ansatz path                                                  
 #------------------------------------------------------------------------------
 def xsum(nin, z, f, t):
-    neven = nin - nin % 2
+    neven = nin - (nin % 2)
     xsum = -f
-    for i in range(1, neven, 2):
+    for i in range(0, neven, 2):
         xsum += f * np.tanh(2.0 * f * (t - z[i])) - f * np.tanh(2.0 * f * (t - z[i+1]))
     if nin % 2 != 0:
         xsum += f * np.tanh(2.0 * f * (t - z[nin])) + f   
