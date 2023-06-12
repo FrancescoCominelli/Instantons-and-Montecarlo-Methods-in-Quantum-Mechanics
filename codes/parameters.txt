@@ -8,7 +8,7 @@ Unperturbed oscillator frequency (choose w0 ~ 4f)
 w0     = 5.6
 
 Number of lattice points in the euclidean time direction (n ~ 800)
-n      = 100
+n      = 800
 
 Lattice spacing (a ∼ 0.05)
 a      = 0.05
@@ -42,6 +42,9 @@ ncool  = 100
 
 Number of steps in adiabatic switching (nswitch ∼ 20)
 nalpha = 5
+
+Number of instantons for random generation (even)
+nin    = 10 
 
 Random seed
 seed   = 12345
