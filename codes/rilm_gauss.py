@@ -49,7 +49,6 @@ import re
 file16 = open('Data/rilm_gauss/rilm_gauss.dat',  'w')
 file17 = open('Data/rilm_gauss/config_gauss.dat','w')
 file18 = open('Data/rilm_gauss/trajectory.dat',  'w')
-file19 = open('Data/rilm_gauss/qmdist.dat',      'w')
 file20 = open('Data/rilm_gauss/rcor_gauss.dat',  'w')
 file21 = open('Data/rilm_gauss/rcor2_gauss.dat', 'w')
 file22 = open('Data/rilm_gauss/rcor3_gauss.dat', 'w') 
@@ -140,10 +139,10 @@ xnin2 = dens2*tmax
 nexp  = int(xnin+0.5)
 nexp2 = int(xnin2+0.5)
 
-file16.write('qm rilm gauss 1.0')   
-file16.write('-----------------')   
+file16.write('qm rilm gauss 1.0\n')   
+file16.write('-----------------\n')   
 file16.write(fs.f101.format(f,n,a)) 
-file16.write(fs.f102.format(nin,nmc)) 
+file16.write(fs.f1102.format(nin,nmc,0)) 
 file16.write(fs.f103.format(n_p,nc))
 file16.write(fs.f107.format(delx,nheat)) 
 file16.write('\n')
@@ -224,12 +223,6 @@ for i in tqdm(range(nmc)):
         stot += s
     
     file18.write(fs.f555.format(i,stot,ttot,vtot,stot/(nin*s0)))
-    if i % kp == 0:
-        file17.write('configuration: ')
-        file17.write(str(i))
-        file17.write('\n')
-        for i in range(n):
-            file17.write(fs.f222.format(i*a, x[i]))
             
     #------------------------------------------------------------------------------
     #   heat configuration: start from classical path  
@@ -249,9 +242,6 @@ for i in tqdm(range(nmc)):
             v = 0.5*w[j]*(x_hot[j]-x[j])**2
             sold = a*(t+v)
          
-            #------------------------------------------------------------------------------
-            #   heating sweeps   
-            #------------------------------------------------------------------------------
             xmin = abs(f*np.tanh(f*a))
             if abs(x[j]) < xmin:
                 continue
@@ -266,6 +256,7 @@ for i in tqdm(range(nmc)):
             t = 1.0/4.0*(xpm**2+xpp**2)
             v = 0.5*w[j]*(xnew-x[j])**2
             snew = a*(t+v)
+            
             #------------------------------------------------------------------------------
             #   accept/reject  
             #------------------------------------------------------------------------------
@@ -276,15 +267,17 @@ for i in tqdm(range(nmc)):
                 x[j]  = xnew
                 nacc += 1
             
-        x[n-1]= x[0]
-        x[n]  = x[1]
+        x_hot[n-1]= x_hot[0]
+        x_hot[n]  = x_hot[1]
+        
     #------------------------------------------------------------------------------
     #   configuration  
     #------------------------------------------------------------------------------
     if i % kp == 0:
         file17.write('configuraton: ')
         file17.write(str(i))
-        file17.write(fs.f222.format(k*a,x_hot[k]))    
+        for k in range(n):
+            file17.write(fs.f222.format(k*a,x_hot[k]))    
     
     #------------------------------------------------------------------------------
     #   include in sample  
@@ -416,13 +409,19 @@ for ip in range(n_p-1):
 #------------------------------------------------------------------------------
 #   histograms                                                              
 #------------------------------------------------------------------------------
-file16.write('Z_IA distribtion')
 for i in range(nzhist):
     xx = (i+0.5)*stzhist
     file30.write(fs.f222.format(xx, iz[i]))
-    
-fn.plot_histogram(xhist_min, nxhist, ix)
-    
+      
+#------------------------------------------------------------------------------
+#------------------------------------------------------------------------------
+file16.close()
+file17.close()
+file18.close()
+file20.close()
+file21.close()
+file22.close()
+file30.close()
     
     
     
