@@ -42,6 +42,23 @@ plt.ylabel('V(x)')
 plt.xlim(-2.5, 2.5)
 plt.ylim(0, 10)
 plt.show()
+
+#------------------------------------------------------------------------------
+#   Fig. 1.b Spectrum of the double well potential.
+#------------------------------------------------------------------------------
+with open('Data/qmdiag/spectrum.dat', 'r') as file:
+    lines = file.readlines()
+
+for i in range(6):
+    column  = [float(line.split()[i]) for line in lines]
+    
+    y = np.array(column)
+    x = range(len(y))
+    plt.plot(x, y, color = 'black', linewidth = 0.8)
+
+plt.xlabel('configurations')
+plt.ylabel('E')
+plt.show()
 '''
 #------------------------------------------------------------------------------
 #   FIG. 2: Typical euclidean path obtained in a Monte Carlo simulation of the 
@@ -870,7 +887,6 @@ plt.xlim(0, 3000)
 plt.xlabel('configurations')
 plt.ylabel('x')
 plt.show()
-
 
 
 
