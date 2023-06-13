@@ -99,7 +99,7 @@ def psiosc(m, w, n, x, psi):
 #------------------------------------------------------------------------------
 #   discretized action for configuration x(n)                           
 #------------------------------------------------------------------------------
-def act(f, a, delx, n, x):
+def act(f, a, n, x):
     stot = 0.0
     ttot = 0.0
     vtot = 0.0
@@ -167,46 +167,14 @@ def xsum(nin, z, f, t):
     return xsum
 
 #------------------------------------------------------------------------------
-#   save array z in zstore                                             
-#------------------------------------------------------------------------------
-def store(nin,z,zstore):
-    for i in range(nin):
-         zstore[i] = z[i]
-    return 
-
-#------------------------------------------------------------------------------
-#   restore array z from zstore                                        
-#------------------------------------------------------------------------------
-def restore(nin,z,zstore):
-    for i in range(nin):
-         zstore[i] = z[i]
-    return
-#------------------------------------------------------------------------------
-#     discretized action for configuration x(n)                           
-#------------------------------------------------------------------------------
-def action(n,x,f,a):
-    stot = 0.0
-    ttot = 0.0
-    vtot = 0.0  
-    for j in range(n-1):
-        xp = (x[j+1]-x[j])/a
-        t  = 1.0/4.0*xp**2
-        v  = (x[j]**2-f**2)**2
-        s  = a*(t+v)
-        ttot += a*t
-        vtot += a*v
-        stot += s  
-    return stot,ttot,vtot
-
-#------------------------------------------------------------------------------
 #   sumansatz configuration on grid x(n)                                
 #------------------------------------------------------------------------------
 def xconf(n,x,nin,z,f,a):
-    for j in range(1,n):  
+    for j in range(n):  
          xx = a*j
          x[j] = xsum(nin,z,f,xx)        
     x[0] = x[n-1]
-    x    = np.append(x, x[1])
+    x[n] = x[1]
     return
 
 #------------------------------------------------------------------------------
@@ -214,14 +182,13 @@ def xconf(n,x,nin,z,f,a):
 #------------------------------------------------------------------------------
 def sshort(z,nin,tcore,score,tmax):
     shc = 0.0
-    tcore2 = tcore**2
-    if tcore == 0 and tcore2 == 0:
+    if tcore == 0:
         return shc
-    for i in range(1, nin+1):
-        if i == 1:
-            zm = z[nin-1] - tmax
+    for i in range(nin+1):
+        if i == 0:
+            zm = z[nin] - tmax
         else:
-            zm = z[i-2]
-        dz = z[i-1] - zm
+            zm = z[i-1]
+        dz = z[i] - zm
         shc = shc + score * np.exp(-dz/tcore)
     return shc

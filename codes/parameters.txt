@@ -20,7 +20,7 @@ Number of equilibration sweeps before first measurement (neq ∼ 100)
 neq    = 100
 
 Number of Monte Carlo sweeps (nmc ∼ 10^5)
-nmc    = 10000
+nmc    = 3000
 
 Width of Gaussian distribution used for Monte Carlo update x(n) (delx ∼ 0.5)
 delx   = 0.5
@@ -38,7 +38,7 @@ Number of sweeps between cooling
 kp2    = 50
 
 Number of cooling sweeps (ncool<5000)
-ncool  = 100
+ncool  = 10
 
 Number of steps in adiabatic switching (nswitch ∼ 20)
 nalpha = 5

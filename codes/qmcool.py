@@ -374,7 +374,7 @@ for i in tqdm(range(nmc)):
     if i % kp2 == 0:
         ncoolconf += 1
         ni, na = fn.inst(f, a, delx, n, xs, xi, xa, z)
-        ss, ts, vs = fn.act(f, a, delx, n, xs)
+        ss, ts, vs = fn.act(f, a, n, xs)
         nin = ni + na
         nin_sum[0]   += nin
         nin2_sum[0]  += nin**2
@@ -399,7 +399,7 @@ for i in tqdm(range(nmc)):
                     if snew2 < sold2 :
                         xs[w]=xnew2         
             ni, na = fn.inst(f, a, delx, n, xs, xi, xa, z)
-            ss, ts, vs = fn.act(f, a, delx, n, xs)
+            ss, ts, vs = fn.act(f, a, n, xs)
             nin = ni + na
             nin_sum[icool]   += nin
             nin2_sum[icool]  += nin**2

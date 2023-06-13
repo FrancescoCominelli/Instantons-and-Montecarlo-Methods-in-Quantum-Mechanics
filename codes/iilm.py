@@ -38,17 +38,15 @@ import re
 #------------------------------------------------------------------------------
 #   open the files
 #------------------------------------------------------------------------------
-#file6 = open('I dont know the name')
-file16 = open('Data/iilm.dat',       'w')
-file17 = open('Data/config.dat',     'w')
-file18 = open('Data/trajectory.dat', 'w')
-file19 = open('Data/qmdist.dat',     'w')
-file20 = open('Data/icor.dat',       'w')
-file21 = open('Data/icor2.dat',      'w')
-file22 = open('Data/icor3.dat',      'w')
-file23 = open('Data/iconf.dat',      'w')
-file30 = open('Data/zdist.dat',      'w')
-file31 = open('Data/sia.dat',        'w')
+file16 = open('Data/iilm/iilm.dat',       'w')
+file17 = open('Data/iilm/config.dat',     'w')
+file18 = open('Data/iilm/trajectory.dat', 'w')
+file20 = open('Data/iilm/icor.dat',       'w')
+file21 = open('Data/iilm/icor2.dat',      'w')
+file22 = open('Data/iilm/icor3.dat',      'w')
+file23 = open('Data/iilm/iconf.dat',      'w')
+file30 = open('Data/iilm/zdist.dat',      'w')
+file31 = open('Data/iilm/sia.dat',        'w')
 #------------------------------------------------------------------------------
 #   inizialize the values
 #------------------------------------------------------------------------------
@@ -102,27 +100,28 @@ xnin = dens*tmax
 xnin2= dens2*tmax
 nexp = int(xnin+0.5)
 nexp2= int(xnin2+0.5)
-file16.write('qm iilm 1.0')   
-file16.write('-----------')   
+file16.write('qm iilm 1.0\n')   
+file16.write('-----------\n')   
 file16.write(fs.f101.format(f,n,a)) 
 file16.write(fs.f1102.format(nin,nmc,neq)) 
 file16.write(fs.f103.format(n_p,nc))
 file16.write(fs.f1104.format(dz,tcore,score))
 file16.write('\n')
+
 #------------------------------------------------------------------------------
 #   initialize                                                  
 #------------------------------------------------------------------------------
-x     = np.zeros(n)
-z     = np.zeros(n)
-zcore = np.zeros(n)    
-xcor_av    =  np.zeros(n_p)
-xcor_er    =  np.zeros(n_p)
-x2cor_av   =  np.zeros(n_p)
-x2cor_er   =  np.zeros(n_p)
-x3cor_av   =  np.zeros(n_p)
-x3cor_er   =  np.zeros(n_p)
-x2sub_av   =  np.zeros(n_p)
-x2sub_er   =  np.zeros(n_p)       
+x          = np.zeros(n+1)
+z          = np.zeros(nin+1)
+zstore     = np.zeros(n)    
+xcor_av    = np.zeros(n_p)
+xcor_er    = np.zeros(n_p)
+x2cor_av   = np.zeros(n_p)
+x2cor_er   = np.zeros(n_p)
+x3cor_av   = np.zeros(n_p)
+x3cor_er   = np.zeros(n_p)
+x2sub_av   = np.zeros(n_p)
+x2sub_er   = np.zeros(n_p)       
 xcor_sum   = np.zeros(n_p)
 xcor2_sum  = np.zeros(n_p)
 x2cor_sum  = np.zeros(n_p)
@@ -133,12 +132,13 @@ x3cor2_sum = np.zeros(n_p)
 #------------------------------------------------------------------------------
 #     plot S_IA                                                              
 #------------------------------------------------------------------------------
-ni = n // 4
+ni = n//4
 for na in range(ni, ni*2+1):
-    z = [ni*a, na*a]
-    fn.xconf(n, x, nin, z, f, a)
-    stot, ttot, vtot = fn.action(n, x, f, a)
-    shc = fn.sshort(z, nin, tcore, score, tmax)
+    z[0] = ni*a
+    z[1] = na*a
+    fn.xconf(n, x, 2, z, f, a)
+    stot, ttot, vtot = fn.act(f, a, n, x)
+    shc = fn.sshort(z, 2, tcore, score, tmax)
     stot += shc
     file31.write(fs.f222.format((na-ni)*a, stot/s0-2.0))
     
@@ -146,30 +146,17 @@ for na in range(ni, ni*2+1):
 #     parameters for histograms                                              
 #------------------------------------------------------------------------------
 
-nxhist = 50
+nxhist    = 50
 xhist_min = -1.5*f
-stxhist= 3.0*f/float(nxhist)
-nzhist = 40
-stzhist= 4.01/float(nzhist)
+stxhist   = 3.0*f/float(nxhist)
+nzhist    = 40
+stzhist   = 4.01/float(nzhist)
 ix= np.zeros(nxhist)
 iz= np.zeros(nzhist)
+
 #------------------------------------------------------------------------------
-#   Read input values from console
+#   clear summation arrays                                                 
 #------------------------------------------------------------------------------
-
-#while True:
-#   try:
-#       seed = int(input("Enter the random seed: ")) #change to int() if expecting int-point input
-#       break # Break out of the loop if input is numeric
-#   except ValueError:
-#       print("Invalid input. Please enter a number.")
-seed = -1234
-random.seed(seed)
-
-#----------------------------------------------------------------------------c
-#   clear summation arrays                                                 c
-#----------------------------------------------------------------------------c
-
 stot_sum  = 0.0
 stot2_sum = 0.0
 vtot_sum  = 0.0
@@ -185,23 +172,24 @@ x8_sum    = 0.0
 nconf     = 0
 ncor      = 0
 nacc      = 0
-nhit      = 0  
+nhit      = 0 
+ 
 #------------------------------------------------------------------------------
 #   setup and intial action                                                
 #------------------------------------------------------------------------------
-
-fn.setup(nin, z, tmax, seed)
+for i in range(nin):
+    z[i] = random.random()*tmax
+z = np.sort(z)
 fn.xconf(n, x, nin, z, f, a)
-stot, ttot, vtot = fn.action(f, a, n, x)
-shc = fn.sshort(z, nin, tcore, score, tmax)
+stot, ttot, vtot = fn.act(f, a, n, x)
+shc   = fn.sshort(z, nin, tcore, score, tmax)
 stot += shc
 
 #------------------------------------------------------------------------------
 #   loop over configs                                                      
 #------------------------------------------------------------------------------
-
 for i in tqdm(range(nmc)):
-    nconf = nconf+1
+    nconf += 1
     if i == neq :
         ncor       = 0
         nconf      = 0
@@ -228,26 +216,27 @@ for i in tqdm(range(nmc)):
     #--------------------------------------------------------------------------
     #   generate new configuration: loop over instantons                       
     #--------------------------------------------------------------------------
-    zstore = np.zeros(nin)
     for iin in range(nin):
         nhit  += 1
-        sold  = stot 
-        fn.store(nin,z,zstore)
-        zold  = z[iin]
-        znew  = zold + (random.random()-0.5)*dz
+        sold   = stot 
+        zstore = np.copy(z)
+        zold   = z[iin]
+        znew   = zold + (random.random()-0.5)*dz
         if znew > tmax:
-            znew=znew-tmax
+            znew -= tmax
         if znew < 0.0:
-                znew=znew+tmax
-        z[iin]= znew
-        fn.sort(nin,z)
+            znew += tmax
+        z[iin] = znew
+        z      = np.sort(z)
+        
         #----------------------------------------------------------------------
         #   calculate new action
         #----------------------------------------------------------------------
         fn.xconf(n,x,nin,z, f, a)
-        snew, tnew, vnew = fn.action(n,x, f, a)
+        snew, tnew, vnew = fn.act(f, a, n, x)
         shc = fn.sshort(z, nin, tcore, score, tmax)
         snew += shc
+        
         #----------------------------------------------------------------------
         #   accept with probability exp(-delta S)                                  
         #----------------------------------------------------------------------
@@ -256,25 +245,25 @@ for i in tqdm(range(nmc)):
             nacc += 1
             stot = snew
         else:
-            fn.restore(nin,z,zstore)
+            z = np.copy(zstore)
         if i < 400:
-            for ipr in range(1, min(11, len(z) + 1)):
-                file23.write(f"{z[ipr-1]:7.4f} ")
-                if ipr % 10 == 0:
-                    file23.write('\n')
-
+            for ipr in range(min(10,len(z))):
+                file23.write(f'{z[ipr]:.4f}')
+                file23.write(' ')
+            file23.write('\n')
     #--------------------------------------------------------------------------
     #   new configuration: instanton distribution                              
     #--------------------------------------------------------------------------
-    for ii in range(1, nin, 2):
-        if ii == 1:
-            zm = z[nin-1] - tmax
+    for ii in range(0, nin, 2):
+        if ii == 0:
+            zm = z[nin] - tmax
         else:
-            zm = z[ii-2]
-        z0 = z[ii-1]
-        zp = z[ii]
-        zia = min(zp - z0, z0 - zm)
-        fn.histogramarray(zia, 0.0, stzhist, nzhist, iz)
+            zm = z[ii-1]
+        z0  = z[ii]
+        zp  = z[ii+1]
+        zia = min(zp-z0, z0-zm)
+        fn.histogramarray( zia, 0.0, stzhist, nzhist, iz)
+        
     #--------------------------------------------------------------------------
     #   action etc.                                                            
     #--------------------------------------------------------------------------
@@ -284,13 +273,7 @@ for i in tqdm(range(nmc)):
         
     file18.write(fs.f555.format(i,stot,ttot,vtot,stot/(nin*s0)))
     if i % kp == 0:
-        '''
-        print("configuration   ", i, "\n",
-              "acceptance rate ", float(nacc)/float(nhit), "\n",
-              "action (t,v)    ", stot, ttot, vtot, \n
-              "s/(n*s_0)       ", stot,ttot,vtot, \n)
-        '''
-        file17.write('configuration')
+        file17.write('configuration: ')
         file17.write(str(i))
         file17.write('\n')
         for k in range(n):
@@ -311,11 +294,12 @@ for i in tqdm(range(nmc)):
         x2_sum += x[k]**2
         x4_sum += x[k]**4
         x8_sum += x[k]**8
+        
     #--------------------------------------------------------------------------
     #   correlation function                                                   
     #--------------------------------------------------------------------------
     for ic in range(nc):
-        ncor = ncor + 1 
+        ncor += 1 
         ip0  = int( (n-n_p)*random.random() ) 
         x0   = x[ip0]
         for ip in range(n_p):
@@ -354,23 +338,23 @@ e_err = np.sqrt(v_err**2+t_err**2)
 #   output                                                                 
 #------------------------------------------------------------------------------
 file16.write('\n')
-file16.write(fs.f901.format(stot_av,stot_err)) 
-file16.write(fs.f902.format(stot_av/float(nin),stot_err/float(nin))) 
-file16.write(fs.f903.format(s0)) 
-file16.write(fs.f904.format(stot_av/(nin*s0),stot_err/(nin*s0)))  
-file16.write(fs.f905.format(v_av,v_err)) 
-file16.write(fs.f906.format(t_av,t_err)) 
-file16.write(fs.f908.format(e_av,e_err)) 
-file16.write(fs.f905.format(x_av,x_err)) 
-file16.write(fs.f910.format(x2_av,x2_err)) 
+file16.write(fs.f801.format(stot_av,stot_err)) 
+file16.write(fs.f9902.format(stot_av/float(nin),stot_err/float(nin))) 
+file16.write(fs.f9903.format(s0)) 
+file16.write(fs.f9904.format(stot_av/(nin*s0),stot_err/(nin*s0)))  
+file16.write(fs.f802.format(v_av,v_err)) 
+file16.write(fs.f803.format(t_av,t_err)) 
+file16.write(fs.f805.format(e_av,e_err)) 
+file16.write(fs.f806.format(x_av,x_err)) 
+file16.write(fs.f807.format(x2_av,x2_err)) 
 file16.write(fs.f808.format(x4_av,x4_err)) 
 file16.write('\n') 
       
 #------------------------------------------------------------------------------
 #   correlation function, log derivative                                   
 #------------------------------------------------------------------------------
-file16.write('# x correlation function\n')
-file20.write('# tau       x(tau)       dx(tau)     dlog\n')
+file16.write("x correlation function\n")
+file20.write("          tau       x(tau)      dx(tau)         dlog\n")
 for ip in range(n_p-1):
     dx   = (xcor_av[ip]-xcor_av[ip+1])/xcor_av[ip]/a
     dxe2 = (xcor_er[ip+1]/xcor_av[ip])**2
@@ -387,8 +371,8 @@ xx_er  = x2cor_er[n_p-1]
 for ip in range(n_p):
     x2sub_av[ip] = x2cor_av[ip]-xx_sub
     x2sub_er[ip] = np.sqrt(x2cor_er[ip]**2+xx_er**2)
-file16.write('# x correlation function\n')
-file21.write('# tau       x(tau)       dx(tau)     dlog\n')
+file16.write("x2 correlation function\n")
+file21.write("          tau      x2(tau)     dx2(tau)         dlog\n")
 for ip in range(n_p-1):
     dx  = (x2sub_av[ip]-x2sub_av[ip+1])/x2sub_av[ip]/a
     dxe2= (x2sub_er[ip+1]/x2sub_av[ip])**2
@@ -400,8 +384,8 @@ for ip in range(n_p-1):
 #------------------------------------------------------------------------------
 #   x^3 correlation function, log derivative                               
 #------------------------------------------------------------------------------
-file16.write('# x correlation function\n')
-file22.write('# tau       x(tau)       dx(tau)     dlog\n')
+file16.write("x3 correlation function\n")
+file22.write("          tau      x3(tau)     dx3(tau)         dlog\n")
 for ip in range(n_p-1):      
     dx   = (x3cor_av[ip]-x3cor_av[ip+1])/x3cor_av[ip]/a
     dxe2 = (x3cor_er[ip+1]/x3cor_av[ip])**2
@@ -413,17 +397,21 @@ for ip in range(n_p-1):
 #------------------------------------------------------------------------------
 #   histograms                                                             
 #------------------------------------------------------------------------------
-file16.write('\n')
-file16.write(' x distribution ')
-fn.plot_histogram(xhist_min, nxhist, ix)
-file16.write('\n')
-file16.write(' Z_IA distribution ')
-fn.plot_histogram(0.0, nzhist, iz)
 for i in range(nzhist):
     xx = (i+0.5)*stzhist
     file30.write(fs.f222.format(xx,iz[i]))      
 
-
+#------------------------------------------------------------------------------
+#------------------------------------------------------------------------------
+file16.close
+file17.close
+file18.close
+file20.close
+file21.close
+file22.close
+file23.close
+file30.close
+file31.close
 
 
 

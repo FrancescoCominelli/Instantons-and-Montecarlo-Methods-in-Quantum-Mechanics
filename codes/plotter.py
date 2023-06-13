@@ -850,7 +850,26 @@ plt.ylabel('d[log<xⁿ(0)xⁿ(τ)>]/dτ')
 
 plt.show()
 
+#------------------------------------------------------------------------------
+#   Fig.17 Typical instanton configuration in an instanton calculation
+#------------------------------------------------------------------------------
+with open('Data/iilm/iconf.dat', 'r') as file:
+    lines = file.readlines()[:3001]
 
+for i in range(10):
+    column  = [float(line.split()[i]) for line in lines]
+    
+    y = np.array(column)
+    x = range(len(y))
+    if i % 2 == 0:
+        plt.plot(x, y, color = 'blue', linewidth = 0.8)
+    else:
+        plt.plot(x, y, color = 'red', linewidth = 0.8)
+
+plt.xlim(0, 3000)
+plt.xlabel('configurations')
+plt.ylabel('x')
+plt.show()
 
 
 
