@@ -8,7 +8,7 @@ Unperturbed oscillator frequency (choose w0 ~ 4f)
 w0     = 5.6
 
 Number of lattice points in the euclidean time direction (n ~ 800)
-n      = 100
+n      = 400
 
 Lattice spacing (a ∼ 0.05)
 a      = 0.05
@@ -47,11 +47,19 @@ Number of instantons for random generation (even)
 nin    = 10
 
 Number of heating steps (nheat ∼ 10)
-nheat  = 5
+nheat  = 10
+
+Position update dz 
+dz     = 1.0
+
+Hard core radius rcore (tcore=rcore/f) (0.3)
+rcore  = 0.3     
+         
+Hard core strength A (score=A*s0) (3.0)
+acore  = 3.0
 
 Random seed
 seed   = 12345
-
 
 
 

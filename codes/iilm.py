@@ -52,39 +52,46 @@ file31 = open('Data/sia.dat',        'w')
 #------------------------------------------------------------------------------
 #   inizialize the values
 #------------------------------------------------------------------------------
+# open the file for reading
+with open('parameters.txt', 'r') as file:
+    # read the contents of the file
+    contents = file.read()
+   
+# search for the values of f and a using regular expressions
+f      = re.search(r'f\s*=\s*(\d+\.\d+)', contents).group(1)
+n      = re.search(r'n\s*=\s*(\d+)', contents).group(1)
+a      = re.search(r'a\s*=\s*(\d+\.\d+)', contents).group(1)
+neq    = re.search(r'neq\s*=\s*(\d+)', contents).group(1)
+nmc    = re.search(r'nmc\s*=\s*(\d+)', contents).group(1)
+nc     = re.search(r'nc\s*=\s*(\d+)', contents).group(1)
+n_p    = re.search(r'n_p\s*=\s*(\d+)', contents).group(1)
+kp     = re.search(r'kp\s*=\s*(\d+)', contents).group(1)
+nin    = re.search(r'nin\s*=\s*(\d+)', contents).group(1)
+nheat  = re.search(r'nheat\s*=\s*(\d+)', contents).group(1)
+dz     = re.search(r'dz\s*=\s*(\d+\.\d+)', contents).group(1)
+rcore  = re.search(r'rcore\s*=\s*(\d+\.\d+)', contents).group(1)
+acore  = re.search(r'acore\s*=\s*(\d+\.\d+)', contents).group(1)
+seed   = re.search(r'seed\s*=\s*(\d+)', contents).group(1)
+
+# convert the values to integers
+f      = float(f)    #separation of wells f (f=1.4)
+n      = int(n)      #grid size n<10000 (n=100)
+a      = float(a)    #grid spacing a (dtau=0.05)
+nmc    = int(nmc)    #monte carlo sweeps
+neq    = int(neq)    #equilibration sweeps
+n_p    = int(n_p)    #number of points in correlator
+kp     = int(kp)     #number of sweeps between cooling
+nc     = int(nc)     #number of measurements per configuration
+nin    = int(nin)    #number of instantons
+dz     = float(dz)   #position update dz
+rcore  = float(rcore)#hard core radius rcore (tcore=rcore/f) (0.3)
+acore  = float(acore)#hard core strength A (score=A*s0) (3.0)
+seed   = int(seed)   #seed to generate random numbers
+
+#------------------------------------------------------------------------------
+#     echo input parameters                                                  
+#------------------------------------------------------------------------------
 pi  = np.pi
-#grid size n<1000 (n=100)
-n = 100
-#grid spacing a (dtau=0.05)
-a = 0.05
-#file6.write('number of equilibration sweeps') 
-neq = 100
-#file6.write('position update dz') 
-dz  = 1.0
-#separation of wells f (f=1.4)
-f = 1.4
-#grid size n<1000 (n=800)
-n = 100
-#grid spacing a (dtau=0.05)
-a = 0.05
-#file6.write('number of instantons (even)') 
-#file6.write('semiclassical result',nexp) 
-#file6.write('two loop result     ',nexp2) 
-nin = 2
-#file6.write('number of configurations') 
-nmc = 1000
-#file6.write('number of points in correlator') 
-n_p = 20
-#file6.write('number of measurements per config') 
-nc = 5
-#file6.write('write every kth config') 
-kp = 5
-#file6.write('hard core radius rcore (tcore=rcore/f) (0.3)')
-rcore = 0.3              
-#file6.write('hard core strength A (score=A*s0) (3.0)')
-acore = 3.0
-
-
 tcore = rcore/f
 tmax = n*a
 s0   = 4.0/3.0*f**3
@@ -95,7 +102,16 @@ xnin = dens*tmax
 xnin2= dens2*tmax
 nexp = int(xnin+0.5)
 nexp2= int(xnin2+0.5)
-
+file16.write('qm iilm 1.0')   
+file16.write('-----------')   
+file16.write(fs.f101.format(f,n,a)) 
+file16.write(fs.f1102.format(nin,nmc,neq)) 
+file16.write(fs.f103.format(n_p,nc))
+file16.write(fs.f1104.format(dz,tcore,score))
+file16.write('\n')
+#------------------------------------------------------------------------------
+#   initialize                                                  
+#------------------------------------------------------------------------------
 x     = np.zeros(n)
 z     = np.zeros(n)
 zcore = np.zeros(n)    
@@ -114,16 +130,6 @@ x2cor2_sum = np.zeros(n_p)
 x3cor_sum  = np.zeros(n_p)
 x3cor2_sum = np.zeros(n_p)     
 
-#------------------------------------------------------------------------------
-#   echo input parameters                                                  
-#------------------------------------------------------------------------------
-file16.write('qm iilm 1.0')   
-file16.write('-----------')   
-file16.write(fs.f101.format(f,n,a)) 
-file16.write(fs.f1102.format(nin,nmc,neq)) 
-file16.write(fs.f103.format(n_p,nc))
-file16.write(fs.f1104.format(dz,tcore,score))
-file16.write('\n') 
 #------------------------------------------------------------------------------
 #     plot S_IA                                                              
 #------------------------------------------------------------------------------
@@ -416,7 +422,6 @@ fn.plot_histogram(0.0, nzhist, iz)
 for i in range(nzhist):
     xx = (i+0.5)*stzhist
     file30.write(fs.f222.format(xx,iz[i]))      
-
 
 
 

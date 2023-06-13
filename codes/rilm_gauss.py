@@ -51,7 +51,8 @@ file17 = open('Data/rilm_gauss/config_gauss.dat','w')
 file18 = open('Data/rilm_gauss/trajectory.dat',  'w')
 file20 = open('Data/rilm_gauss/rcor_gauss.dat',  'w')
 file21 = open('Data/rilm_gauss/rcor2_gauss.dat', 'w')
-file22 = open('Data/rilm_gauss/rcor3_gauss.dat', 'w') 
+file22 = open('Data/rilm_gauss/rcor3_gauss.dat', 'w')
+file23 = open('Data/rilm_gauss/config.dat','w') 
 file30 = open('Data/rilm_gauss/zdist.dat',       'w')
 
 #------------------------------------------------------------------------------
@@ -223,8 +224,7 @@ for i in tqdm(range(nmc)):
         tvtot+= a*tv
         stot += s
     
-    file18.write(fs.f555.format(i,stot,ttot,vtot,stot/(nin*s0)))
-            
+    file18.write(fs.f555.format(i,stot,ttot,vtot,stot/(nin*s0)))    
     #------------------------------------------------------------------------------
     #   heat configuration: start from classical path  
     #------------------------------------------------------------------------------
@@ -275,11 +275,16 @@ for i in tqdm(range(nmc)):
     #   configuration  
     #------------------------------------------------------------------------------
     if i % kp == 0:
+        file23.write('configuration: ')
+        file23.write(str(i))
+        file23.write('\n')
         file17.write('configuration: ')
         file17.write(str(i))
         file17.write('\n')
         for k in range(n):
-            file17.write(fs.f222.format(k*a,x_hot[k]))    
+            file23.write(fs.f222.format(k*a, x[k]))
+            file17.write(fs.f222.format(k*a, x_hot[k]))
+                
     
     #------------------------------------------------------------------------------
     #   include in sample  
@@ -423,6 +428,7 @@ file18.close()
 file20.close()
 file21.close()
 file22.close()
+file23.close()
 file30.close()
     
     

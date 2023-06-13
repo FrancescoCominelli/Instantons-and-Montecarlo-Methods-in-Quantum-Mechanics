@@ -666,7 +666,7 @@ plt.show()
 #   discretized euclidean action of the double well potential for  = 1.4.
 #------------------------------------------------------------------------------
 
-with open('Data/rilm/config.dat', 'r') as file:
+with open('Data/rilm_gauss/config.dat', 'r') as file:
     lines = file.readlines()
 
 start_line = None

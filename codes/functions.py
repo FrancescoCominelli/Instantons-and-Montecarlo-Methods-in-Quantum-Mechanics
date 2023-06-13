@@ -1,7 +1,6 @@
 # Definition of functions
 import numpy as np
 import matplotlib.pyplot as plt
-import random
 
 #------------------------------------------------------------------------------
 #     function to include value a in histogram array hist(n)
