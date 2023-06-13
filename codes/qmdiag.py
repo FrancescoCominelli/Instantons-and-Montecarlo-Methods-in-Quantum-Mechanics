@@ -2,28 +2,51 @@ import numpy as np
 import format_strings as fs
 import functions as fn 
 import re
+#------------------------------------------------------------------------------
+#   Direct diagonalization of quantum mechanical anharmonic oscillator
+#------------------------------------------------------------------------------
+#   hamiltonian m/2(\dot x)^2+k(x^2-f^2)^2, units 2m=k=1.                      
+#------------------------------------------------------------------------------
+#   harmonic oscillator: H_0=m/2(\dot x)^2+m/2*w^2x^2
+#   perturbation:        H_1=A*x^4+B*x^2+C  
+#------------------------------------------------------------------------------
+#   Input:
+#------------------------------------------------------------------------------
+#   f       minimum of harmonic oxillator: (x^2-f^2)^2
+#   n       number of lattice points in the euclidean time direction (n=800)
+#   w0      unperturbed oscillator frequency (w0 = 4f))
+#------------------------------------------------------------------------------
+#------------------------------------------------------------------------------
+#   open files
+#------------------------------------------------------------------------------
+file16 = open('Data/qmdiag/qmdiag.dat', 'w')
+file17 = open('Data/qmdiag/cor.dat', 'w')
+file18 = open('Data/qmdiag/cor2.dat', 'w')
+file19 = open('Data/qmdiag/z.dat', 'w')
+file20 = open('Data/qmdiag/psi.dat', 'w')
+file21 = open('Data/qmdiag/dcor.dat', 'w')
 
-#Direct diagonalization of quantum mechanical anharmonic oscillator
-
-#Hamiltonian m/2(\dot x)^2+k(x^2-f^2)^2, units 2m=k=1
-#Harmonic oscillator: H_0=m/2(\dot x)^2+m/2*w^2x^2
-#Perturbation: H_1=A*x^4+B*x^2+C
-
+#------------------------------------------------------------------------------
+#   input parameters                                                                 
+#------------------------------------------------------------------------------
 # open the file for reading
 with open('parameters.txt', 'r') as file:
     # read the contents of the file
     contents = file.read()
    
-# search for the values of f and a using regular expressions
+# search for the values
 f    = re.search(r'f\s*=\s*(\d+\.\d+)', contents).group(1)
 ndim = re.search(r'ndim\s*=\s*(\d+)', contents).group(1)
 w0   = re.search(r'w0\s*=\s*(\d+\.\d+)', contents).group(1)
 
-# convert the values to integers
+# convert the values to integers and floats
 f    = float(f)
 ndim = int(ndim)
 w0   = float(w0)
 
+#------------------------------------------------------------------------------
+#     initialize                                                  
+#------------------------------------------------------------------------------
 eps = 1.e-30
 pi = np.pi
 
@@ -35,34 +58,6 @@ xmax = 2.0 * f
 nx = 100
 dx = 2.0 * xmax / float(nx)
 
-h = np.zeros((ndim, ndim), dtype=np.float32)
-e = np.zeros(ndim, dtype=np.float32)
-v = np.zeros((ndim, ndim), dtype=np.float32)
-psi = np.zeros(ndim, dtype=np.float32)
-rho = np.zeros(ndim, dtype=np.float32)
-rho2 = np.zeros(ndim, dtype=np.float32)
-rho3 = np.zeros(ndim, dtype=np.float32)
-xcorp = np.zeros((ntau + 1, ntau + 1), dtype=np.float32)
-x3corp = np.zeros((ntau + 1, ntau + 1), dtype=np.float32)
-x2corp = np.zeros((ntau + 1, ntau + 1), dtype=np.float32)
-
-# Open files with specified file names and modes
-file16 = open('Data/qmdiag/qmdiag.dat', 'w')
-file17 = open('Data/qmdiag/cor.dat', 'w')
-file18 = open('Data/qmdiag/cor2.dat', 'w')
-file19 = open('Data/qmdiag/z.dat', 'w')
-file20 = open('Data/qmdiag/psi.dat', 'w')
-file21 = open('Data/qmdiag/dcor.dat', 'w')
-
-# Write information to the files
-
-file16.write('qmdiag 1.0\n')
-file16.write('----------\n')
-file16.write(fs.f601.format(f, ndim))
-file16.write(fs.f602.format(taumax, ntau))
-file16.write(fs.f603.format(xmax, nx))
-
-#Initialize parameters
 m = 0.5
 w = w0
 
@@ -75,43 +70,68 @@ cw = 1.0 / np.sqrt(m*w)
 c22 = cw**2/2.0
 c44 = cw**4/4.0
 
-#Build up Hamiltonian matrix h
 
+h      = np.zeros((ndim, ndim))
+e      = np.zeros(ndim)
+v      = np.zeros((ndim, ndim))
+psi    = np.zeros(ndim)
+rho    = np.zeros(ndim)
+rho2   = np.zeros(ndim)
+rho3   = np.zeros(ndim)
+xcorp  = np.zeros((ntau + 1, ntau + 1))
+x3corp = np.zeros((ntau + 1, ntau + 1))
+x2corp = np.zeros((ntau + 1, ntau + 1))
+
+#------------------------------------------------------------------------------
+#     echo input parameters                                                  
+#------------------------------------------------------------------------------
+file16.write('qmdiag 1.0\n')
+file16.write('----------\n')
+file16.write(fs.f601.format(f, ndim))
+file16.write(fs.f602.format(taumax, ntau))
+file16.write(fs.f603.format(xmax, nx))
+
+#------------------------------------------------------------------------------
+#     Build up Hamiltonian matrix h
+#------------------------------------------------------------------------------
 for n in range(ndim):
-    # <n|h|n>
+    #--------------------------------------------------------------------------
+    #     <n|h|n>                                           
+    #--------------------------------------------------------------------------
     x4 = c44 * 3.0 * ((n + 1) ** 2 + n ** 2)
     x2 = c22 * (2 * n + 1)
     e0 = w * (n + 0.5) + c
     h[n, n] = a * x4 + b * x2 + e0
-
-    # <n|h|n+2>
+    #--------------------------------------------------------------------------
+    #     <n|h|n+2>                                           
+    #--------------------------------------------------------------------------
     if n + 2 < ndim:
         x4 = c44 * np.sqrt((n + 1.0) * (n + 2)) * (4 * n + 6)
         x2 = c22 * np.sqrt((n + 1.0) * (n + 2))
         hh = a * x4 + b * x2
         h[n, n + 2] = hh
         h[n + 2, n] = hh
-
-    # <n|h|n+4>
+    #--------------------------------------------------------------------------
+    #     <n|h|n+4>                                           
+    #--------------------------------------------------------------------------
     if n + 4 < ndim:
         x4 = c44 * np.sqrt((n + 1.0) * (n + 2) * (n + 3) * (n + 4))
         hh = a * x4
         h[n, n + 4] = hh
         h[n + 4, n] = hh
-    
-# Diagonalize h using numpy's eigh function
-
+#------------------------------------------------------------------------------
+#     Diagonalize h and sort the eigenvalues and eigenvectors in ascending
+#     order and removing non physical values
+#------------------------------------------------------------------------------
 e, v = np.linalg.eigh(h)
-
-# Sort the eigenvalues and eigenvectors in ascending order and removing non physical values
 
 sorted_indices = np.argsort(e)
 e = e[sorted_indices]
 v = v[:, sorted_indices]
 
-
-# Energy eigenvalues and matrix elements <0|x|n>
-
+#------------------------------------------------------------------------------
+#     Energy eigenvalues and matrix elements <0|x|n>                                                
+#------------------------------------------------------------------------------
 print('\n')
 file16.write('\n')
 print(fs.f901.format())
@@ -144,9 +164,9 @@ for n in range(ndim):
     
     print(fs.f551.format(n, e[n], rho[n], rho2[n], rho3[n]))
     file16.write(fs.f551.format(n, e[n], rho[n], rho2[n], rho3[n]))
-
-# Groundstate wave function 
-
+#------------------------------------------------------------------------------
+#     Groundstate wave function                                            
+#------------------------------------------------------------------------------
 file16.write('\n')
 file16.write(fs.f902.format()) 
 
@@ -160,13 +180,16 @@ for k in range(nx+1):
     
     for j in range(ndim):
         psix += v[j,0] * psi[j]
-    
-    # Compare to simple model
+    #------------------------------------------------------------------------------
+    #     Compare to simple model                                                
+    #------------------------------------------------------------------------------
     psip = (2.0 * f / pi)**0.25 * np.exp(-f * (x - f)**2)
     psim = (2.0 * f / pi)**0.25 * np.exp(-f * (x + f)**2)
     psi0 = 1.0 / np.sqrt(2.0) * (psip + psim)
     
-    # Check normalization
+    #------------------------------------------------------------------------------
+    #     Check normalization                                                
+    #------------------------------------------------------------------------------
     xnorm += dx * psix**2
     xnorm2 += dx * psi[0]**2
     
@@ -180,8 +203,9 @@ for j in range(ndim):
 # Print normalization results
 print("\nnorm ", xnorm, xnorm2, xnorm3)
 
-# Coordinate space correlator
-
+#------------------------------------------------------------------------------
+#     Coordinate space correlator                                                
+#------------------------------------------------------------------------------
 file16.write('\n')
 file16.write(fs.f903.format())
 file17.write(fs.f906.format())
@@ -194,9 +218,10 @@ for k in range(ntau+1):
         xcorp[k][j] = xcor
     file16.write(fs.f555.format(tau, xcor, xcorp[k][1], xcorp[k][3], xcorp[k][5]))
     file17.write(fs.f333.format(tau, xcor, 0.01))
-
-# Log derivative
-
+    
+#------------------------------------------------------------------------------
+#     Log derivative                                                
+#------------------------------------------------------------------------------
 file16.write('\n')
 file16.write(fs.f904.format())
 
@@ -215,9 +240,10 @@ for k in range(ntau):
     dlog3 = -(np.log(xcorp[k+1][3] + eps) - np.log(xcorp[k][3] + eps)) / dtau
     dlog5 = -(np.log(xcorp[k+1][5] + eps) - np.log(xcorp[k][5] + eps)) / dtau
     file16.write(fs.f555.format(tau, dlog, dlog1, dlog3, dlog5))
-
-#x^2 and x^3 correlator
-
+    
+#------------------------------------------------------------------------------
+#     x^2 and x^3 correlator                                                
+#------------------------------------------------------------------------------
 file16.write('\n')
 file16.write(fs.f907.format())
 file18.write(fs.f908.format())
@@ -257,9 +283,9 @@ for k in range(ntau+1):
     x3xor = x3corp[k][n-1]
     file16.write(fs.f555.format(tau, x3cor, x3corp[k][1], x3corp[k][3], x3corp[k][5]))
     file18.write(fs.f333.format(tau, x3cor, 0.01))
-
-# Partition function
-
+#------------------------------------------------------------------------------
+#     Partition function                                                
+#------------------------------------------------------------------------------
 xlmax = 100.0
 xlmin = 0.1
 xlogmax = np.log(xlmax)
@@ -277,12 +303,11 @@ for il in range(nl+1):
     p = t*np.log(z) - e[0]
     file19.write(fs.f333.format(t, xl, p))
 
-# Close the files
-
+#------------------------------------------------------------------------------
+#------------------------------------------------------------------------------
 file16.close()
 file17.close()
 file18.close()
 file19.close()
 file20.close()
 file21.close()
-
