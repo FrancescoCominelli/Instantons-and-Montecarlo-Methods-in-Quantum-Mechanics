@@ -38,14 +38,39 @@ for i in range(4):
 
 plt.xlabel('x')
 plt.ylabel('V(x)')
+plt.title('Energy levels')
 
 plt.xlim(-2.5, 2.5)
 plt.ylim(0, 10)
+
+plt.show()  
+
+#------------------------------------------------------------------------------
+#   Fig. 1.b Spectrum of the double well potential.
+#------------------------------------------------------------------------------
+with open('Data/qmdiag/spectrum.dat', 'r') as file:
+    lines = file.readlines()
+
+for i in range(6):
+    column  = [float(line.split()[i]) for line in lines]
+    
+    y = np.array(column)
+    x = list(range(len(y)))
+    x = [num / 10 for num in x]
+    plt.plot(x, y, color = 'black', linewidth = 0.8)
+
+plt.xlabel('f')
+plt.ylabel('E')
+plt.title('Energy spectrum')
+
+plt.xlim(0, 2)
+plt.ylim(0, 23)
+
 plt.show()
-'''
+
 #------------------------------------------------------------------------------
 #   FIG. 2: Typical euclidean path obtained in a Monte Carlo simulation of the 
-#   discretized euclidean action of the double well potential for  = 1.4.
+#   discretized euclidean action of the double well potential.
 #------------------------------------------------------------------------------
 
 with open('Data/qmcool/config.dat', 'r') as file:
@@ -90,15 +115,17 @@ y     = np.array(column2)
 
 plt.plot(x, y, color = 'green',linewidth = 0.8, label = 'Cooled')
 
-plt.xlim(0, 20)
+
 plt.xlabel('τ')
 plt.ylabel('x')
 plt.legend()
+plt.title('Monte Carlo vs Cooled configurations')
 
+plt.xlim(0, 20)
 plt.show()
-'''
+
 #------------------------------------------------------------------------------
-#   FIG. 3: Probability distribution in the double well potential for f = 1.4.
+#   FIG. 3: Probability distribution in the double well potential.
 #------------------------------------------------------------------------------
 with open('Data/qmdiag/psi.dat', 'r') as file:
     lines = file.readlines()
@@ -120,9 +147,12 @@ x = np.array(column1)
 y = np.array(column2)
 plt.plot(x, y, color = 'blue', drawstyle = 'steps', label = 'Monte Carlo' )
 
-plt.legend()
+
 plt.xlabel('x')
 plt.ylabel('P(x)')
+plt.legend()
+plt.title('Probability distribution |\u03C8|\u00B2')
+
 plt.show()
 
 #------------------------------------------------------------------------------
@@ -186,11 +216,14 @@ y_err = np.array(column3)
 plt.errorbar(x, y, yerr=y_err, fmt='D',markerfacecolor='none',
              markeredgecolor = 'green', markersize=8, capsize=5, label = '<x³(0)x³(τ)>')
 
-plt.xlim(0, 1.5)
-plt.ylim(0, 8)
-plt.legend()
 plt.xlabel('τ')
 plt.ylabel('<xⁿ(0)xⁿ(τ)>')
+plt.legend()
+plt.title('Correlation functions')
+
+plt.xlim(0, 1.5)
+plt.ylim(0, 8)
+
 plt.show()
 
 #------------------------------------------------------------------------------
@@ -253,11 +286,15 @@ y_err = np.array(column3)
 plt.errorbar(x, y, yerr=y_err, fmt='D',markerfacecolor='none',
              markeredgecolor = 'green', markersize=8, capsize=5, label = '<x³(0)x³(τ)>')
 
-plt.xlim(0, 1.5)
-plt.ylim(0, 4.5)
-plt.legend()
+
+
 plt.xlabel('τ')
 plt.ylabel('d[log<xⁿ(0)xⁿ(τ)>]/dτ')
+plt.legend()
+plt.title('Log derivative of correlation functions')
+
+plt.xlim(0, 1.5)
+plt.ylim(0, 4.5)
 
 plt.show()
 
@@ -275,11 +312,8 @@ x     = np.array(column1)
 y     = np.array(column2)
 
 plt.plot(x, y, color = 'black')
-plt.xscale('log')  # Set x-axis scale to logarithmic
-plt.xlim(0.01,2.5)
-plt.ylim(-2.5, -1)
-plt.xlabel('T')
-plt.ylabel('F')
+
+
 
 #data from qmswitch.py runned 6 times with different n
 y     = np.array([-2.24413, -2.23835, -2.22145, -2.10050, -1.94522,       -1.74119])
@@ -287,6 +321,14 @@ y_err = np.array([ 0.02725,  0.05859,  0.03459,  0.05179,  0.03288,        0.021
 x     = np.array([ 0.2,      0.025,    0.1,      0.5,      0.740740740741, 1.0])
 plt.errorbar(x, y, yerr=y_err, fmt='s', markerfacecolor='none',
              markeredgecolor = 'blue',markersize=8, capsize=5)
+
+plt.xlabel('T')
+plt.ylabel('F')
+plt.title('Free energy of anharmonic oscillator')
+
+plt.xscale('log')
+plt.xlim(0.01,2.5)
+plt.ylim(-2.5, -1)
 
 plt.show()
 
@@ -351,11 +393,14 @@ y_err = np.array(column3)
 plt.errorbar(x, y, yerr=y_err, fmt='D',markerfacecolor='none',
              markeredgecolor = 'green', markersize=8, capsize=5, label = '<x³(0)x³(τ)>')
 
-plt.xlim(0, 1.5)
-plt.ylim(0, 8)
-plt.legend()
 plt.xlabel('τ')
 plt.ylabel('<xⁿ(0)xⁿ(τ)>')
+plt.legend()
+plt.title('Cooled correlation functions')
+
+plt.xlim(0, 1.5)
+plt.ylim(0, 8)
+
 plt.show()
 
 #------------------------------------------------------------------------------
@@ -418,11 +463,14 @@ y_err = np.array(column3)
 plt.errorbar(x, y, yerr=y_err, fmt='D',markerfacecolor='none',
              markeredgecolor = 'green', markersize=8, capsize=5, label = '<x³(0)x³(τ)>')
 
-plt.xlim(0, 1.5)
-plt.ylim(0, 4.5)
-plt.legend()
+
 plt.xlabel('τ')
 plt.ylabel('d[log<xⁿ(0)xⁿ(τ)>]/dτ')
+plt.legend()
+plt.title('Cooled log derivative of correlation functions')
+
+plt.xlim(0, 1.5)
+plt.ylim(0, 4.5)
 
 plt.show()
 
@@ -452,10 +500,12 @@ plt.plot(x, y, color = 'green', linewidth = 0.8)
 
 plt.xlabel('n_cool')
 plt.ylabel('N_top/\u03B2')
+plt.title('Instanton density')
 
 plt.xscale('log')
 plt.yscale('log')
 plt.xlim(1, )
+
 plt.show()
 
 #------------------------------------------------------------------------------
@@ -482,6 +532,7 @@ plt.plot(x, y, color='green', linewidth = 0.8)
 
 plt.xlabel('n_cool')
 plt.ylabel('S/N_inst')
+plt.title('Action per instanton')
 
 plt.xscale('log')
 plt.yscale('log')
@@ -522,6 +573,8 @@ for i in range(4):
 
 plt.xlabel('τ')
 plt.ylabel('X')
+plt.title('Quantum mechanical path of one-instanton partition function')
+
 plt.xlim(0, n*a-a)
 
 plt.show()
@@ -587,11 +640,14 @@ y_err = np.array(column3)
 plt.errorbar(x, y, yerr=y_err, fmt='D',markerfacecolor='none',
              markeredgecolor = 'green', markersize=8, capsize=5, label = '<x³(0)x³(τ)>')
 
-plt.xlim(0, 1.5)
-plt.ylim(0, 8)
-plt.legend()
 plt.xlabel('τ')
 plt.ylabel('<xⁿ(0)xⁿ(τ)>')
+plt.legend()
+plt.title('Random instanton configuration correlation functions')
+
+plt.xlim(0, 1.5)
+plt.ylim(0, 8)
+
 plt.show()
 
 #------------------------------------------------------------------------------
@@ -654,11 +710,13 @@ y_err = np.array(column3)
 plt.errorbar(x, y, yerr=y_err, fmt='D',markerfacecolor='none',
              markeredgecolor = 'green', markersize=8, capsize=5, label = '<x³(0)x³(τ)>')
 
-plt.xlim(0, 1.5)
-plt.ylim(0, 4.5)
-plt.legend()
 plt.xlabel('τ')
 plt.ylabel('d[log<xⁿ(0)xⁿ(τ)>]/dτ')
+plt.legend()
+plt.title('Random instanton configuration log derivative correlation functions')
+
+plt.xlim(0, 1.5)
+plt.ylim(0, 4.5)
 
 plt.show()
 #------------------------------------------------------------------------------
@@ -708,10 +766,13 @@ y     = np.array(column2)
 
 plt.plot(x, y, color = 'green',linewidth = 0.8, label = 'Gaussian fl')
 
-plt.xlim(0, 20)
+
 plt.xlabel('τ')
 plt.ylabel('x')
 plt.legend()
+plt.title('Random instanton configuration vs Gaussian fluctuations')
+
+plt.xlim(0, 20)
 
 plt.show()
 #------------------------------------------------------------------------------
@@ -775,11 +836,14 @@ y_err = np.array(column3)
 plt.errorbar(x, y, yerr=y_err, fmt='D',markerfacecolor='none',
              markeredgecolor = 'green', markersize=8, capsize=5, label = '<x³(0)x³(τ)>')
 
-plt.xlim(0, 1.5)
-plt.ylim(0, 8)
-plt.legend()
 plt.xlabel('τ')
 plt.ylabel('<xⁿ(0)xⁿ(τ)>')
+plt.legend()
+plt.title('Ran. inst. gaussian fluctuations correlation functions')
+
+plt.xlim(0, 1.5)
+plt.ylim(0, 8)
+
 plt.show()
 
 #------------------------------------------------------------------------------
@@ -842,11 +906,13 @@ y_err = np.array(column3)
 plt.errorbar(x, y, yerr=y_err, fmt='D',markerfacecolor='none',
              markeredgecolor = 'green', markersize=8, capsize=5, label = '<x³(0)x³(τ)>')
 
-plt.xlim(0, 1.5)
-plt.ylim(0, 4.5)
-plt.legend()
 plt.xlabel('τ')
 plt.ylabel('d[log<xⁿ(0)xⁿ(τ)>]/dτ')
+plt.legend()
+plt.title('Ran. inst. gaussian fluctuations log derivative correlation functions')
+
+plt.xlim(0, 1.5)
+plt.ylim(0, 4.5)
 
 plt.show()
 
@@ -866,11 +932,13 @@ for i in range(10):
     else:
         plt.plot(x, y, color = 'red', linewidth = 0.8)
 
-plt.xlim(0, 3000)
 plt.xlabel('configurations')
 plt.ylabel('x')
-plt.show()
+plt.title('Instanton configuration in an interacting instanton calculation')
 
+plt.xlim(0, 3000)
+
+plt.show()
 
 
 
