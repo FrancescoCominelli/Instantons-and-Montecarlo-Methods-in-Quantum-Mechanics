@@ -4,7 +4,6 @@ import random
 from tqdm import tqdm
 import functions as fn
 import re
-
 #------------------------------------------------------------------------------
 #------------------------------------------------------------------------------
 #   Random instanton calculation in quantum mechanics.
@@ -16,7 +15,7 @@ import re
 #------------------------------------------------------------------------------
 #   Program follows units and conventions of txt file
 #------------------------------------------------------------------------------
-#   Imput:
+#   Input:
 #------------------------------------------------------------------------------
 #   f       minimum of harmonic oxillator: (x^2-f^2)^2
 #   n       number of lattice points in the euclidean time direction (n=800)
@@ -43,9 +42,6 @@ import re
 #               DeltaPi(tau), dlog(Pi)/dtau, Delta[dlog(Pi)/dtau],where 
 #               DeltaPi(tau) is the statistical error in Pi(tau)
 #------------------------------------------------------------------------------
-#------------------------------------------------------------------------------
-#   open files
-#------------------------------------------------------------------------------
 file16 = open('Data/rilm_gauss/rilm_gauss.dat',  'w')
 file17 = open('Data/rilm_gauss/config_gauss.dat','w')
 file18 = open('Data/rilm_gauss/trajectory.dat',  'w')
@@ -54,7 +50,6 @@ file21 = open('Data/rilm_gauss/rcor2_gauss.dat', 'w')
 file22 = open('Data/rilm_gauss/rcor3_gauss.dat', 'w')
 file23 = open('Data/rilm_gauss/config.dat','w') 
 file30 = open('Data/rilm_gauss/zdist.dat',       'w')
-
 #------------------------------------------------------------------------------
 #   input parameters                                                                 
 #------------------------------------------------------------------------------
@@ -91,8 +86,6 @@ nin    = int(nin)   #number of instantons
 nheat  = int(nheat) #number of heating steps
 seed   = int(seed)  #seed to generate random numbers
 
-
-
 #------------------------------------------------------------------------------
 #     parameters for histograms                                              
 #------------------------------------------------------------------------------  
@@ -105,32 +98,50 @@ stzhist= 4.01/float(nzhist)
 #------------------------------------------------------------------------------
 #     initialize                                                  
 #------------------------------------------------------------------------------
-x      =  np.zeros(n+1)
-z      =  np.zeros(n)  
-x_hot  =  np.zeros(n+1)
-w      =  np.zeros(n+1)
-ix     = np.zeros(nxhist)
-iz     = np.zeros(nzhist)
-xcor_sum   =  np.zeros(n_p)
-xcor2_sum  =  np.zeros(n_p)
-xcor_av    =  np.zeros(n_p)
-xcor_er    =  np.zeros(n_p)
-x2cor_sum  =  np.zeros(n_p)
-x2cor2_sum =  np.zeros(n_p)
-x2cor_av   =  np.zeros(n_p)
-x2cor_er   =  np.zeros(n_p)
-x3cor_sum  =  np.zeros(n_p)
-x3cor2_sum =  np.zeros(n_p)
-x3cor_av   =  np.zeros(n_p)
-x3cor_er   =  np.zeros(n_p)
-x2sub_av   =  np.zeros(n_p)
-x2sub_er   =  np.zeros(n_p)
+nconf= 0
+ncor = 0
+nhit = 0 
+nacc = 0
+
+stot_sum  = 0.0
+stot2_sum = 0.0
+vtot_sum  = 0.0
+vtot2_sum = 0.0
+ttot_sum  = 0.0
+ttot2_sum = 0.0
+tvir_sum  = 0.0
+tvir2_sum = 0.0
+x_sum     = 0.0
+x2_sum    = 0.0
+x4_sum    = 0.0
+x8_sum    = 0.0
+
+x          = np.zeros(n+1)
+z          = np.zeros(n)  
+x_hot      = np.zeros(n+1)
+w          = np.zeros(n+1)
+ix         = np.zeros(nxhist)
+iz         = np.zeros(nzhist)
+xcor_sum   = np.zeros(n_p)
+xcor2_sum  = np.zeros(n_p)
+xcor_av    = np.zeros(n_p)
+xcor_er    = np.zeros(n_p)
+x2cor_sum  = np.zeros(n_p)
+x2cor2_sum = np.zeros(n_p)
+x2cor_av   = np.zeros(n_p)
+x2cor_er   = np.zeros(n_p)
+x3cor_sum  = np.zeros(n_p)
+x3cor2_sum = np.zeros(n_p)
+x3cor_av   = np.zeros(n_p)
+x3cor_er   = np.zeros(n_p)
+x2sub_av   = np.zeros(n_p)
+x2sub_er   = np.zeros(n_p)
 
 #------------------------------------------------------------------------------
-#     echo input parameters                                                  
+#   echo input parameters                                                  
 #------------------------------------------------------------------------------
-pi  = np.pi
-
+random.seed(seed)
+pi    = np.pi
 tmax  = n*a
 s0    = 4.0/3.0*f**3
 dens  = 8*np.sqrt(2.0/pi)*f**2.5*np.exp(-s0)
@@ -151,31 +162,7 @@ file17.write(fs.f444.format(n, nmc/kp, n*a, f))
 file17.write('\n') 
 
 #------------------------------------------------------------------------------
-#     clear summation arrays                                                 
-#------------------------------------------------------------------------------
-stot_sum  = 0.0
-stot2_sum = 0.0
-vtot_sum  = 0.0
-vtot2_sum = 0.0
-ttot_sum  = 0.0
-ttot2_sum = 0.0
-tvir_sum  = 0.0
-tvir2_sum = 0.0
-x_sum     = 0.0
-x2_sum    = 0.0
-x4_sum    = 0.0
-x8_sum    = 0.0
-
-#------------------------------------------------------------------------------
-#   initialize
-#------------------------------------------------------------------------------
-nconf= 0
-ncor = 0
-nhit = 0 
-nacc = 0
-
-#------------------------------------------------------------------------------
-#   loop over configs
+#   loop over configurations
 #------------------------------------------------------------------------------
 for i in tqdm(range(nmc)):
     nconf += 1
@@ -205,13 +192,13 @@ for i in tqdm(range(nmc)):
         zia = min(zp-z0, z0-zm)
         fn.histogramarray( zia, 0.0, stzhist, nzhist, iz)
         
-    #------------------------------------------------------------------------------
+    #--------------------------------------------------------------------------
     #   calculate action etc.
-    #------------------------------------------------------------------------------
-    stot = 0.0
-    ttot = 0.0
-    tvtot= 0.0
-    vtot = 0.0  
+    #--------------------------------------------------------------------------
+    stot  = 0.0
+    ttot  = 0.0
+    tvtot = 0.0
+    vtot  = 0.0  
     
     for j in range(1, n):
         xp = (x[j+1]-x[j])/a
@@ -225,42 +212,41 @@ for i in tqdm(range(nmc)):
         stot += s
     
     file18.write(fs.f555.format(i,stot,ttot,vtot,stot/(nin*s0)))    
-    #------------------------------------------------------------------------------
+    #--------------------------------------------------------------------------
     #   heat configuration: start from classical path  
-    #------------------------------------------------------------------------------
+    #--------------------------------------------------------------------------
     for k in range(n+1):
         x_hot[k] = x[k]
         w[k] = -4.0*(f**2-3.0*x[k]**2)
     
-    #------------------------------------------------------------------------------
+    #--------------------------------------------------------------------------
     #   heating sweeps   
-    #------------------------------------------------------------------------------
+    #--------------------------------------------------------------------------
     for ih in range(nheat):
         for j in range(1, n):
-            xpm = (x_hot[j]-x_hot[j-1])/a
-            xpp = (x_hot[j+1]-x_hot[j])/a
-            t = 1.0/4.0*(xpm**2+xpp**2)
-            v = 0.5*w[j]*(x_hot[j]-x[j])**2
+            xpm  = (x_hot[j]-x_hot[j-1])/a
+            xpp  = (x_hot[j+1]-x_hot[j])/a
+            t    = 1.0/4.0*(xpm**2+xpp**2)
+            v    = 0.5*w[j]*(x_hot[j]-x[j])**2
             sold = a*(t+v)
          
             xmin = abs(f*np.tanh(f*a))
             if abs(x[j]) < xmin:
                 continue
            
-            #------------------------------------------------------------------------------
+            #------------------------------------------------------------------
             #   update  
-            #------------------------------------------------------------------------------
+            #------------------------------------------------------------------
             xnew = x_hot[j] + delx*(2.0*random.random()-1.0)
-
-            xpm = (xnew-x_hot[j-1])/a
-            xpp = (x_hot[j+1]-xnew)/a
-            t = 1.0/4.0*(xpm**2+xpp**2)
-            v = 0.5*w[j]*(xnew-x[j])**2
+            xpm  = (xnew-x_hot[j-1])/a
+            xpp  = (x_hot[j+1]-xnew)/a
+            t    = 1.0/4.0*(xpm**2+xpp**2)
+            v    = 0.5*w[j]*(xnew-x[j])**2
             snew = a*(t+v)
             
-            #------------------------------------------------------------------------------
+            #------------------------------------------------------------------
             #   accept/reject  
-            #------------------------------------------------------------------------------
+            #------------------------------------------------------------------
             dels  = snew-sold
             dels  = min(dels,70.0)
             dels  = max(dels,-70.0)
@@ -271,9 +257,9 @@ for i in tqdm(range(nmc)):
         x_hot[n-1]= x_hot[0]
         x_hot[n]  = x_hot[1]
         
-    #------------------------------------------------------------------------------
+    #--------------------------------------------------------------------------
     #   configuration  
-    #------------------------------------------------------------------------------
+    #--------------------------------------------------------------------------
     if i % kp == 0:
         file23.write('configuration: ')
         file23.write(str(i))
@@ -284,19 +270,18 @@ for i in tqdm(range(nmc)):
         for k in range(n):
             file23.write(fs.f222.format(k*a, x[k]))
             file17.write(fs.f222.format(k*a, x_hot[k]))
-                
     
-    #------------------------------------------------------------------------------
+    #--------------------------------------------------------------------------
     #   include in sample  
-    #------------------------------------------------------------------------------
-    stot_sum += stot
-    stot2_sum+= stot**2
-    vtot_sum += vtot
-    vtot2_sum+= vtot**2
-    ttot_sum += ttot
-    ttot2_sum+= ttot**2
-    tvir_sum += tvtot
-    tvir2_sum+= tvtot**2
+    #--------------------------------------------------------------------------
+    stot_sum  += stot
+    stot2_sum += stot**2
+    vtot_sum  += vtot
+    vtot2_sum += vtot**2
+    ttot_sum  += ttot
+    ttot2_sum += ttot**2
+    tvir_sum  += tvtot
+    tvir2_sum += tvtot**2
     
     for k in range(n):
         fn.histogramarray(x_hot[k], xhist_min, stxhist, nxhist, ix)
@@ -313,7 +298,7 @@ for i in tqdm(range(nmc)):
         ip0  = int((n-n_p)*random.random()) 
         x0   = x_hot[ip0] 
         for ip in range(n_p):
-            x1 = x_hot[ip0+ip]
+            x1    = x_hot[ip0+ip]
             xcor  = x0*x1
             x2cor = xcor**2
             x3cor = xcor**3   
@@ -338,14 +323,14 @@ for ip in range(n_p):
     xcor_av[ip],xcor_er[ip]   = fn.disp(ncor,xcor_sum[ip],xcor2_sum[ip])
     x2cor_av[ip],x2cor_er[ip] = fn.disp(ncor,x2cor_sum[ip],x2cor2_sum[ip],)
     x3cor_av[ip],x3cor_er[ip] = fn.disp(ncor,x3cor_sum[ip],x3cor2_sum[ip],)
-v_av  = vtot_av/tmax
-v_err = vtot_err/tmax
-t_av  = ttot_av/tmax
-t_err = ttot_err/tmax
-tv_av = tvir_av/tmax
-tv_err= tvir_err/tmax
-e_av  = v_av + tv_av
-e_err = np.sqrt(v_err**2 + tv_err**2)
+v_av   = vtot_av/tmax
+v_err  = vtot_err/tmax
+t_av   = ttot_av/tmax
+t_err  = ttot_err/tmax
+tv_av  = tvir_av/tmax
+tv_err = tvir_err/tmax
+e_av   = v_av + tv_av
+e_err  = np.sqrt(v_err**2 + tv_err**2)
 
 #------------------------------------------------------------------------------
 #   output                                                               
@@ -401,7 +386,6 @@ for ip in range(n_p-1):
 #------------------------------------------------------------------------------
 #   x^3 correlation function, log derivative                                                              
 #------------------------------------------------------------------------------
-
 file16.write("x3 correlation function\n")
 file22.write("          tau      x3(tau)     dx3(tau)         dlog\n")
 
@@ -429,12 +413,4 @@ file20.close()
 file21.close()
 file22.close()
 file23.close()
-file30.close()
-    
-    
-    
-    
-    
-    
-    
-    
+file30.close()   

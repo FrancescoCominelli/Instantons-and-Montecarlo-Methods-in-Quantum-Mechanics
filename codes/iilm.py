@@ -5,14 +5,13 @@ from tqdm import tqdm
 import functions as fn
 import re
 #------------------------------------------------------------------------------
-#     interacting instanton calculation in quantum mechanics.                
-                     
+#     interacting instanton calculation in quantum mechanics                    
 #------------------------------------------------------------------------------
 #     action m/2(\dot x)^2+k(x^2-f^2)^2, units 2m=k=1.                       
 #------------------------------------------------------------------------------
 #     program follows units and conventions of txt file                    
 #------------------------------------------------------------------------------
-#   Imput:
+#   Input:
 #------------------------------------------------------------------------------
 #   f       minimum of harmonic oxillator: (x^2-f^2)^2
 #   n       number of lattice points in the euclidean time direction (n=800)
@@ -32,12 +31,6 @@ import re
 #   acore   strenght of hard core interaction (acore=3.0)
 #   dz      average position update (dz=1)
 #------------------------------------------------------------------------------
-#   Output:
-#------------------------------------------------------------------------------
-    
-#------------------------------------------------------------------------------
-#   open the files
-#------------------------------------------------------------------------------
 file16 = open('Data/iilm/iilm.dat',       'w')
 file17 = open('Data/iilm/config.dat',     'w')
 file18 = open('Data/iilm/trajectory.dat', 'w')
@@ -48,7 +41,7 @@ file23 = open('Data/iilm/iconf.dat',      'w')
 file30 = open('Data/iilm/zdist.dat',      'w')
 file31 = open('Data/iilm/sia.dat',        'w')
 #------------------------------------------------------------------------------
-#   inizialize the values
+#   input parameters
 #------------------------------------------------------------------------------
 # open the file for reading
 with open('parameters.txt', 'r') as file:
@@ -87,19 +80,21 @@ acore  = float(acore)#hard core strength A (score=A*s0) (3.0)
 seed   = int(seed)   #seed to generate random numbers
 
 #------------------------------------------------------------------------------
-#     echo input parameters                                                  
+#   echo input parameters                                                  
 #------------------------------------------------------------------------------
-pi  = np.pi
+random.seed(seed)
+pi    = np.pi
 tcore = rcore/f
-tmax = n*a
-s0   = 4.0/3.0*f**3
-score= acore*s0
-dens = 8*np.sqrt(2.0/pi)*f**2.5*np.exp(-s0)
-dens2= 8*np.sqrt(2.0/pi)*f**2.5*np.exp(-s0-71.0/72.0/s0)
-xnin = dens*tmax 
-xnin2= dens2*tmax
-nexp = int(xnin+0.5)
-nexp2= int(xnin2+0.5)
+tmax  = n*a
+s0    = 4.0/3.0*f**3
+score = acore*s0
+dens  = 8*np.sqrt(2.0/pi)*f**2.5*np.exp(-s0)
+dens2 = 8*np.sqrt(2.0/pi)*f**2.5*np.exp(-s0-71.0/72.0/s0)
+xnin  = dens*tmax 
+xnin2 = dens2*tmax
+nexp  = int(xnin+0.5)
+nexp2 = int(xnin2+0.5)
+
 file16.write('qm iilm 1.0\n')   
 file16.write('-----------\n')   
 file16.write(fs.f101.format(f,n,a)) 
@@ -107,10 +102,36 @@ file16.write(fs.f1102.format(nin,nmc,neq))
 file16.write(fs.f103.format(n_p,nc))
 file16.write(fs.f1104.format(dz,tcore,score))
 file16.write('\n')
+#------------------------------------------------------------------------------
+#     parameters for histograms                                              
+#------------------------------------------------------------------------------
+nxhist    = 50
+xhist_min = -1.5*f
+stxhist   = 3.0*f/float(nxhist)
+nzhist    = 40
+stzhist   = 4.01/float(nzhist)
 
 #------------------------------------------------------------------------------
 #   initialize                                                  
 #------------------------------------------------------------------------------
+nconf = 0
+ncor  = 0
+nacc  = 0
+nhit  = 0
+
+stot_sum  = 0.0
+stot2_sum = 0.0
+vtot_sum  = 0.0
+vtot2_sum = 0.0
+ttot_sum  = 0.0
+ttot2_sum = 0.0
+tvir_sum  = 0.0
+tvir2_sum = 0.0
+x_sum     = 0.0
+x2_sum    = 0.0
+x4_sum    = 0.0
+x8_sum    = 0.0
+
 x          = np.zeros(n+1)
 z          = np.zeros(nin+1)
 zstore     = np.zeros(n)    
@@ -128,9 +149,11 @@ x2cor_sum  = np.zeros(n_p)
 x2cor2_sum = np.zeros(n_p)
 x3cor_sum  = np.zeros(n_p)
 x3cor2_sum = np.zeros(n_p)     
+ix         = np.zeros(nxhist)
+iz         = np.zeros(nzhist)
 
 #------------------------------------------------------------------------------
-#     plot S_IA                                                              
+#   plot S_IA                                                              
 #------------------------------------------------------------------------------
 ni = n//4
 for na in range(ni, ni*2+1):
@@ -138,42 +161,10 @@ for na in range(ni, ni*2+1):
     z[1] = na*a
     fn.xconf(n, x, 2, z, f, a)
     stot, ttot, vtot = fn.act(f, a, n, x)
-    shc = fn.sshort(z, 2, tcore, score, tmax)
+    shc   = fn.sshort(z, 2, tcore, score, tmax)
     stot += shc
     file31.write(fs.f222.format((na-ni)*a, stot/s0-2.0))
-    
-#------------------------------------------------------------------------------
-#     parameters for histograms                                              
-#------------------------------------------------------------------------------
 
-nxhist    = 50
-xhist_min = -1.5*f
-stxhist   = 3.0*f/float(nxhist)
-nzhist    = 40
-stzhist   = 4.01/float(nzhist)
-ix= np.zeros(nxhist)
-iz= np.zeros(nzhist)
-
-#------------------------------------------------------------------------------
-#   clear summation arrays                                                 
-#------------------------------------------------------------------------------
-stot_sum  = 0.0
-stot2_sum = 0.0
-vtot_sum  = 0.0
-vtot2_sum = 0.0
-ttot_sum  = 0.0
-ttot2_sum = 0.0
-tvir_sum  = 0.0
-tvir2_sum = 0.0
-x_sum     = 0.0
-x2_sum    = 0.0
-x4_sum    = 0.0
-x8_sum    = 0.0
-nconf     = 0
-ncor      = 0
-nacc      = 0
-nhit      = 0 
- 
 #------------------------------------------------------------------------------
 #   setup and intial action                                                
 #------------------------------------------------------------------------------
@@ -251,6 +242,7 @@ for i in tqdm(range(nmc)):
                 file23.write(f'{z[ipr]:.4f}')
                 file23.write(' ')
             file23.write('\n')
+            
     #--------------------------------------------------------------------------
     #   new configuration: instanton distribution                              
     #--------------------------------------------------------------------------
@@ -316,7 +308,6 @@ for i in tqdm(range(nmc)):
 #------------------------------------------------------------------------------
 #   averages                                                               
 #------------------------------------------------------------------------------
-
 stot_av,stot_err = fn.disp(nconf,stot_sum,stot2_sum)
 vtot_av,vtot_err = fn.disp(nconf,vtot_sum,vtot2_sum)
 ttot_av,ttot_err = fn.disp(nconf,ttot_sum,ttot2_sum)
@@ -412,23 +403,3 @@ file22.close
 file23.close
 file30.close
 file31.close
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-

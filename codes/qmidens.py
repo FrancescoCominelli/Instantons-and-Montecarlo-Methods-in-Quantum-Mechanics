@@ -4,24 +4,24 @@ import random
 import functions as fn
 import re
 from tqdm import tqdm
-
 #------------------------------------------------------------------------------
-#   lattice calculation in quantum mechanics.                                                                         
+#   Lattice calculation in quantum mechanics                                                                         
 #------------------------------------------------------------------------------
-#   calculate instanton density by adiabatically switching from gaussian
-#   approximation to full potential. Have
-#    d(inst)=d(gaussian)*exp(-S(non-gaussian))
-#   where S(non-gaussian)=\int d\alpha <S-S(gaussian)>_\alpha. perform
+#   Action m/2(\dot x)^2+k(x^2-f^2)^2, units 2m=k=1 
+#------------------------------------------------------------------------------
+#   Calculate instanton density by adiabatically switching from gaussian
+#   approximation to full potential. Have d(inst)=d(gaussian)*exp(-S(non-gaussian)) 
+#   where S(non-gaussian)=\int d\alpha <S-S(gaussian)>_\alpha. Perform
 #   reference calculation of fluctuations around trivial vacuum.
 #------------------------------------------------------------------------------
-#   instanton is placed at beta/2. anti-symmetric boundary conditions are
-#   used. position is fixed during update by requiring x(beta/2)=0.
+#   Instanton is placed at beta/2. anti-symmetric boundary conditions are
+#   used. position is fixed during update by requiring x(beta/2)=0
 #------------------------------------------------------------------------------
-#   action m/2(\dot x)^2+k(x^2-f^2)^2, units 2m=k=1. 
+file16 = open('Data/qmidens/qmidens.dat', 'w')
+file17 = open('Data/qmidens/idens_conf.dat', 'w')
+file18 = open('Data/qmidens/vac_conf.dat', 'w')
 #------------------------------------------------------------------------------
-
-#------------------------------------------------------------------------------
-#   set the values
+#   imput parameters
 #------------------------------------------------------------------------------
 # open the file for reading
 with open('parameters.txt', 'r') as file:
@@ -41,38 +41,28 @@ nalpha = re.search(r'nalpha\s*=\s*(\d+)', contents).group(1)
 seed   = re.search(r'seed\s*=\s*(\d+)', contents).group(1)
 
 # convert the values to integers
-f      = float(f)
-n      = int(n)
-a      = float(a)
-icold  = int(icold)
-neq    = int(neq)
-nmc    = int(nmc)
-delx   = float(delx)
-kp     = int(kp)
-nalpha = int(nalpha)
-seed   = int(seed)
+f      = float(f)   #separation of wells f (f=1.4)
+n      = int(n)     #grid size n<10000 (n=100)
+a      = float(a)   #grid spacing a (dtau=0.05)
+icold  = int(icold) #cold/hot start (0,1)
+neq    = int(neq)   #equilibration sweeps
+nmc    = int(nmc)   #monte carlo sweeps
+delx   = float(delx)#update x (delx)
+kp     = int(kp)    #write every kth config
+nalpha = int(nalpha)#number of steps in adiabatic switching (nswitch ∼ 20)
+seed   = int(seed)  #seed to generate random numbers
 
-
+#------------------------------------------------------------------------------
+# echo input parameters
+#------------------------------------------------------------------------------
+random.seed(seed)
+pi     = np.pi
 dalpha = 1.0/float(nalpha)
 beta   = n*a
 tau0   = beta/2.0
 n0     = n/2
 n0p    = int(n0+1)
 n0m    = int(n0-1)
-sng    = 0.0
-svacng = 0.0
-pi     = np.pi
-
-#------------------------------------------------------------------------------
-# echo input parameters
-#------------------------------------------------------------------------------
-#   open txt files
-
-file16 = open('Data/qmidens/qmidens.dat', 'w')
-file17 = open('Data/qmidens/idens_conf.dat', 'w')
-file18 = open('Data/qmidens/vac_conf.dat', 'w')
-
-# write on a txt file the values
 
 file16.write('lattice qm idens 1.0\n')
 file16.write('--------------------\n')
@@ -85,14 +75,27 @@ file16.write('------------------------------------\n')
 #------------------------------------------------------------------------------
 #     initialize                                                             
 #------------------------------------------------------------------------------
-random.seed(seed)
-
+stot        = 0.0
+sng         = 0.0
+svacng      = 0.0
 stot_sum    = 0.0
 stot2_sum   = 0.0
 vav_sum     = 0.0
 vav2_sum    = 0.0
 valpha_sum  = 0.0
 valpha2_sum = 0.0
+sup_sum     = 0.0
+sup_err     = 0.0
+sup_hal     = 0.0
+sdw_sum     = 0.0
+sdw_err     = 0.0
+sdw_hal     = 0.0
+svacup_sum  = 0.0
+svacup_err  = 0.0
+svacup_hal  = 0.0
+svacdw_sum  = 0.0
+svacdw_err  = 0.0
+svacdw_hal  = 0.0
 
 x      = np.zeros(n)
 w      = np.zeros(n)
@@ -104,7 +107,6 @@ va_err = np.zeros(2 * nalpha + 1)
 #------------------------------------------------------------------------------
 #     initialize instanton and gaussian potential                                                            
 #------------------------------------------------------------------------------
-
 for i in range(n):
     tau   = i*a
     x[i]  = f*np.tanh(2.0*f*(tau-tau0))
@@ -116,16 +118,12 @@ for i in range(n):
 #------------------------------------------------------------------------------
 #     anti-periodic boundary conditions                                                            
 #------------------------------------------------------------------------------
-
 x[n-1] = -x[0]
 x      = np.append(x, -x[1])
 
 #------------------------------------------------------------------------------
 #     initial actions                                                          
 #------------------------------------------------------------------------------
-
-stot = 0
-
 for i in range(n):
     xp = (x[i+1]-x[i])/a
     t  = 1.0/4.0*xp**2    
@@ -143,18 +141,15 @@ file16.write(fs.f301.format(f0, stot, s0))
 #------------------------------------------------------------------------------
 #     loop over coupling constant (up/down)                                                          
 #------------------------------------------------------------------------------
-
 for ialpha in tqdm(range(2*nalpha+1)):
     if ialpha <= nalpha:
         alpha = ialpha * dalpha
     else:
         alpha = 2.0 - ialpha * dalpha
-    
-    nacc = 0
-    nhit = 0    
-    nconf= 0
-    ncor = 0
-
+    nacc  = 0
+    nhit  = 0    
+    nconf = 0
+    ncor  = 0
     #------------------------------------------------------------------------------
     #    monte carlo sweeps                                                     
     #------------------------------------------------------------------------------
@@ -168,22 +163,22 @@ for ialpha in tqdm(range(2*nalpha+1)):
             vav2_sum   = 0.0 
             valpha_sum = 0.0
             valpha2_sum= 0.0
-
+            
         #----------------------------------------------------------------------
         #   one sweep thorough configuration                                       
         #----------------------------------------------------------------------
         for j in range(1,n):
             nhit += 1
     
-        #----------------------------------------------------------------------
-        #   fix instanton center
-        #----------------------------------------------------------------------
+            #------------------------------------------------------------------
+            #   fix instanton center
+            #------------------------------------------------------------------
             if j == n0:
                 continue
 
-        #----------------------------------------------------------------------
-        #   old action                                       
-        #----------------------------------------------------------------------
+            #------------------------------------------------------------------
+            #   old action                                       
+            #------------------------------------------------------------------
             xpm   = (x[j]-x[j-1])/a
             xpp   = (x[j+1]-x[j])/a
             t     = 1.0/4.0*(xpm**2+xpp**2)
@@ -192,22 +187,22 @@ for ialpha in tqdm(range(2*nalpha+1)):
             v     = alpha*(v1-v0) + v0
             sold  = a*(t+v)
 
-        #----------------------------------------------------------------------
-        #   jakobian of constraint
-        #----------------------------------------------------------------------
+            #------------------------------------------------------------------
+            #   jakobian of constraint
+            #------------------------------------------------------------------
             if j == n0m or j == n0p:
                 vel = (x[n0p] - x[n0m]) / (2.0 * a)
                 sjak = -np.log(abs(vel))
                 sold = sold + sjak
 
-        #----------------------------------------------------------------------
-        #   MC hit                                       
-        #----------------------------------------------------------------------
+            #------------------------------------------------------------------
+            #   MC hit                                       
+            #------------------------------------------------------------------
             xnew = x[j] + delx*(2.0*random.random()-1.0)
 
-        #----------------------------------------------------------------------
-        #   new action                                       
-        #----------------------------------------------------------------------
+            #------------------------------------------------------------------
+            #   new action                                       
+            #------------------------------------------------------------------
             xpm   = (xnew-x[j-1])/a
             xpp   = (x[j+1]-xnew)/a
             t     = 1.0/4.0*(xpm**2+xpp**2)
@@ -216,9 +211,9 @@ for ialpha in tqdm(range(2*nalpha+1)):
             v     = alpha*(v1-v0) + v0
             snew  = a*(t+v)
 
-        #----------------------------------------------------------------------
-        #   jakobian                                     
-        #----------------------------------------------------------------------
+            #------------------------------------------------------------------
+            #   jakobian                                     
+            #------------------------------------------------------------------
             if j == n0m:
                 vel = (x[n0p] - xnew) / (2.0 * a)
                 sjak = -np.log(abs(vel))
@@ -228,21 +223,22 @@ for ialpha in tqdm(range(2*nalpha+1)):
                 sjak = -np.log(abs(vel))
                 snew = snew + sjak
 
-        #----------------------------------------------------------------------
-        #   accept/reject                                     
-        #----------------------------------------------------------------------
+            #------------------------------------------------------------------
+            #   accept/reject                                     
+            #------------------------------------------------------------------
             dels  = snew-sold
             dels  = min(dels,70.0)
             dels  = max(dels,-70.0)
             if np.exp(-dels) > random.random():
                 x[j]  = xnew
                 nacc += 1
+                
         x[n-1] = -x[0]
         x[n]   = -x[1]
     
-    #--------------------------------------------------------------------------
-    #   calculate action and other things                                                  
-    #--------------------------------------------------------------------------
+        #----------------------------------------------------------------------
+        #   calculate action and other things                                                  
+        #----------------------------------------------------------------------
         stot = 0.0
         ttot = 0.0
         vtot = 0.0
@@ -258,16 +254,10 @@ for ialpha in tqdm(range(2*nalpha+1)):
             vtot += a*v
             stot += s
             ptot += a*(v1-v0)
-        '''
-        if i % kp == 0:
-            print("configuration:   ", i, "\n",
-                  "coupling:        ", alpha, "\n",
-                  "acceptance rate: ", float(nacc)/float(nhit), "\n",
-                  "action (T,V):    ", stot, ttot, vtot)
-        '''
-    #--------------------------------------------------------------------------
-    #   include in sample                                                     
-    #--------------------------------------------------------------------------
+        
+        #----------------------------------------------------------------------
+        #   include in sample                                                     
+        #----------------------------------------------------------------------
         stot_sum    += stot
         stot2_sum   += stot**2
         vav_sum     += vtot/beta
@@ -275,16 +265,14 @@ for ialpha in tqdm(range(2*nalpha+1)):
         valpha_sum  += ptot/beta
         valpha2_sum += ptot**2/beta
 
-#------------------------------------------------------------------------------
-#   averages                                                     
-#------------------------------------------------------------------------------
+    #--------------------------------------------------------------------------
+    #   averages                                                     
+    #--------------------------------------------------------------------------
     stot_av, stot_err     = fn.disp(nconf, stot_sum, stot2_sum)
     v_av, v_err           = fn.disp(nconf, vav_sum, vav2_sum)
     valpha_av, valpha_err = fn.disp(nconf, valpha_sum, valpha2_sum)
-
     va_av[ialpha]  = valpha_av
-    va_err[ialpha] = valpha_err
-    
+    va_err[ialpha] = valpha_err   
     if ialpha % (2 * nalpha) == 0:
         da = dalpha / 4.0
     else:
@@ -292,9 +280,9 @@ for ialpha in tqdm(range(2*nalpha+1)):
     dsng = da * valpha_av
     sng += dsng
 
-#------------------------------------------------------------------------------
-#   output                                                               
-#------------------------------------------------------------------------------
+    #--------------------------------------------------------------------------
+    #   output                                                               
+    #--------------------------------------------------------------------------
     file16.write('\n')
     file16.write(fs.f800.format(alpha))
     file16.write(fs.f801.format(stot_av, stot_err))
@@ -306,22 +294,9 @@ for ialpha in tqdm(range(2*nalpha+1)):
         file17.write(fs.f222.format(j*a, x[j]))
 
 #------------------------------------------------------------------------------
-#   end of loop over coupling constants                                                                
+#   final estimate of integral over coupling have:
+#   sum=1/2(up+down) and up = 1/2*f0+f1+...+1/2*fn, down=...                                                               
 #------------------------------------------------------------------------------
-#------------------------------------------------------------------------------
-#   final estimate of integral over coupling                                                                
-#------------------------------------------------------------------------------
-sup_sum = 0.0
-sup_err = 0.0
-sup_hal = 0.0
-sdw_sum = 0.0
-sdw_err = 0.0
-sdw_hal = 0.0
-
-#------------------------------------------------------------------------------
-#   have sum=1/2(up+down) and up = 1/2*f0+f1+...+1/2*fn, down=...                                                               
-#------------------------------------------------------------------------------
-
 for ia in range(nalpha+1):
     if ia % nalpha == 0:
         da = dalpha / 4.0
@@ -332,7 +307,6 @@ for ia in range(nalpha+1):
     sup_err += da * va_err[ia] ** 2
     sdw_sum += da * va_av[iap]
     sdw_err += da * va_err[iap] ** 2
-
 
 for ia in range(0, nalpha+1, 2):
     if ia % nalpha == 0:
@@ -401,15 +375,14 @@ for ialpha in tqdm(range(2 * nalpha + 1)):
         alpha = ialpha * dalpha
     else:
         alpha = 2.0 - ialpha * dalpha
-    
     nacc = 0
     nhit = 0    
     nconf= 0
     ncor = 0
     
-    #------------------------------------------------------------------------------
+    #--------------------------------------------------------------------------
     #    monte carlo sweeps                                                     
-    #------------------------------------------------------------------------------
+    #--------------------------------------------------------------------------
     for i in range(nmc):
         nconf += 1
         if i == neq:
@@ -421,15 +394,15 @@ for ialpha in tqdm(range(2 * nalpha + 1)):
             valpha_sum = 0.0
             valpha2_sum= 0.0
 
-        #--------------------------------------------------------------------------
+        #----------------------------------------------------------------------
         #   one sweep thorough configuration                                       
-        #--------------------------------------------------------------------------
+        #----------------------------------------------------------------------
         for j in range(1,n):
             nhit += 1
 
-        #--------------------------------------------------------------------------
-        #   old action                                       
-        #--------------------------------------------------------------------------
+            #------------------------------------------------------------------
+            #   old action                                       
+            #------------------------------------------------------------------
             xpm   = (x[j]-x[j-1])/a
             xpp   = (x[j+1]-x[j])/a
             t     = 1.0/4.0*(xpm**2+xpp**2)
@@ -438,14 +411,14 @@ for ialpha in tqdm(range(2 * nalpha + 1)):
             v     = alpha*(v1-v0) + v0
             sold  = a*(t+v)
 
-        #--------------------------------------------------------------------------
-        #   MC hit                                       
-        #--------------------------------------------------------------------------
+            #------------------------------------------------------------------
+            #   MC hit                                       
+            #------------------------------------------------------------------
             xnew = x[j] + delx*(2.0*random.random()-1.0)
 
-        #--------------------------------------------------------------------------
-        #   new action                                       
-        #--------------------------------------------------------------------------
+            #------------------------------------------------------------------
+            #   new action                                       
+            #------------------------------------------------------------------
             xpm   = (xnew-x[j-1])/a
             xpp   = (x[j+1]-xnew)/a
             t     = 1.0/4.0*(xpm**2+xpp**2)
@@ -454,21 +427,22 @@ for ialpha in tqdm(range(2 * nalpha + 1)):
             v     = alpha*(v1-v0) + v0
             snew  = a*(t+v)
 
-        #--------------------------------------------------------------------------
-        #   accept/reject                                     
-        #--------------------------------------------------------------------------
+            #------------------------------------------------------------------
+            #   accept/reject                                     
+            #------------------------------------------------------------------
             dels  = snew-sold
             dels  = min(dels,70.0)
             dels  = max(dels,-70.0)
             if np.exp(-dels) > random.random():
                 x[j]  = xnew
                 nacc += 1
+                
         x[n-1] = x[0]
         x[n]   = x[1]
     
-    #--------------------------------------------------------------------------
-    #   calculate action and other things                                                  
-    #--------------------------------------------------------------------------
+        #----------------------------------------------------------------------
+        #   calculate action and other things                                                  
+        #----------------------------------------------------------------------
         stot = 0.0
         ttot = 0.0
         vtot = 0.0
@@ -484,16 +458,10 @@ for ialpha in tqdm(range(2 * nalpha + 1)):
             vtot += a*v
             stot += s
             ptot += a*(v1-v0)
-        '''
-        if i % kp == 0:
-            print("configuration:   ", i, "\n",
-                  "coupling:        ", alpha, "\n",
-                  "acceptance rate: ", float(nacc)/float(nhit), "\n",
-                  "action (T,V):    ", stot, ttot, vtot)
-        '''
-    #--------------------------------------------------------------------------
-    #   include in sample                                                     
-    #--------------------------------------------------------------------------
+       
+        #----------------------------------------------------------------------
+        #   include in sample                                                     
+        #----------------------------------------------------------------------
         stot_sum    += stot
         stot2_sum   += stot**2
         vav_sum     += vtot/beta
@@ -501,9 +469,9 @@ for ialpha in tqdm(range(2 * nalpha + 1)):
         valpha_sum  += ptot/beta
         valpha2_sum += ptot**2/beta
 
-#--------------------------------------------------------------------------
-#   averages                                                     
-#--------------------------------------------------------------------------
+    #--------------------------------------------------------------------------
+    #   averages                                                     
+    #--------------------------------------------------------------------------
     stot_av, stot_err     = fn.disp(nconf, stot_sum, stot2_sum)
     v_av, v_err           = fn.disp(nconf, vav_sum, vav2_sum)
     valpha_av, valpha_err = fn.disp(nconf, valpha_sum, valpha2_sum)
@@ -518,9 +486,9 @@ for ialpha in tqdm(range(2 * nalpha + 1)):
     dsvacng = da * valpha_av
     svacng += dsvacng
 
-#------------------------------------------------------------------------------
-#   output                                                               
-#------------------------------------------------------------------------------
+    #--------------------------------------------------------------------------
+    #   output                                                               
+    #--------------------------------------------------------------------------
     file16.write('\n')
     file16.write(fs.f800.format(alpha))
     file16.write(fs.f801.format(stot_av, stot_err))
@@ -532,22 +500,9 @@ for ialpha in tqdm(range(2 * nalpha + 1)):
         file18.write(fs.f222.format(j*a, x[j]))
 
 #------------------------------------------------------------------------------
-#   end of loop over coupling constants                                                                  
+#   final estimate of integral over coupling have
+#   sum=1/2(up+down) and up = 1/2*f0+f1+...+1/2*fn, down=...                                                               
 #------------------------------------------------------------------------------
-#------------------------------------------------------------------------------
-#   final estimate of integral over coupling                                                                
-#------------------------------------------------------------------------------
-svacup_sum = 0.0
-svacup_err = 0.0
-svacup_hal = 0.0
-svacdw_sum = 0.0
-svacdw_err = 0.0
-svacdw_hal = 0.0
-
-#------------------------------------------------------------------------------
-#   have sum=1/2(up+down) and up = 1/2*f0+f1+...+1/2*fn, down=...                                                               
-#------------------------------------------------------------------------------
-
 for ia in range(nalpha+1):
     if ia % nalpha == 0:
         da = dalpha / 4.0
@@ -558,7 +513,6 @@ for ia in range(nalpha+1):
     svacup_err += da * va_err[ia] ** 2
     svacdw_sum += da * va_av[iap]
     svacdw_err += da * va_err[iap] ** 2
-
 
 for ia in range(0, nalpha+1, 2):
     if ia % nalpha == 0:
@@ -611,13 +565,3 @@ file16.write(fs.f820.format(dens_ng, dens_er))
 file16.close()
 file17.close()
 file18.close()
-
-
-
-
-
-
-
-
-
-

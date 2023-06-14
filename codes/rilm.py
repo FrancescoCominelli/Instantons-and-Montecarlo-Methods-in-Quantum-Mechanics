@@ -6,13 +6,13 @@ import functions as fn
 import re
 #------------------------------------------------------------------------------
 #------------------------------------------------------------------------------
-#     random instanton calculation in quantum mechanics.                     
+#     Random instanton calculation in quantum mechanics                     
 #------------------------------------------------------------------------------
-#     action m/2(\dot x)^2+k(x^2-f^2)^2, units 2m=k=1.                       
+#     action m/2(\dot x)^2+k(x^2-f^2)^2, units 2m=k=1                       
 #------------------------------------------------------------------------------
 #     program follows units and conventions of txt file
 #------------------------------------------------------------------------------
-#   Imput:
+#   Input:
 #------------------------------------------------------------------------------
 #   f       minimum of harmonic oxillator: (x^2-f^2)^2
 #   n       number of lattice points in the euclidean time direction (n=800)
@@ -39,9 +39,6 @@ import re
 #               DeltaPi(tau), dlog(Pi)/dtau, Delta[dlog(Pi)/dtau],where 
 #               DeltaPi(tau) is the statistical error in Pi(tau)
 #------------------------------------------------------------------------------
-#------------------------------------------------------------------------------
-#   open files
-#------------------------------------------------------------------------------
 file16 = open('Data/rilm/rilm.dat',       'w')
 file17 = open('Data/rilm/config.dat',     'w')
 file18 = open('Data/rilm/trajectory.dat', 'w')
@@ -50,7 +47,6 @@ file20 = open('Data/rilm/rcor.dat',       'w')
 file21 = open('Data/rilm/rcor2.dat',      'w')
 file22 = open('Data/rilm/rcor3.dat',      'w') 
 file30 = open('Data/rilm/zdist.dat',      'w')
-
 #------------------------------------------------------------------------------
 #   input parameters                                                                 
 #------------------------------------------------------------------------------
@@ -87,11 +83,11 @@ nc     = int(nc)    #number of measurements per configuration
 nin    = int(nin)    #number of instantons
 seed   = int(seed)  #seed to generate random numbers
 
-
 #------------------------------------------------------------------------------
 #     echo input parameters                                                  
 #------------------------------------------------------------------------------
-pi  = np.pi
+random.seed(seed)
+pi    = np.pi
 tmax  = n*a
 s0    = 4.0/3.0*f**3
 dens  = 8*np.sqrt(2.0/pi)*f**2.5*np.exp(-s0)
@@ -111,7 +107,7 @@ file17.write(fs.f444.format(n, nmc/kp, n*a, f))
 file17.write('\n') 
 
 #------------------------------------------------------------------------------
-#     parameters for histograms                                              
+#   parameters for histograms                                              
 #------------------------------------------------------------------------------      
 nxhist    = 50
 xhist_min = -1.5*f
@@ -120,10 +116,28 @@ nzhist    = 40
 stzhist   = 4.01/float(nzhist)
 
 #------------------------------------------------------------------------------
-#     clear summation arrays                                                 
+#   inizialize                                                 
 #------------------------------------------------------------------------------
-x  =  np.zeros(n+1)
-z  =  np.zeros(nin+1)     
+nconf = 0
+ncor  = 0
+
+stot_sum  = 0.0
+stot2_sum = 0.0
+vtot_sum  = 0.0
+vtot2_sum = 0.0
+ttot_sum  = 0.0
+ttot2_sum = 0.0
+tvir_sum  = 0.0
+tvir2_sum = 0.0
+x_sum     = 0.0
+x2_sum    = 0.0
+x4_sum    = 0.0
+x8_sum    = 0.0
+
+ix         = np.zeros(nxhist)
+iz         = np.zeros(nzhist)
+x          =  np.zeros(n+1)
+z          =  np.zeros(nin+1)     
 xcor_av    = np.zeros(n_p)
 xcor_er    = np.zeros(n_p)
 x2cor_av   = np.zeros(n_p)
@@ -138,25 +152,6 @@ x2cor_sum  = np.zeros(n_p)
 x2cor2_sum = np.zeros(n_p)
 x3cor_sum  = np.zeros(n_p)
 x3cor2_sum = np.zeros(n_p)
-   
-stot_sum  = 0.0
-stot2_sum = 0.0
-vtot_sum  = 0.0
-vtot2_sum = 0.0
-ttot_sum  = 0.0
-ttot2_sum = 0.0
-tvir_sum  = 0.0
-tvir2_sum = 0.0
-x_sum     = 0.0
-x2_sum    = 0.0
-x4_sum    = 0.0
-x8_sum    = 0.0
-
-ix = np.zeros(nxhist)
-iz = np.zeros(nzhist)
-
-nconf = 0
-ncor  = 0
 
 #------------------------------------------------------------------------------
 #   loop over configurations                                                            
@@ -191,10 +186,10 @@ for i in tqdm(range(nmc)):
     #--------------------------------------------------------------------------
     #   calculate action etc.                                             
     #--------------------------------------------------------------------------
-    stot = 0.0
-    ttot = 0.0
-    tvtot= 0.0
-    vtot = 0.0
+    stot  = 0.0
+    ttot  = 0.0
+    tvtot = 0.0
+    vtot  = 0.0
     
     for j in range(1, n):
         xp = (x[j+1]-x[j])/a
@@ -202,10 +197,10 @@ for i in tqdm(range(nmc)):
         v  = (x[j]**2-f**2)**2
         tv = 2.0*x[j]**2*(x[j]**2-f**2)
         s  = a*(t+v)
-        ttot += a*t
-        vtot += a*v
-        tvtot+= a*tv
-        stot += s
+        ttot  += a*t
+        vtot  += a*v
+        tvtot += a*tv
+        stot  += s
     
     file18.write(fs.f555.format(i,stot,ttot,vtot,stot/(nin*s0)))
     if i % kp == 0:
@@ -242,15 +237,15 @@ for i in tqdm(range(nmc)):
         ip0 = int((n-n_p)*random.random())
         x0 = x[ip0]
         for ip in range(n_p):
-            x1 = x[ip0+ip]
-            xcor = x0*x1
+            x1    = x[ip0+ip]
+            xcor  = x0*x1
             x2cor = xcor**2
             x3cor = xcor**3
-            xcor_sum[ip] += xcor
-            xcor2_sum[ip] += xcor**2
-            x2cor_sum[ip] += x2cor
+            xcor_sum[ip]   += xcor
+            xcor2_sum[ip]  += xcor**2
+            x2cor_sum[ip]  += x2cor
             x2cor2_sum[ip] += x2cor**2
-            x3cor_sum[ip] += x3cor
+            x3cor_sum[ip]  += x3cor
             x3cor2_sum[ip] += x3cor**2
             
 #------------------------------------------------------------------------------
@@ -282,17 +277,17 @@ e_err = np.sqrt(v_err**2+tv_err**2)
 #     output                                                                 
 #------------------------------------------------------------------------------
 file16.write('\n')
-file16.write(fs.f9901.format(           stot_av, stot_err)) 
+file16.write(fs.f9901.format(stot_av, stot_err)) 
 file16.write(fs.f9902.format(stot_av/float(nin), stot_err/float(nin))) 
-file16.write(fs.f9903.format(               s0)) 
-file16.write(fs.f9904.format(  stot_av/(nin*s0), stot_err/(nin*s0))) 
-file16.write(fs.f9905.format(              v_av, v_err)) 
-file16.write(fs.f9906.format(              t_av, t_err)) 
-file16.write(fs.f9907.format(             tv_av, tv_err)) 
-file16.write(fs.f9908.format(              e_av, e_err)) 
-file16.write(fs.f9909.format(              x_av, x_err)) 
-file16.write(fs.f9910.format(              x2_av, x2_err)) 
-file16.write(fs.f9911.format(             x4_av, x4_err)) 
+file16.write(fs.f9903.format(s0)) 
+file16.write(fs.f9904.format(stot_av/(nin*s0), stot_err/(nin*s0))) 
+file16.write(fs.f9905.format(v_av, v_err)) 
+file16.write(fs.f9906.format(t_av, t_err)) 
+file16.write(fs.f9907.format(tv_av, tv_err)) 
+file16.write(fs.f9908.format(e_av, e_err)) 
+file16.write(fs.f9909.format(x_av, x_err)) 
+file16.write(fs.f9910.format(x2_av, x2_err)) 
+file16.write(fs.f9911.format(x4_av, x4_err)) 
 file16.write('\n') 
 
 #------------------------------------------------------------------------------
@@ -357,17 +352,3 @@ file20.close()
 file21.close()
 file22.close()
 file30.close()
-
-
-
-
-
-
-
-
-
-
-
-
-
-

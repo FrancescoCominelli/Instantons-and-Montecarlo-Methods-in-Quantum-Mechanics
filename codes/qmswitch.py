@@ -4,47 +4,41 @@ import random
 import functions as fn
 import re
 from tqdm import tqdm 
-
-
-#------------------------------------------------------------------------------
-# Lattice calculation in quantum mechanics.
 #------------------------------------------------------------------------------
 #------------------------------------------------------------------------------
-# Action m/2(\dot x)^2+k(x^2-f^2)^2, units 2m=k=1.
+#   Lattice calculation in quantum mechanics                              
 #------------------------------------------------------------------------------
 #------------------------------------------------------------------------------
-# Calculate partition function from adiabatic switching.
+#   Action m/2(\dot x)^2+k(x^2-f^2)^2, units 2m=k=1.                      
 #------------------------------------------------------------------------------
+#   periodic b.c. x(0)=x(n-1)                               
+#------------------------------------------------------------------------------
+#------------------------------------------------------------------------------
+#   Calculate partition function from adiabatic switching.
+#------------------------------------------------------------------------------
+#------------------------------------------------------------------------------
+#   Input:
 #------------------------------------------------------------------------------
 #   f       minimum of harmonic oxillator: (x^2-f^2)^2
 #   n       number of lattice points in the euclidean time direction (n=800)
 #   a       lattice spacing (a=0.05)
 #   ih      ih=0: cold start, x_i=-f; ih=1: hot start, x_i=random
-#   neq     number of equlibration sweeps before the first measurement (neq=100)
+#   neq     number of equlibration sweeps before the first measurement(neq=100)
 #   nmc     number of Monte Carlo sweeps (nmc=10^5)
-#   dx      width of Gaussian distribution used for MonteCarlo update: x_i^(n)-->x_i^(n+1)
-#   np      number of points on which the correlation functions are measured: 
+#   dx      width of Gaussian distribution used for MonteCarlo update:
+#           x_i^(n)-->x_i^(n+1)
+#   n_p      number of points on which the correlation functions are measured: 
 #           <x_i x_(i+1)>,...,<x_i x_(i+np)> (np=20)
-#   nmea    number of measurement of the correlation function given MonteCarlo configuration x_i
-#           (nmea=5)
-#   npri    number of MonteCarlo configurations between output of averaes to output file (npri=100)
+#   nmea    number of measurement of the correlation function given MonteCarlo 
+#           configuration x_i (nmea=5)
+#   npri    number of MonteCarlo configurations between output of averaes to
+#           output file (npri=100)
 #   nc      number of correlator measurements in a single configuration                                
-#   kp      number of sweeps between writeout of complete configuration     
+#   kp      number of sweeps between writeout of complete configuration   
 #------------------------------------------------------------------------------
-
+file16 = open('Data/qmswitch/qmswitch.dat', 'w')
 #------------------------------------------------------------------------------
-#   Read input values from console
-#------------------------------------------------------------------------------
-
-while True:
-    try:
-        seed = int(input("Enter the random seed: ")) #change to int() if expecting int-point input
-        break # Break out of the loop if input is numeric
-    except ValueError:
-        print("Invalid input. Please enter a number.")
-
-#------------------------------------------------------------------------------
-#   set the values
+#   Input parameters 
 #------------------------------------------------------------------------------
 # open the file for reading
 with open('parameters.txt', 'r') as file:
@@ -62,32 +56,33 @@ delx   = re.search(r'delx\s*=\s*(\d+\.\d+)', contents).group(1)
 kp     = re.search(r'kp\s*=\s*(\d+)', contents).group(1)
 w0     = re.search(r'w0\s*=\s*(\d+\.\d+)', contents).group(1)
 nalpha = re.search(r'nalpha\s*=\s*(\d+)', contents).group(1)
+seed   = re.search(r'seed\s*=\s*(\d+)', contents).group(1)
 
-# convert the values to integers
-f      = float(f)
-n      = int(n)
-a      = float(a)
-icold  = int(icold)
-neq    = int(neq)
-nmc    = int(nmc)
-delx   = float(delx)
-kp     = int(kp)
-w0     = float(w0)
-nalpha = int(nalpha)
+# convert the values to numbers
+f      = float(f)   #separation of wells f (f=1.4)
+n      = int(n)     #grid size n<10000 (n=100)
+a      = float(a)   #grid spacing a (dtau=0.05)
+icold  = int(icold) #cold/hot start (0,1)
+neq    = int(neq)   #equilibration sweeps
+nmc    = int(nmc)   #monte carlo sweeps
+delx   = float(delx)#update x (delx)
+kp     = int(kp)    #write every kth config
+w0     = float(w0)  #unperturbed oscillator frequency (choose w0 ~ 4f)
+nalpha = int(nalpha)#number of steps in adiabatic switching (nswitch ∼ 20)
+seed   = int(seed)  #seed to generate random numbers
 
-w      = w0
-dalpha = 1.0/float(nalpha)
-beta   = n*a
+
 
 #------------------------------------------------------------------------------
 # echo input parameters
 #------------------------------------------------------------------------------
-#open txt files
-
-file16 = open('Data/qmswitch/qmswitch.dat', 'w')
-
-
-# write on a txt file the values
+random.seed(seed)
+w      = w0
+dalpha = 1.0/float(nalpha)
+beta   = n*a
+e0     = w/2.0
+f0     = 1.0/beta*np.log(2.0*np.sinh(e0*beta))
+ei     = e0
 
 file16.write('lattice qm switch 1.0\n')
 file16.write('---------------------\n')
@@ -99,22 +94,36 @@ file16.write(fs.f105.format(w, nalpha))
 #------------------------------------------------------------------------------
 #     initialize                                                             
 #------------------------------------------------------------------------------
-random.seed(seed)
+nacc  = 0
+nhit  = 0    
+nconf = 0
+ncor  = 0
 
+stot        = 0.0  
 stot_sum    = 0.0
 stot2_sum   = 0.0
 vav_sum     = 0.0
 vav2_sum    = 0.0
 valpha_sum  = 0.0
 valpha2_sum = 0.0
-x_sum  = 0
-x2_sum = 0
-x4_sum = 0
-x8_sum = 0
+x_sum       = 0.0
+x2_sum      = 0.0
+x4_sum      = 0.0
+x8_sum      = 0.0
+eup_sum     = 0.0
+eup_err     = 0.0
+eup_hal     = 0.0
+edw_sum     = 0.0
+edw_err     = 0.0
+edw_hal     = 0.0
 
 x      = np.zeros(n)
 va_av  = np.zeros(2 * nalpha + 1)
 va_err = np.zeros(2 * nalpha + 1)
+
+#------------------------------------------------------------------------------
+#   set the start
+#------------------------------------------------------------------------------
 if icold==0:
     for i in range(n):
         x[i]= -f
@@ -125,15 +134,12 @@ else:
 #------------------------------------------------------------------------------
 #     periodic boundary conditions                                           
 #------------------------------------------------------------------------------
-
 x[0] = x[n-1]
 x    = np.append(x, x[1])
 
 #------------------------------------------------------------------------------
 #     initial action                                                       
-#------------------------------------------------------------------------------
-
-stot= 0.0         
+#------------------------------------------------------------------------------       
 for i in range(n):
     xp = (x[i+1]-x[i])/a
     t  = 1.0/4.0*xp**2
@@ -146,21 +152,11 @@ for i in range(n):
 #------------------------------------------------------------------------------
 #     loop over coupling constant alpha                                                  
 #------------------------------------------------------------------------------
-
-e0 = w/2.0
-f0 = 1.0/beta*np.log(2.0*np.sinh(e0*beta))
-ei = e0
-
 for ialpha in tqdm(range(2 * nalpha + 1)):
     if ialpha <= nalpha:
         alpha = ialpha * dalpha
     else:
         alpha = 2.0 - ialpha * dalpha
-    
-    nacc = 0
-    nhit = 0    
-    nconf= 0
-    ncor = 0
 
     #--------------------------------------------------------------------------
     #   monte carlo sweeps                                                     
@@ -169,23 +165,22 @@ for ialpha in tqdm(range(2 * nalpha + 1)):
         nconf += 1
         if i == neq:
             nconf = 0
-            stot_sum   = 0.0
-            stot2_sum  = 0.0
-            vav_sum    = 0.0
-            vav2_sum   = 0.0 
-            valpha_sum = 0.0
-            valpha2_sum= 0.0
-            x_sum  = 0.0
-            x2_sum = 0.0 
-            x4_sum = 0.0
-            x8_sum = 0.0
+            stot_sum    = 0.0
+            stot2_sum   = 0.0
+            vav_sum     = 0.0
+            vav2_sum    = 0.0 
+            valpha_sum  = 0.0
+            valpha2_sum = 0.0
+            x_sum       = 0.0
+            x2_sum      = 0.0 
+            x4_sum      = 0.0
+            x8_sum      = 0.0
 
         #--------------------------------------------------------------------------
         #   one sweep thorough configuration                                       
         #--------------------------------------------------------------------------
         for j in range(1,n):
             nhit += 1
-        
             xpm   = (x[j]-x[j-1])/a
             xpp   = (x[j+1]-x[j])/a
             t     = 1.0/4.0*(xpm**2+xpp**2)
@@ -193,19 +188,15 @@ for ialpha in tqdm(range(2 * nalpha + 1)):
             v1    = (x[j]**2-f**2)**2
             v     = alpha*(v1-v0) + v0
             sold  = a*(t+v)
-        
             xnew  = x[j] + delx*(2.0*random.random()-1.0)
-        
             xpm   = (xnew-x[j-1])/a
             xpp   = (x[j+1]-xnew)/a
             t     = 1.0/4.0*(xpm**2+xpp**2)
             v0    = 1.0/4.0*w**2*xnew**2
             v1    = (xnew**2-f**2)**2
             v     = alpha*(v1-v0) + v0
-        
             snew  = a*(t+v)
             dels  = snew-sold
-        
             dels  = min(dels,70.0)
             dels  = max(dels,-70.0)
             if np.exp(-dels) > random.random():
@@ -232,13 +223,7 @@ for ialpha in tqdm(range(2 * nalpha + 1)):
             vtot += a*v
             stot += s
             ptot += a*(v1-v0)
-        '''
-        if i % kp == 0:
-            print("configuration:   ", i, "\n",
-                  "coupling:        ", alpha, "\n",
-                  "acceptance rate: ", float(nacc)/float(nhit), "\n",
-                  "action (T,V):    ", stot, ttot, vtot)
-        '''
+        
         #----------------------------------------------------------------------
         #   include in sample                                                     
         #----------------------------------------------------------------------
@@ -258,7 +243,6 @@ for ialpha in tqdm(range(2 * nalpha + 1)):
     #--------------------------------------------------------------------------
     #   averages                                                               
     #--------------------------------------------------------------------------
-    
     stot_av, stot_err     = fn.disp(nconf, stot_sum, stot2_sum)
     v_av, v_err           = fn.disp(nconf, vav_sum, vav2_sum)
     valpha_av, valpha_err = fn.disp(nconf, valpha_sum, valpha2_sum)
@@ -273,6 +257,7 @@ for ialpha in tqdm(range(2 * nalpha + 1)):
         da = dalpha / 4.0
     else:
         da = dalpha / 2.0
+        
     de = da * valpha_av
     ei += de
 
@@ -291,27 +276,14 @@ for ialpha in tqdm(range(2 * nalpha + 1)):
     file16.write('\n')
 
 #------------------------------------------------------------------------------
-#   final estimate of integral over coupling                                                               
-#------------------------------------------------------------------------------
-
-eup_sum = 0.0
-eup_err = 0.0
-eup_hal = 0.0
-edw_sum = 0.0
-edw_err = 0.0
-edw_hal = 0.0
-
-
-#------------------------------------------------------------------------------
 #   have sum=1/2(up+down) and up = 1/2*f0+f1+...+1/2*fn, down=...                                                               
 #------------------------------------------------------------------------------
-
 for ia in range(nalpha+1):
     if ia % nalpha == 0:
         da = dalpha / 4.0
     else:
         da = dalpha / 2.0
-    iap = ia + nalpha
+    iap      = ia + nalpha
     eup_sum += da * va_av[ia]
     eup_err += da * va_err[ia] ** 2
     edw_sum += da * va_av[iap]
@@ -323,14 +295,13 @@ for ia in range(0, nalpha+1, 2):
         da = dalpha / 2.0
     else:
         da = dalpha
-    iap = ia + nalpha
+    iap      = ia + nalpha
     eup_hal += da * va_av[ia]
     edw_hal += da * va_av[iap]
 
 #------------------------------------------------------------------------------
 #   uncertainties                                                                         
 #------------------------------------------------------------------------------
-
 de     = eup_sum + edw_sum
 ei     = e0 + de
 de_err = np.sqrt(eup_err + edw_err)
@@ -342,7 +313,6 @@ de_tot = np.sqrt(de_err**2 + de_dif**2 + de_dis**2)
 #------------------------------------------------------------------------------
 #   output                                                                         
 #------------------------------------------------------------------------------
-
 file16.write("input parameters\n")   
 file16.write("----------------\n")
 file16.write(fs.f811.format(beta, f0, e0))
@@ -350,5 +320,6 @@ file16.write("final, initial energy\n")
 file16.write(fs.f810.format(ei, de, e0))
 file16.write(fs.f812.format(ei, de_tot))
 file16.write(fs.f813.format(de_err, de_dif, de_dis))
-    
+#------------------------------------------------------------------------------
+#------------------------------------------------------------------------------    
 file16.close()
