@@ -53,7 +53,6 @@ import re
 file16 = open('Data/qmcool/qm.dat', 'w')
 file17 = open('Data/qmcool/config.dat', 'w')
 file18 = open('Data/qmcool/trajectory.dat', 'w')
-file19 = open('Data/qmcool/qmdist.dat', 'w')
 file20 = open('Data/qmcool/coolconfig.dat', 'w')
 file21 = open('Data/qmcool/cor.dat', 'w')
 file22 = open('Data/qmcool/coolcor.dat', 'w')
@@ -319,6 +318,7 @@ for i in tqdm(range(nmc)):
     xs[0] = xs[n-1]
     xs[n] = xs[1]
     
+    file18.write(fs.f444.format(i,stot,ttot,vtot)) 
     #--------------------------------------------------------------------------
     #     populate histogram include in sample                                                     
     #--------------------------------------------------------------------------
@@ -613,7 +613,6 @@ for i in range(nzhist):
 file16.close()
 file17.close()
 file18.close()
-file19.close()
 file20.close()
 file21.close()
 file22.close()
