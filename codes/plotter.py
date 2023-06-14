@@ -81,7 +81,7 @@ end_line   = None
 for i, line in enumerate(lines):
     if line.startswith('configuration: 100'):
         start_line = i
-    elif line.startswith('configuration: 200'):
+    elif line.startswith('configuration: 150'):
         end_line = i
         break
 data_lines = lines[start_line+1: end_line]
@@ -103,7 +103,7 @@ end_line   = None
 for i, line in enumerate(lines):
     if line.startswith('configuration: 100'):
         start_line = i
-    elif line.startswith('configuration: 200'):
+    elif line.startswith('configuration: 150'):
         end_line = i
         break
 data_lines = lines[start_line+1: end_line]
@@ -572,6 +572,20 @@ x = list(range(len(y)))
 x = [num / 10 for num in x]
 plt.plot(x, y, color = 'black', linewidth = 0.8)
 
+y     = np.array([4.36018,  4.0583, 3.52726, 2.82591, 2.41121, 1.10605,0.32266, 0.05903])/5
+y_err = np.array([0.04225, 0.04020, 0.03971, 0.03659, 0.03607, 0.02963,0.01941, 0.00839])/5
+x     = np.array([    0.5,    0.75,       1,    1.15,    1.25,    1.35,    1.5,    1.65])
+
+plt.errorbar(x, y, yerr=y_err, fmt='s', markerfacecolor='none',
+             markeredgecolor = 'blue',markersize=8, capsize=5)
+
+y     = np.array([0.65972, 0.32880,0.11004, 0.05115])
+y_err = np.array([0.13140, 0.10810,0.03076, 0.00039])
+x     = np.array([   1.25,    1.35,    1.5,    1.65])
+
+plt.errorbar(x, y, yerr=y_err, fmt='D', markerfacecolor='none',
+             markeredgecolor = 'red',markersize=8, capsize=5)
+
 plt.xlabel('f')
 plt.ylabel('N_top/\u03B2')
 plt.title('Instanton density')
@@ -982,6 +996,7 @@ plt.title('Instanton configuration in an interacting instanton calculation')
 plt.xlim(0, 3000)
 
 plt.show()
+
 
 
 
