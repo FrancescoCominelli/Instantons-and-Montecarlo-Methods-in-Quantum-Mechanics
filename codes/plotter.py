@@ -541,6 +541,49 @@ plt.xlim(1, )
 plt.show()
 
 #------------------------------------------------------------------------------
+#   FIG. 8: Instanton density as a function of the parameter f.
+#------------------------------------------------------------------------------
+def l1(x):
+    return 8*x**(5/2)*np.sqrt(2/np.pi)*np.exp(-4/3*x**3)
+def l2(x):
+    return 8*x**(5/2)*np.sqrt(2/np.pi)*np.exp(-4/3*x**3-71/72*1/(4/3*x**3))
+def dE(x):
+    return np.sqrt((6*(4/3)*x**3)/np.pi)*4*x*np.exp(-4/3*x**3)
+
+x = np.linspace(0.02, 2, 100)
+y = l1(x)
+
+plt.plot(x, y, color = 'green', linewidth = 0.8, linestyle = '--')
+
+y = l2(x)
+plt.plot(x, y, color = 'green', linewidth = 0.8)
+
+with open('Data/qmdiag/spectrum.dat', 'r') as file:
+    lines = file.readlines()
+
+column1  = [float(line.split()[0]) for line in lines]
+column2  = [float(line.split()[1]) for line in lines]
+
+E0 = np.array(column1)
+E1 = np.array(column2)
+
+y = (E1 - E0)/2
+x = list(range(len(y)))
+x = [num / 10 for num in x]
+plt.plot(x, y, color = 'black', linewidth = 0.8)
+
+plt.xlabel('f')
+plt.ylabel('N_top/\u03B2')
+plt.title('Instanton density')
+
+plt.yscale('log')
+plt.xlim(0, 1.9)
+plt.ylim(0.01, 2)
+plt.gca().yaxis.set_major_formatter(plt.FuncFormatter(lambda x, _: '' if x == y[0] else f'{x:.1f}'))
+
+plt.show()
+
+#------------------------------------------------------------------------------
 #   FIG. 9: Quantum mechanical paths which appear in a Monte-Carlo calculation
 #   of the one-instanton partition function in the double well potential.
 #------------------------------------------------------------------------------
