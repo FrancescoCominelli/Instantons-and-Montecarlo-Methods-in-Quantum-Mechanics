@@ -567,7 +567,7 @@ column2  = [float(line.split()[1]) for line in lines]
 E0 = np.array(column1)
 E1 = np.array(column2)
 
-y = (E1 - E0)/2
+y = (E1 - E0)/2 
 x = list(range(len(y)))
 x = [num / 10 for num in x]
 plt.plot(x, y, color = 'black', linewidth = 0.8)
@@ -899,7 +899,7 @@ plt.legend()
 plt.title('Ran. inst. gaussian fluctuations correlation functions')
 
 plt.xlim(0, 1.5)
-plt.ylim(0, 8)
+plt.ylim(0, 12)
 
 plt.show()
 
@@ -969,7 +969,29 @@ plt.legend()
 plt.title('Ran. inst. gaussian fluctuations log derivative correlation functions')
 
 plt.xlim(0, 1.5)
-plt.ylim(0, 4.5)
+plt.ylim(0, 5)
+
+plt.show()
+
+#------------------------------------------------------------------------------
+#   Fig.16 Distribution of instanton-anti-instanton separations
+#------------------------------------------------------------------------------
+with open('Data/rilm/zdist.dat', 'r') as file:
+    lines = file.readlines()
+
+column1 = [float(line.split()[0]) for line in lines]
+column2 = [float(line.split()[1]) for line in lines]
+
+x     = np.array(column1)
+y     = np.array(column2)
+
+plt.plot(x, y, color = 'red')
+
+plt.xlabel('τ_z')
+plt.ylabel('n_IA(τ_z)')
+plt.title('Istanton-anti-istanton separation distribution')
+
+plt.xlim(0,3.95)
 
 plt.show()
 
