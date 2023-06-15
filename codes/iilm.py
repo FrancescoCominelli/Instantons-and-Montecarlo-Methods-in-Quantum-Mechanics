@@ -215,7 +215,7 @@ for i in tqdm(range(nmc)):
         znew   = zold + (random.random()-0.5)*dz
         if znew > tmax:
             znew -= tmax
-        if znew < 0.0:
+        if znew < -tmax:
             znew += tmax
         z[iin] = znew
         z      = np.sort(z)
