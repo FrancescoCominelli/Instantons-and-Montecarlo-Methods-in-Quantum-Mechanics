@@ -19,7 +19,7 @@ icold  = 1
 Number of equilibration sweeps before first measurement (neq ∼ 100)
 neq    = 100
 
-Number of Monte Carlo sweeps (nmc ∼ 10^5)
+Number of Monte Carlo sweeps (nmc > 10^4 ∼ 10^5)
 nmc    = 100000
 
 Width of Gaussian distribution used for Monte Carlo update x(n) (delx ∼ 0.5)
@@ -43,7 +43,7 @@ ncool  = 200
 Number of steps in adiabatic switching (nswitch ∼ 20)
 nalpha = 20
 
-Number of instantons for random generation (even)
+Number of instantons for random generation (even, ∼ 10)
 nin    = 10
 
 Number of heating steps (nheat ∼ 10)
@@ -59,7 +59,7 @@ Hard core strength A (score=A*s0) (3.0)
 acore  = 3.0
 
 Random seed
-seed   = 12345
+seed   = 123456
 
 
 
