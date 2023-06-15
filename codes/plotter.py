@@ -987,11 +987,19 @@ y     = np.array(column2)
 
 plt.plot(x, y, color = 'red')
 
+with open('Data/iilm/zdist.dat', 'r') as file:
+    lines = file.readlines()
+
+column1 = [float(line.split()[0]) for line in lines]
+column2 = [float(line.split()[1]) for line in lines]
+
+plt.plot(x, y, color = 'black', style = 'step')
+
 plt.xlabel('τ_z')
 plt.ylabel('n_IA(τ_z)')
 plt.title('Istanton-anti-istanton separation distribution')
 
-plt.xlim(0,3.95)
+plt.xlim(0,3.90)
 
 plt.show()
 
