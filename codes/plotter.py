@@ -833,7 +833,8 @@ plt.xlim(0, 20)
 
 plt.show()
 #------------------------------------------------------------------------------
-#   FIG. 13.a Shows the correlation functions
+#   FIG. 13.a Shows the correlation functions in a random instanton ensamble
+#   with gaussian fluctuations
 #------------------------------------------------------------------------------
 
 with open('Data/qmdiag/dcor.dat', 'r') as file:
@@ -905,6 +906,7 @@ plt.show()
 
 #------------------------------------------------------------------------------
 #   FIG. 13.b Shows the logarithmic derivative of the correlators
+#   in a random instanton ensamble with gaussian fluctuations
 #------------------------------------------------------------------------------
 with open('Data/qmdiag/dcor.dat', 'r') as file:
     lines = file.readlines()
@@ -987,19 +989,20 @@ y     = np.array(column2)
 
 plt.plot(x, y, color = 'red')
 
-with open('Data/iilm/zdist.dat', 'r') as file:
+with open('Data/rilm_gauss/zdist.dat', 'r') as file:
     lines = file.readlines()
 
 column1 = [float(line.split()[0]) for line in lines]
 column2 = [float(line.split()[1]) for line in lines]
 
-plt.plot(x, y, color = 'black', style = 'step')
+plt.plot(x, y, color = 'black', drawstyle = 'steps')
 
 plt.xlabel('τ_z')
 plt.ylabel('n_IA(τ_z)')
 plt.title('Istanton-anti-istanton separation distribution')
 
-plt.xlim(0,3.90)
+plt.xlim(0,3.85)
+plt.xlim(0,40000)
 
 plt.show()
 
@@ -1027,6 +1030,146 @@ plt.xlim(0, 3000)
 
 plt.show()
 
+#------------------------------------------------------------------------------
+#   FIG. 18.a Shows the correlation functions interacting
+#------------------------------------------------------------------------------
+
+with open('Data/qmdiag/dcor.dat', 'r') as file:
+    lines = file.readlines()
+
+column1 = [float(line.split()[0]) for line in lines]
+column2 = [float(line.split()[1]) for line in lines]
+column3 = [float(line.split()[2]) for line in lines]
+column4 = [float(line.split()[3]) for line in lines]
+
+x = np.array(column1)
+y = np.array(column2)
+plt.plot(x, y, color = 'black')
+
+y = np.array(column3)
+plt.plot(x, y, color = 'black')
+
+y = np.array(column4)
+plt.plot(x, y, color = 'black')
+
+with open('Data/iilm/icor.dat', 'r') as file:
+    lines = file.readlines()[1:]
+
+column1 = [float(line.split()[0]) for line in lines]
+column2 = [float(line.split()[1]) for line in lines]
+column3 = [float(line.split()[2]) for line in lines]
+
+x     = np.array(column1)
+y     = np.array(column2)
+y_err = np.array(column3)
+plt.errorbar(x, y, yerr=y_err, fmt='s', markerfacecolor='none',
+             markeredgecolor = 'blue', markersize=8, capsize=5, label = '<x(0)x(τ)>')
+
+with open('Data/iilm/icor2.dat', 'r') as file:
+    lines = file.readlines()[1:]
+
+column1 = [float(line.split()[0]) for line in lines]
+column2 = [float(line.split()[1]) for line in lines]
+column3 = [float(line.split()[2]) for line in lines]
+
+x     = np.array(column1)
+y     = np.array(column2)
+y_err = np.array(column3)
+plt.errorbar(x, y, yerr=y_err, fmt='o', markerfacecolor='none',
+             markeredgecolor = 'red',markersize=8, capsize=5, label = '<x²(0)x²(τ)>')
+
+with open('Data/iilm/icor3.dat', 'r') as file:
+    lines = file.readlines()[1:]
+
+column1 = [float(line.split()[0]) for line in lines]
+column2 = [float(line.split()[1]) for line in lines]
+column3 = [float(line.split()[2]) for line in lines]
+
+x     = np.array(column1)
+y     = np.array(column2)
+y_err = np.array(column3)
+plt.errorbar(x, y, yerr=y_err, fmt='D',markerfacecolor='none',
+             markeredgecolor = 'green', markersize=8, capsize=5, label = '<x³(0)x³(τ)>')
+
+plt.xlabel('τ')
+plt.ylabel('<xⁿ(0)xⁿ(τ)>')
+plt.legend()
+plt.title('Interacting instatons correlation functions')
+
+plt.xlim(0, 1.5)
+plt.ylim(0, 12)
+
+plt.show()
+
+#------------------------------------------------------------------------------
+#   FIG. 18.b Shows the logarithmic derivative of the correlators
+#------------------------------------------------------------------------------
+with open('Data/qmdiag/dcor.dat', 'r') as file:
+    lines = file.readlines()
+
+column1 = [float(line.split()[0]) for line in lines]
+column2 = [float(line.split()[4]) for line in lines]
+column3 = [float(line.split()[5]) for line in lines]
+column4 = [float(line.split()[6]) for line in lines]
+
+x = np.array(column1)
+y = np.array(column2)
+plt.plot(x, y, color = 'black')
+
+y = np.array(column3)
+plt.plot(x, y, color = 'black')
+
+y = np.array(column4)
+plt.plot(x, y, color = 'black')
+
+with open('Data/iilm/icor.dat', 'r') as file:
+    lines = file.readlines()[1:]
+
+column1 = [float(line.split()[0]) for line in lines]
+column2 = [float(line.split()[3]) for line in lines]
+column3 = [float(line.split()[4]) for line in lines]
+
+x     = np.array(column1)
+y     = np.array(column2)
+y_err = np.array(column3)
+plt.errorbar(x, y, yerr=y_err, fmt='s', markerfacecolor='none',
+             markeredgecolor = 'blue', markersize=8, capsize=5, label = '<x(0)x(τ)>')
+
+with open('Data/iilm/icor2.dat', 'r') as file:
+    lines = file.readlines()[1:]
+
+column1 = [float(line.split()[0]) for line in lines]
+column2 = [float(line.split()[3]) for line in lines]
+column3 = [float(line.split()[4]) for line in lines]
+
+x     = np.array(column1)
+y     = np.array(column2)
+y_err = np.array(column3)
+plt.errorbar(x, y, yerr=y_err, fmt='o', markerfacecolor='none',
+             markeredgecolor = 'red',markersize=8, capsize=5, label = '<x²(0)x²(τ)>')
+
+with open('Data/iilm/icor3.dat', 'r') as file:
+    lines = file.readlines()[1:]
+
+column1 = [float(line.split()[0]) for line in lines]
+column2 = [float(line.split()[3]) for line in lines]
+column3 = [float(line.split()[4]) for line in lines]
+
+x     = np.array(column1)
+y     = np.array(column2)
+y_err = np.array(column3)
+plt.errorbar(x, y, yerr=y_err, fmt='D',markerfacecolor='none',
+             markeredgecolor = 'green', markersize=8, capsize=5, label = '<x³(0)x³(τ)>')
+
+plt.xlabel('τ')
+plt.ylabel('d[log<xⁿ(0)xⁿ(τ)>]/dτ')
+plt.legend()
+plt.title('Interacting instatons log derivative correlation functions')
+
+plt.xlim(0, 1.5)
+plt.ylim(0, 5)
+
+plt.show()
 
 
 
