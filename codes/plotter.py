@@ -553,10 +553,10 @@ def dE(x):
 x = np.linspace(0.02, 2, 100)
 y = l1(x)
 
-plt.plot(x, y, color = 'green', linewidth = 0.8, linestyle = '--', label = '1-loop')
+plt.plot(x, y, color = 'green', linewidth = 0.8, linestyle = '--')
 
 y = l2(x)
-plt.plot(x, y, color = 'green', linewidth = 0.8, label = '2-loop')
+plt.plot(x, y, color = 'green', linewidth = 0.8)
 
 with open('Data/qmdiag/spectrum.dat', 'r') as file:
     lines = file.readlines()
@@ -570,26 +570,27 @@ E1 = np.array(column2)
 y = (E1 - E0)/2 
 x = list(range(len(y)))
 x = [num / 10 for num in x]
-plt.plot(x, y, color = 'black', linewidth = 0.8, label = '\u0394E/2')
+plt.plot(x, y, color = 'black', linewidth = 0.8)
 
+#extracted by qmcool.py
 y     = np.array([4.36018,  4.0583, 3.52726, 2.82591, 2.41121, 1.10605,0.32266, 0.05903])/5
 y_err = np.array([0.04225, 0.04020, 0.03971, 0.03659, 0.03607, 0.02963,0.01941, 0.00839])/5
 x     = np.array([    0.5,    0.75,       1,    1.15,    1.25,    1.35,    1.5,    1.65])
 
 plt.errorbar(x, y, yerr=y_err, fmt='s', markerfacecolor='none',
-             markeredgecolor = 'blue',markersize=8, capsize=5, label = 'cooling')
+             markeredgecolor = 'blue',markersize=8, capsize=5)
 
+# extracted by qmidens.py
 y     = np.array([0.65972, 0.32880,0.11004, 0.05115])
 y_err = np.array([0.13140, 0.10810,0.03076, 0.00039])
 x     = np.array([   1.25,    1.35,    1.5,    1.65])
 
 plt.errorbar(x, y, yerr=y_err, fmt='D', markerfacecolor='none',
-             markeredgecolor = 'red',markersize=8, capsize=5, label = 'Monte Carlo')
+             markeredgecolor = 'red',markersize=8, capsize=5)
 
 plt.xlabel('f')
 plt.ylabel('N_top/\u03B2')
 plt.title('Instanton density')
-plt.legend()
 
 plt.yscale('log')
 plt.xlim(0, 1.9)
@@ -779,7 +780,7 @@ plt.ylim(0, 4.5)
 plt.show()
 #------------------------------------------------------------------------------
 #   FIG. 12: Typical euclidean path obtained in a Monte Carlo simulation of the 
-#   discretized euclidean action of the double well potential for  = 1.4.
+#   discretized euclidean action of the double well potential for f = 1.4.
 #------------------------------------------------------------------------------
 
 with open('Data/rilm_gauss/config.dat', 'r') as file:
@@ -834,8 +835,7 @@ plt.xlim(0, 20)
 
 plt.show()
 #------------------------------------------------------------------------------
-#   FIG. 13.a Shows the correlation functions in a random instanton ensamble
-#   with gaussian fluctuations
+#   FIG. 13.a Shows the correlation functions
 #------------------------------------------------------------------------------
 
 with open('Data/qmdiag/dcor.dat', 'r') as file:
@@ -907,7 +907,6 @@ plt.show()
 
 #------------------------------------------------------------------------------
 #   FIG. 13.b Shows the logarithmic derivative of the correlators
-#   in a random instanton ensamble with gaussian fluctuations
 #------------------------------------------------------------------------------
 with open('Data/qmdiag/dcor.dat', 'r') as file:
     lines = file.readlines()
@@ -1003,8 +1002,7 @@ plt.ylabel('n_IA(τ_z)')
 plt.title('Istanton-anti-istanton separation distribution')
 
 plt.xlim(0,3.85)
-plt.xlim(0,40000)
-
+plt.ylim(0,40000)
 plt.show()
 
 #------------------------------------------------------------------------------
@@ -1031,145 +1029,5 @@ plt.xlim(0, 3000)
 
 plt.show()
 
-#------------------------------------------------------------------------------
-#   FIG. 18.a Shows the correlation functions interacting
-#------------------------------------------------------------------------------
-
-with open('Data/qmdiag/dcor.dat', 'r') as file:
-    lines = file.readlines()
-
-column1 = [float(line.split()[0]) for line in lines]
-column2 = [float(line.split()[1]) for line in lines]
-column3 = [float(line.split()[2]) for line in lines]
-column4 = [float(line.split()[3]) for line in lines]
-
-x = np.array(column1)
-y = np.array(column2)
-plt.plot(x, y, color = 'black')
-
-y = np.array(column3)
-plt.plot(x, y, color = 'black')
-
-y = np.array(column4)
-plt.plot(x, y, color = 'black')
-
-with open('Data/iilm/icor.dat', 'r') as file:
-    lines = file.readlines()[1:]
-
-column1 = [float(line.split()[0]) for line in lines]
-column2 = [float(line.split()[1]) for line in lines]
-column3 = [float(line.split()[2]) for line in lines]
-
-x     = np.array(column1)
-y     = np.array(column2)
-y_err = np.array(column3)
-plt.errorbar(x, y, yerr=y_err, fmt='s', markerfacecolor='none',
-             markeredgecolor = 'blue', markersize=8, capsize=5, label = '<x(0)x(τ)>')
-
-with open('Data/iilm/icor2.dat', 'r') as file:
-    lines = file.readlines()[1:]
-
-column1 = [float(line.split()[0]) for line in lines]
-column2 = [float(line.split()[1]) for line in lines]
-column3 = [float(line.split()[2]) for line in lines]
-
-x     = np.array(column1)
-y     = np.array(column2)
-y_err = np.array(column3)
-plt.errorbar(x, y, yerr=y_err, fmt='o', markerfacecolor='none',
-             markeredgecolor = 'red',markersize=8, capsize=5, label = '<x²(0)x²(τ)>')
-
-with open('Data/iilm/icor3.dat', 'r') as file:
-    lines = file.readlines()[1:]
-
-column1 = [float(line.split()[0]) for line in lines]
-column2 = [float(line.split()[1]) for line in lines]
-column3 = [float(line.split()[2]) for line in lines]
-
-x     = np.array(column1)
-y     = np.array(column2)
-y_err = np.array(column3)
-plt.errorbar(x, y, yerr=y_err, fmt='D',markerfacecolor='none',
-             markeredgecolor = 'green', markersize=8, capsize=5, label = '<x³(0)x³(τ)>')
-
-plt.xlabel('τ')
-plt.ylabel('<xⁿ(0)xⁿ(τ)>')
-plt.legend()
-plt.title('Interacting instatons correlation functions')
-
-plt.xlim(0, 1.5)
-plt.ylim(0, 12)
-
-plt.show()
-
-#------------------------------------------------------------------------------
-#   FIG. 18.b Shows the logarithmic derivative of the correlators
-#------------------------------------------------------------------------------
-with open('Data/qmdiag/dcor.dat', 'r') as file:
-    lines = file.readlines()
-
-column1 = [float(line.split()[0]) for line in lines]
-column2 = [float(line.split()[4]) for line in lines]
-column3 = [float(line.split()[5]) for line in lines]
-column4 = [float(line.split()[6]) for line in lines]
-
-x = np.array(column1)
-y = np.array(column2)
-plt.plot(x, y, color = 'black')
-
-y = np.array(column3)
-plt.plot(x, y, color = 'black')
-
-y = np.array(column4)
-plt.plot(x, y, color = 'black')
-
-with open('Data/iilm/icor.dat', 'r') as file:
-    lines = file.readlines()[1:]
-
-column1 = [float(line.split()[0]) for line in lines]
-column2 = [float(line.split()[3]) for line in lines]
-column3 = [float(line.split()[4]) for line in lines]
-
-x     = np.array(column1)
-y     = np.array(column2)
-y_err = np.array(column3)
-plt.errorbar(x, y, yerr=y_err, fmt='s', markerfacecolor='none',
-             markeredgecolor = 'blue', markersize=8, capsize=5, label = '<x(0)x(τ)>')
-
-with open('Data/iilm/icor2.dat', 'r') as file:
-    lines = file.readlines()[1:]
-
-column1 = [float(line.split()[0]) for line in lines]
-column2 = [float(line.split()[3]) for line in lines]
-column3 = [float(line.split()[4]) for line in lines]
-
-x     = np.array(column1)
-y     = np.array(column2)
-y_err = np.array(column3)
-plt.errorbar(x, y, yerr=y_err, fmt='o', markerfacecolor='none',
-             markeredgecolor = 'red',markersize=8, capsize=5, label = '<x²(0)x²(τ)>')
-
-with open('Data/iilm/icor3.dat', 'r') as file:
-    lines = file.readlines()[1:]
-
-column1 = [float(line.split()[0]) for line in lines]
-column2 = [float(line.split()[3]) for line in lines]
-column3 = [float(line.split()[4]) for line in lines]
-
-x     = np.array(column1)
-y     = np.array(column2)
-y_err = np.array(column3)
-plt.errorbar(x, y, yerr=y_err, fmt='D',markerfacecolor='none',
-             markeredgecolor = 'green', markersize=8, capsize=5, label = '<x³(0)x³(τ)>')
-
-plt.xlabel('τ')
-plt.ylabel('d[log<xⁿ(0)xⁿ(τ)>]/dτ')
-plt.legend()
-plt.title('Interacting instatons log derivative correlation functions')
-
-plt.xlim(0, 1.5)
-plt.ylim(0, 5)
-
-plt.show()
 
 
