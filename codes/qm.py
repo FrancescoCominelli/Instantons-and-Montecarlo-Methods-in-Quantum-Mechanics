@@ -26,11 +26,7 @@ from tqdm import tqdm
 #           x_i^(n)-->x_i^(n+1)
 #   n_p      number of points on which the correlation functions are measured: 
 #           <x_i x_(i+1)>,...,<x_i x_(i+np)> (np=20)
-#   nmea    number of measurement of the correlation function given MonteCarlo 
-#           configuration x_i (nmea=5)
-#   npri    number of MonteCarlo configurations between output of averaes to
-#           output file (npri=100)
-#   nc      number of correlator measurements in a single configuration                                
+#   nc      number of correlator measurements in a single configuration (nc=5)                               
 #   kp      number of sweeps between writeout of complete configuration     
 #------------------------------------------------------------------------------
 #   Output:

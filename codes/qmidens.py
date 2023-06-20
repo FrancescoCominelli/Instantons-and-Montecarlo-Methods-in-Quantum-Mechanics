@@ -21,7 +21,7 @@ file16 = open('Data/qmidens/qmidens.dat', 'w')
 file17 = open('Data/qmidens/idens_conf.dat', 'w')
 file18 = open('Data/qmidens/vac_conf.dat', 'w')
 #------------------------------------------------------------------------------
-#   imput parameters
+#   input parameters
 #------------------------------------------------------------------------------
 # open the file for reading
 with open('parameters.txt', 'r') as file:
