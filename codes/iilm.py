@@ -39,7 +39,6 @@ file21 = open('Data/iilm/icor2.dat',      'w')
 file22 = open('Data/iilm/icor3.dat',      'w')
 file23 = open('Data/iilm/iconf.dat',      'w')
 file30 = open('Data/iilm/zdist.dat',      'w')
-file31 = open('Data/iilm/sia.dat',        'w')
 #------------------------------------------------------------------------------
 #   input parameters
 #------------------------------------------------------------------------------
@@ -151,19 +150,6 @@ x3cor_sum  = np.zeros(n_p)
 x3cor2_sum = np.zeros(n_p)     
 ix         = np.zeros(nxhist)
 iz         = np.zeros(nzhist)
-
-#------------------------------------------------------------------------------
-#   plot S_IA                                                              
-#------------------------------------------------------------------------------
-ni = n//4
-for na in range(ni, ni*2+1):
-    z[0] = ni*a
-    z[1] = na*a
-    fn.xconf(n, x, 2, z, f, a)
-    stot, ttot, vtot = fn.act(f, a, n, x)
-    shc   = fn.sshort(z, 2, tcore, score, tmax)
-    stot += shc
-    file31.write(fs.f222.format((na-ni)*a, stot/s0-2.0))
 
 #------------------------------------------------------------------------------
 #   setup and intial action                                                
@@ -402,4 +388,3 @@ file21.close
 file22.close
 file23.close
 file30.close
-file31.close
