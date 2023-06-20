@@ -54,7 +54,6 @@ with open('parameters.txt', 'r') as file:
 f      = re.search(r'f\s*=\s*(\d+\.\d+)', contents).group(1)
 n      = re.search(r'n\s*=\s*(\d+)', contents).group(1)
 a      = re.search(r'a\s*=\s*(\d+\.\d+)', contents).group(1)
-icold  = re.search(r'icold\s*=\s*(\d+)', contents).group(1)
 neq    = re.search(r'neq\s*=\s*(\d+)', contents).group(1)
 nmc    = re.search(r'nmc\s*=\s*(\d+)', contents).group(1)
 nc     = re.search(r'nc\s*=\s*(\d+)', contents).group(1)
@@ -68,7 +67,6 @@ seed   = re.search(r'seed\s*=\s*(\d+)', contents).group(1)
 f      = float(f)   #separation of wells f (f=1.4)
 n      = int(n)     #grid size n<10000 (n=100)
 a      = float(a)   #grid spacing a (dtau=0.05)
-icold  = int(icold) #cold/hot start (0,1)
 neq    = int(neq)   #equilibration sweeps
 nmc    = int(nmc)   #monte carlo sweeps
 delx   = float(delx)#update x (delx)
