@@ -25,11 +25,7 @@ import re
 #   nmc     number of Monte Carlo sweeps (nmc=10^5)
 #   n_p      number of points on which the correlation functions are measured: 
 #           <x_i x_(i+1)>,...,<x_i x_(i+np)> (np=20)
-#   nmea    number of measurement of the correlation function given MonteCarlo 
-#           configuration x_i(nmea=5)
-#   npri    number of MonteCarlo configurations between output of averaes to 
-#           output file (npri=100)
-#   nc      number of correlator measurements in a single configuration                                
+#   nc      number of correlator measurements in a single configuration (nc=5)                               
 #   kp      number of sweeps between writeout of complete configuration     
 #------------------------------------------------------------------------------
 #   Output:
@@ -62,7 +58,6 @@ with open('parameters.txt', 'r') as file:
 f      = re.search(r'f\s*=\s*(\d+\.\d+)', contents).group(1)
 n      = re.search(r'n\s*=\s*(\d+)', contents).group(1)
 a      = re.search(r'a\s*=\s*(\d+\.\d+)', contents).group(1)
-icold  = re.search(r'icold\s*=\s*(\d+)', contents).group(1)
 nmc    = re.search(r'nmc\s*=\s*(\d+)', contents).group(1)
 nc     = re.search(r'nc\s*=\s*(\d+)', contents).group(1)
 delx   = re.search(r'delx\s*=\s*(\d+\.\d+)', contents).group(1)
@@ -76,7 +71,6 @@ seed   = re.search(r'seed\s*=\s*(\d+)', contents).group(1)
 f      = float(f)   #separation of wells f (f=1.4)
 n      = int(n)     #grid size n<10000 (n=100)
 a      = float(a)   #grid spacing a (dtau=0.05)
-icold  = int(icold) #cold/hot start (0,1)
 nmc    = int(nmc)   #monte carlo sweeps
 delx   = float(delx)#update x (delx)
 n_p    = int(n_p)   #number of points in correlator
