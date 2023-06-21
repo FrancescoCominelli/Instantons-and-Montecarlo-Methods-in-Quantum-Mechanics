@@ -490,13 +490,13 @@ y     = np.array(column2)/(n*a)
 
 
 plt.errorbar(x, y, fmt ='s', markerfacecolor = 'none',
-             markeredgecolor = 'blue', markersize = 8, capsize = 5, label = 'η = 1.4')
+             markeredgecolor = 'blue', markersize = 8, capsize = 5, label = 'f = 1.4')
 
 y     = np.array(column3)/(n*a)
-plt.plot(x, y, color = 'green', linewidth = 0.8, linestyle = '--')
+plt.plot(x, y, color = 'green', linewidth = 0.8, linestyle = '--', label = '2-loop')
 
 y     = np.array(column4)/(n*a)
-plt.plot(x, y, color = 'green', linewidth = 0.8)
+plt.plot(x, y, color = 'green', linewidth = 0.8, label = '1-loop')
 
 plt.xlabel('n_cool')
 plt.ylabel('N_top/\u03B2')
@@ -505,7 +505,7 @@ plt.title('Instanton density')
 plt.xscale('log')
 plt.yscale('log')
 plt.xlim(1, )
-
+plt.legend()
 plt.show()
 
 #------------------------------------------------------------------------------
@@ -528,7 +528,7 @@ plt.errorbar(x, y, yerr=y_err, fmt='s',markerfacecolor='none',
 
 y     = np.array(column4)
 
-plt.plot(x, y, color='green', linewidth = 0.8)
+plt.plot(x, y, color='green', linewidth = 0.8, label= 'classical')
 
 plt.xlabel('n_cool')
 plt.ylabel('S/N_inst')
@@ -537,7 +537,7 @@ plt.title('Action per instanton')
 plt.xscale('log')
 plt.yscale('log')
 plt.xlim(1, )
-
+plt.legend()
 plt.show()
 
 #------------------------------------------------------------------------------
@@ -1173,5 +1173,4 @@ plt.xlim(0, 1.5)
 plt.ylim(0, 5)
 
 plt.show()
-
 
