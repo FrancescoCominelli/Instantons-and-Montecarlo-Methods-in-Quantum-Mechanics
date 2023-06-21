@@ -989,11 +989,14 @@ y     = np.array(column2)
 
 plt.plot(x, y, color = 'red')
 
-with open('Data/rilm_gauss/zdist.dat', 'r') as file:
+with open('Data/iilm/zdist.dat', 'r') as file:
     lines = file.readlines()
 
 column1 = [float(line.split()[0]) for line in lines]
 column2 = [float(line.split()[1]) for line in lines]
+
+x     = np.array(column1)
+y     = np.array(column2)
 
 plt.plot(x, y, color = 'black', drawstyle = 'steps')
 
