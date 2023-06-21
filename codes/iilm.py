@@ -21,11 +21,7 @@ import re
 #   nmc     number of Monte Carlo sweeps (nmc=10^5)
 #   n_p      number of points on which the correlation functions are measured: 
 #           <x_i x_(i+1)>,...,<x_i x_(i+np)> (np=20)
-#   nmea    number of measurement of the correlation function given MonteCarlo 
-#           configuration x_i(nmea=5)
-#   npri    number of MonteCarlo configurations between output of averaes to 
-#           output file (npri=100)
-#   nc      number of correlator measurements in a single configuration                                
+#   nc      number of correlator measurements in a single configuration (nc=5)                              
 #   kp      number of sweeps between writeout of complete configuration
 #   tcore   range of hard interaction (tcore=0.3)
 #   acore   strenght of hard core interaction (acore=3.0)
@@ -39,6 +35,7 @@ file21 = open('Data/iilm/icor2.dat',      'w')
 file22 = open('Data/iilm/icor3.dat',      'w')
 file23 = open('Data/iilm/iconf.dat',      'w')
 file30 = open('Data/iilm/zdist.dat',      'w')
+file31 = open('Data/iilm/sia.dat',        'w')
 #------------------------------------------------------------------------------
 #   input parameters
 #------------------------------------------------------------------------------
@@ -150,6 +147,19 @@ x3cor_sum  = np.zeros(n_p)
 x3cor2_sum = np.zeros(n_p)     
 ix         = np.zeros(nxhist)
 iz         = np.zeros(nzhist)
+
+#------------------------------------------------------------------------------
+#   plot S_IA                                                              
+#------------------------------------------------------------------------------
+ni = n//4
+for na in range(ni, ni*2+1):
+    z[0] = ni*a
+    z[1] = na*a
+    fn.xconf(n, x, 2, z, f, a)
+    stot, ttot, vtot = fn.act(f, a, n, x)
+    shc   = fn.sshort(z, 2, tcore, score, tmax)
+    stot += shc
+    file31.write(fs.f222.format((na-ni)*a, stot/s0-2.0))
 
 #------------------------------------------------------------------------------
 #   setup and intial action                                                
@@ -388,3 +398,4 @@ file21.close
 file22.close
 file23.close
 file30.close
+file31.close
