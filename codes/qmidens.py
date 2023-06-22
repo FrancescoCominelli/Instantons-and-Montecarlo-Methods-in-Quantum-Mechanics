@@ -189,9 +189,9 @@ for ialpha in tqdm(range(2*nalpha+1)):
             #   jakobian of constraint
             #------------------------------------------------------------------
             if j == n0m or j == n0p:
-                vel = (x[n0p] - x[n0m]) / (2.0 * a)
-                sjak = -np.log(abs(vel))
-                sold = sold + sjak
+                vel   = (x[n0p] - x[n0m]) / (2.0 * a)
+                sjak  = -np.log(abs(vel))
+                sold += sjak
 
             #------------------------------------------------------------------
             #   MC hit                                       
@@ -213,13 +213,13 @@ for ialpha in tqdm(range(2*nalpha+1)):
             #   jakobian                                     
             #------------------------------------------------------------------
             if j == n0m:
-                vel = (x[n0p] - xnew) / (2.0 * a)
-                sjak = -np.log(abs(vel))
-                snew = snew + sjak
+                vel   = (x[n0p] - xnew) / (2.0 * a)
+                sjak  = -np.log(abs(vel))
+                snew += sjak
             elif j == n0p:
-                vel = (xnew - x[n0m]) / (2.0 * a)
-                sjak = -np.log(abs(vel))
-                snew = snew + sjak
+                vel   = (xnew - x[n0m]) / (2.0 * a)
+                sjak  = -np.log(abs(vel))
+                snew += sjak
 
             #------------------------------------------------------------------
             #   accept/reject                                     
